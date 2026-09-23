@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard | 返済計画</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8;
+            --accent-credit: #38bdf8; --accent-loan: #fb923c; --accent-repay: #4ade80; --border-color: #334155;
+            --sidebar-width: 260px; --grid-gap: 24px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; }
+        
+        /* 共通サイドバー */
+        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1000; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: #090d16; border-right: 1px solid var(--border-color); z-index: 999; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar.open { left: 0; }
+        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; color: var(--text-sub); padding: 14px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+        .nav-item:hover { color: var(--text-main); background: var(--bg-card); }
+        .nav-item.active { background: var(--bg-card); color: var(--text-main); border-left: 4px solid var(--accent-repay); }
+
+        .main-wrapper { flex: 1; width: 100%; padding: 40px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @media (min-width: 1024px) { body.sidebar-open .main-wrapper { margin-left: var(--sidebar-width); } }
+        .container { max-width: 1200px; margin: 0 auto; padding-top: 40px; }
+        header { margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+        h1 { font-size: 24px; font-weight: 700; }
+        h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 4px; font-weight: 400; }
+
+        .summary-flex { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--grid-gap); margin-bottom: 32px; }
+        .summary-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; }
+        .card-label { font-size: 13px; color: var(--text-sub); margin-bottom: 8px; }
+        .card-value { font-size: 24px; font-weight: 700; }
+        
+        .section-box { background: var(--bg-card); border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); }
+        .loan-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .loan-table th, .loan-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); text-align: left; }
+        .amount-col { text-align: right; font-weight: 600; }
+        .repay-select { background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-size: 13px; outline: none; cursor: pointer; font-weight: 600; }
+        .badge-finish { padding: 4px 8px; border-radius: 4px; font-size: 11px; background: rgba(56, 189, 248, 0.12); color: var(--accent-credit); }
+        tr.完済 { background: rgba(74, 222, 128, 0.05); }
+    </style>
+</head>
+<body class="sidebar-open">
+
+    <button class="menu-toggle" id="menu-btn"><i class="fa-solid fa-bars"></i></button>
+
+    <div class="sidebar" id="sidebar">
+        <ul class="nav-list">
+            <a href="index.html" class="nav-item"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
+            <a href="loan-history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-loan);"></i>カードローン実績・同期</a>
+            <a href="simulation.html" class="nav-item active"><i class="fa-solid fa-chart-line" style="color: var(--accent-repay);"></i>将来の返済計画</a>
+            <a href="credit-card.html" class="nav-item"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>クレカ明細 (Mastercard)</a>
+        </ul>
+        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v3.0</div>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <header>
+                <h1>Repayment Simulator <span>将来返済計画シミュレーション（金利 4.525% 固定）</span></h1>
+            </header>
+
+            <div class="summary-flex">
+                <div class="summary-card"><div class="card-label">シミュレーション開始残高</div><div class="card-value" id="sim-start-balance" style="color:var(--accent-loan)">¥0</div></div>
+                <div class="summary-card"><div class="card-label">完済予定時期</div><div class="card-value" id="sim-finish-date" style="color:var(--accent-repay)">--</div></div>
+                <div class="summary-card"><div class="card-label">完済までの総利息（見込み）</div><div class="card-value" id="sim-total-interest" style="color:#f43f5e;">¥0</div></div>
+            </div>
+
+            <div class="section-box">
+                <p style="font-size:12px; color:var(--text-sub); margin-bottom:16px;">※プルダウンを変更すると、それ以降のすべての月の返済額が一括変更され、残金が再計算されます。</p>
+                <table class="loan-table" id="simulation-table">
+                    <thead>
+                        <tr><th style="width:140px;">返済回数 (年月)</th><th style="width:140px;">返済前残高</th><th style="width:140px; text-align:right;">加算利息 (月利)</th><th style="width:200px; text-align:center;">該当月の返済額</th><th style="text-align:right;">返済後残金</th></tr>
+                    </thead>
+                    <tbody id="sim-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyX1eLqAdfVihQppHz-_UZuSTjW1RsLqVpbpf8_Ua9fnZeWelY4ztPki52JkWv3tH3k/exec";
+        const ANNUAL_INTEREST_RATE = 0.04525;
+        const DEFAULT_REPAYMENT = 65000;
+        let currentActualBalance = 0;
+        let monthlyRepayments = {};
+
+        // サイドバー制御
+        const menuBtn = document.getElementById('menu-btn');
+        const sidebar = document.getElementById('sidebar');
+        if(document.body.classList.contains('sidebar-open')) sidebar.classList.add('open');
+        menuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); document.body.classList.toggle('sidebar-open'); });
+
+        const holidays2026 = ["2026/01/01", "2026/01/02", "2026/01/03", "2026/01/12", "2026/02/11", "2026/02/23", "2026/02/24", "2026/03/20", "2026/04/29", "2026/05/03", "2026/05/04", "2026/05/05", "2026/05/06", "2026/07/20", "2026/08/11", "2026/09/21", "2026/09/22", "2026/09/23", "2026/10/12", "2026/11/03", "2026/11/23", "2026/12/23"];
+        function getNextBusinessDay(date) {
+            let d = new Date(date);
+            while (true) {
+                const dayOfWeek = d.getDay();
+                const formattedStr = `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+                if (dayOfWeek === 0 || dayOfWeek === 6 || holidays2026.includes(formattedStr)) d.setDate(d.getDate() + 1); else break;
+            }
+            return d;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
+            fetch(GAS_URL).then(res => res.json()).then(data => {
+                if(data.length === 0) return;
+                currentActualBalance = Number(data[0].balance);
+                document.getElementById('sim-start-balance').innerText = `¥${currentActualBalance.toLocaleString()}`;
+                runSimulation();
+            });
+        });
+
+        function runSimulation() {
+            const tbody = document.getElementById('sim-tbody');
+            tbody.innerHTML = '';
+            let balance = currentActualBalance; if (balance <= 0) return;
+            let count = 1, totalInterest = 0, lastRepayAmount = DEFAULT_REPAYMENT;
+            const now = new Date(); let currentYear = now.getFullYear(), currentMonth = now.getMonth();
+            if (now > getNextBusinessDay(new Date(currentYear, currentMonth, 8))) currentMonth += 1;
+
+            while (balance > 0 && count <= 240) {
+                let exactRepayDate = getNextBusinessDay(new Date(currentYear, currentMonth + (count - 1), 8));
+                const monthKey = `${exactRepayDate.getFullYear()}/${String(exactRepayDate.getMonth() + 1).padStart(2, '0')}`;
+                const dateDisplay = `${monthKey}/08 (${['日', '月', '火', '水', '木', '金', '土'][exactRepayDate.getDay()]})`;
+                const monthlyInterest = Math.floor(balance * (ANNUAL_INTEREST_RATE / 12));
+                totalInterest += monthlyInterest;
+                let beforeBalance = balance;
+                
+                if (monthlyRepayments[monthKey] !== undefined) lastRepayAmount = monthlyRepayments[monthKey];
+                else monthlyRepayments[monthKey] = lastRepayAmount;
+
+                let currentRepay = lastRepayAmount;
+                let nextBalance = beforeBalance + monthlyInterest - currentRepay;
+                let isFinalRow = false;
+                if (nextBalance <= 0) { currentRepay = beforeBalance + monthlyInterest; nextBalance = 0; isFinalRow = true; }
+
+                let selectHtml = `<select class="repay-select" data-month="${monthKey}">`;
+                for (let val = 50000; val <= 100000; val += 5000) { selectHtml += `<option value="${val}" ${val === currentRepay ? 'selected' : ''}>${val.toLocaleString()} 円</option>`; }
+                selectHtml += `</select>`;
+                if (isFinalRow) selectHtml = `<span class="badge badge-finish">最終調整: ¥${currentRepay.toLocaleString()}</span>`;
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr class="${isFinalRow ? '完済' : ''}">
+                        <td><strong>第 ${count} 回</strong><br><span style="color:var(--text-sub); font-size:11px;">${dateDisplay}</span></td>
+                        <td class="amount-col">¥${beforeBalance.toLocaleString()}</td>
+                        <td class="amount-col" style="color: #f43f5e;">+¥${monthlyInterest.toLocaleString()}</td>
+                        <td style="text-align: center;">${selectHtml}</td>
+                        <td class="amount-col" style="color: ${isFinalRow ? 'var(--accent-repay)' : 'var(--text-main)'};">
+                            ${isFinalRow ? '<i class="fa-solid fa-circle-check"></i> 完済' : '¥' + nextBalance.toLocaleString()}
+                        </td>
+                    </tr>
+                `);
+                if (isFinalRow) { document.getElementById('sim-finish-date').innerText = `${exactRepayDate.getFullYear()}年${exactRepayDate.getMonth() + 1}月`; break; }
+                balance = nextBalance; count++;
+            }
+            document.getElementById('sim-total-interest').innerText = `¥${totalInterest.toLocaleString()}`;
+
+            document.querySelectorAll('.repay-select').forEach(select => {
+                select.addEventListener('change', (e) => {
+                    const mKey = e.target.dataset.month; monthlyRepayments[mKey] = Number(e.target.value);
+                    const [cYear, cMonth] = mKey.split('/').map(Number);
+                    Object.keys(monthlyRepayments).forEach(key => {
+                        const [kYear, kMonth] = key.split('/').map(Number);
+                        if (kYear > cYear || (kYear === cYear && kMonth > cMonth)) delete monthlyRepayments[key];
+                    });
+                    runSimulation();
+                });
+            });
+        }
+    </script>
+</body>
+</html>

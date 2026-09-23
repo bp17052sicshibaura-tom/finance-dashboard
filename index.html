@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard | ダッシュボード</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-main: #0b1121; 
+            --bg-card: rgba(30, 41, 59, 0.65); 
+            --text-main: #f8fafc; 
+            --text-sub: #94a3b8;
+            --accent-credit: #38bdf8; 
+            --accent-loan: #fb923c; 
+            --accent-repay: #4ade80; 
+            --accent-miles: #f43f5e; 
+            --accent-study: #10b981;
+            --accent-meal: #f59e0b;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --grid-gap: 24px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Inter', 'Noto Sans JP', sans-serif; 
+            background-color: var(--bg-main);
+            color: var(--text-main); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+            overflow-x: hidden; 
+            position: relative;
+        }
+
+        /* 背景のにぎやかし（アンビエントライト） */
+        .ambient-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: 
+                radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.07) 0%, transparent 40%),
+                radial-gradient(circle at 85% 60%, rgba(192, 132, 252, 0.06) 0%, transparent 40%),
+                radial-gradient(circle at 50% 90%, rgba(244, 63, 94, 0.05) 0%, transparent 50%);
+        }
+        
+        /* トップナビゲーション（ホテルライクなタブ） */
+        .top-navbar {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(9, 13, 22, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-right: auto;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        
+        .navbar-brand .version {
+            font-size: 11px;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            height: 100%;
+            gap: 32px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-sub);
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            position: relative;
+            height: 100%;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item:hover { color: var(--text-main); }
+        .nav-item.active { color: var(--text-main); }
+
+        /* タブのアクティブインジケーター（下線） */
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            border-radius: 3px 3px 0 0;
+            transition: background 0.3s ease;
+        }
+        
+        .nav-item:hover::after { background: rgba(255, 255, 255, 0.2); }
+        .nav-item.active::after { background: var(--accent-credit); box-shadow: 0 -2px 10px rgba(56, 189, 248, 0.4); }
+        .nav-item.active.revo::after { background: #c084fc; box-shadow: 0 -2px 10px rgba(192, 132, 252, 0.4); }
+
+        /* メインコンテンツエリア */
+        .main-wrapper { 
+            flex: 1; 
+            width: 100%; 
+            padding: 110px 20px 60px 20px; /* ナビバー分の余白（70px + 余白）を下げる */
+            display: flex;
+            justify-content: center;
+        }
+        
+        .container { 
+            width: 100%; 
+            max-width: 1300px; 
+        }
+        
+        header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
+        h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+        h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; letter-spacing: 0; }
+        
+        /* ガラス風カード */
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+        }
+        .glass-panel:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* サマリー */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--grid-gap); margin-bottom: 40px; }
+        .summary-card { padding: 28px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+        .summary-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 4px 0 0 4px; }
+        .summary-card.credit::before { background-color: var(--accent-credit); box-shadow: 0 0 12px var(--accent-credit); }
+        .summary-card.loan::before { background-color: var(--accent-loan); box-shadow: 0 0 12px var(--accent-loan); }
+        .summary-card.asset::before { background-color: var(--accent-repay); box-shadow: 0 0 12px var(--accent-repay); }
+        
+        .card-label { font-size: 14px; color: var(--text-sub); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .card-value { font-size: 36px; font-weight: 800; letter-spacing: -1px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        
+        .progress-bar-container { background: rgba(0,0,0,0.3); border-radius: 8px; height: 8px; width: 100%; margin-top: 12px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-loan), #f97316); border-radius: 8px; width: 0%; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        /* メイングリッド */
+        .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--grid-gap); }
+        .section-box { padding: 28px; display: flex; flex-direction: column; }
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.3px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; }
+        
+        .visual-card-list { display: flex; flex-direction: column; gap: 16px; flex: 1; }
+        
+        /* 内部カード */
+        .visual-card { 
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%); 
+            border-radius: 16px; 
+            padding: 24px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            min-height: 130px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .visual-card:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        
+        .visual-card.credit-blue { border-left: 4px solid var(--accent-credit); }
+        .visual-card.credit-purple { border-left: 4px solid #c084fc; }
+        .visual-card.loan-orange { border-left: 4px solid var(--accent-loan); }
+        .visual-card.miles-box { border-left: 4px solid var(--accent-miles); background: linear-gradient(135deg, rgba(244, 63, 94, 0.05) 0%, rgba(15, 23, 42, 0.8) 100%); }
+        .visual-card.study-box { border-left: 4px solid var(--accent-study); background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.8) 100%); }
+        .visual-card.meal-box { border-left: 4px solid var(--accent-meal); background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(15, 23, 42, 0.8) 100%); }
+        
+        .vc-header { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; align-items: center; }
+        .vc-amount { font-size: 22px; font-weight: 800; text-align: right; margin: 12px 0; letter-spacing: -0.5px; }
+        .vc-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-sub); font-weight: 500; }
+
+        /* 追加ウィジェット専用スタイル */
+        .status-badge { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4); }
+        .progress-mini-bg { height: 6px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .progress-mini-fill { height: 100%; border-radius: 4px; }
+        
+        /* レスポンシブ対応（スマホでタブをスクロール可能に） */
+        @media (max-width: 900px) {
+            .top-navbar { padding: 0 20px; overflow-x: auto; white-space: nowrap; }
+            .navbar-brand { margin-right: 32px; }
+            .nav-list { gap: 24px; padding-right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 背景装飾 -->
+    <div class="ambient-bg"></div>
+
+    <!-- 新しいトップナビゲーション（ホテルライクタブ） -->
+    <nav class="top-navbar">
+        <div class="navbar-brand">
+            Finance Dashboard <span class="version">v5.0</span>
+        </div>
+        <ul class="nav-list">
+            <a href="index.html" class="nav-item active"><i class="fa-solid fa-chart-pie"></i> ダッシュボード</a>
+            <a href="loan-history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> ローン実績</a>
+            <a href="simulation.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> 返済計画</a>
+            <a href="credit-card.html" class="nav-item"><i class="fa-solid fa-credit-card"></i> メインクレカ</a>
+            <a href="credit-card-2.html" class="nav-item revo"><i class="fa-brands fa-cc-visa"></i> サブクレカ(リボ)</a>
+        </ul>
+    </nav>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <header>
+                <h1>Asset & Debt Overview <span>財務・ライフスタイル ダッシュボード</span></h1>
+            </header>
+
+            <!-- サマリーエリア -->
+            <div class="summary-grid">
+                <div class="summary-card glass-panel credit">
+                    <div class="card-label"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit)"></i> クレジット次月請求額</div>
+                    <div class="card-value" id="dash-credit-total">¥0</div>
+                </div>
+                <div class="summary-card glass-panel loan">
+                    <div class="card-label"><i class="fa-solid fa-hand-holding-dollar" style="color: var(--accent-loan)"></i> カードローン残高合計</div>
+                    <div class="card-value" id="dash-loan-total">¥0</div>
+                    <div class="progress-bar-container"><div class="progress-bar" id="dash-loan-progress"></div></div>
+                </div>
+                <div class="summary-card glass-panel asset">
+                    <div class="card-label"><i class="fa-solid fa-wallet" style="color: var(--accent-repay)"></i> 現在の利用枠残高 (合算)</div>
+                    <div class="card-value" id="dash-credit-remain">¥0</div>
+                </div>
+            </div>
+
+            <!-- メインエリア（3カラム） -->
+            <div class="main-grid">
+                
+                <!-- カラム1：クレジットカード -->
+                <div class="section-box glass-panel">
+                    <div class="section-title"><i class="fa-regular fa-credit-card" style="color: var(--accent-credit)"></i> Credit Cards</div>
+                    <div class="visual-card-list">
+                        
+                        <div class="visual-card credit-blue">
+                            <div class="vc-header">
+                                <div>JAL CARD CLUB-A</div>
+                                <div style="color:var(--text-sub); font-family: monospace; font-size: 12px;">JCB •••• 3540</div>
+                            </div>
+                            <div class="vc-amount" id="dash-jal-amount"><i class="fa-solid fa-spinner fa-spin" style="font-size: 16px;"></i></div>
+                            <div class="vc-footer">
+                                <span id="dash-jal-remain">枠残高: 読込中...</span>
+                                <span>次回の支払: 10日</span>
+                            </div>
+                        </div>
+
+                        <div class="visual-card credit-purple">
+                            <div class="vc-header">
+                                <div>SECOND CARD GOLD</div>
+                                <div style="color:var(--text-sub); font-family: monospace; font-size: 12px;">VISA •••• 8823</div>
+                            </div>
+                            <div class="vc-amount" id="dash-sub-amount">¥0</div>
+                            <div class="vc-footer">
+                                <span id="dash-sub-remain">枠残高: ¥500,000</span>
+                                <span>次回の支払: --/--</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- カラム2：ローン -->
+                <div class="section-box glass-panel">
+                    <div class="section-title"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan)"></i> Card Loans</div>
+                    <div class="visual-card-list">
+                        <div class="visual-card loan-orange">
+                            <div class="vc-header">
+                                <div>銀行カードローン A</div>
+                                <div style="color:var(--text-sub); font-size: 12px; font-weight: 500;">年利 4.525%</div>
+                            </div>
+                            <div class="vc-amount" id="dash-card-balance-a"><i class="fa-solid fa-spinner fa-spin" style="font-size: 16px;"></i></div>
+                            <div class="vc-footer">
+                                <span>借入枠: ¥4,500,000</span>
+                                <span>毎月返済日: 8日</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- カラム3：ライフスタイル・目標（余白を賑やかに） -->
+                <div class="section-box glass-panel">
+                    <div class="section-title"><i class="fa-solid fa-layer-group" style="color: var(--text-sub)"></i> Lifestyle & Goals</div>
+                    <div class="visual-card-list">
+                        
+                        <!-- マイルウィジェット -->
+                        <div class="visual-card miles-box">
+                            <div class="vc-header" style="margin-bottom: 8px;">
+                                <div>JAL Mileage Bank</div>
+                                <div class="status-badge">CRYSTAL</div>
+                            </div>
+                            <div style="font-size: 20px; font-weight: 800; color: #fff;">
+                                42,500 <span style="font-size: 11px; color: var(--accent-miles);">miles</span>
+                            </div>
+                            <div style="margin-top: auto;">
+                                <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-sub); font-weight: 600;">
+                                    <span>To SAPPHIRE (JGC)</span>
+                                    <span>32,500 / 50,000 FOP</span>
+                                </div>
+                                <div class="progress-mini-bg">
+                                    <div class="progress-mini-fill" style="width: 65%; background: linear-gradient(90deg, #f43f5e, #fb7185); box-shadow: 0 0 8px rgba(244, 63, 94, 0.6);"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 学習トラッカーウィジェット -->
+                        <div class="visual-card study-box">
+                            <div class="vc-header">
+                                <div>Network Specialist Exam</div>
+                                <div style="color:var(--text-sub); font-size: 12px;"><i class="fa-solid fa-book-open"></i> Daily Log</div>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; font-weight: 600;">
+                                    <span>Today's Goal</span>
+                                    <span style="color: var(--accent-study);">2 hours</span>
+                                </div>
+                                <div class="progress-mini-bg">
+                                    <div class="progress-mini-fill" style="width: 75%; background: linear-gradient(90deg, #10b981, #34d399); box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);"></div>
+                                </div>
+                                <div style="font-size: 10px; color: var(--text-sub); margin-top: 6px; text-align: right; font-weight: 500;">1.5 hrs completed</div>
+                            </div>
+                        </div>
+
+                        <!-- 食事準備ウィジェット -->
+                        <div class="visual-card meal-box" style="min-height: auto; padding: 16px 24px;">
+                            <div class="vc-header" style="margin-bottom: 8px;">
+                                <div>Meal Prep (Dinner & Bento)</div>
+                                <div style="color:var(--text-sub); font-size: 12px;"><i class="fa-solid fa-utensils"></i></div>
+                            </div>
+                            <div style="font-size: 13px; font-weight: 600; color: #fff;">
+                                <i class="fa-solid fa-bowl-food" style="color: var(--accent-meal); margin-right: 6px;"></i> 豚肉と厚揚げの炒め物
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // メインクレカ・ローンGASのURL
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyX1eLqAdfVihQppHz-_UZuSTjW1RsLqVpbpf8_Ua9fnZeWelY4ztPki52JkWv3tH3k/exec";
+        
+        // 各種上限枠の定義
+        const TOTAL_LOAN_LIMIT = 4500000;
+        const JAL_CARD_LIMIT = 800000;
+        const SUB_CARD_LIMIT = 500000;
+
+        // 計算用ヘルパー関数
+        function parseJSTDateInfo(dateStr) {
+            if (!dateStr) return null;
+            let d = new Date(dateStr);
+            if (isNaN(d.getTime())) {
+                const clean = String(dateStr).split('T')[0].replace(/-/g, '/');
+                d = new Date(clean);
+            }
+            if (isNaN(d.getTime())) return null;
+            return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
+        }
+
+        function getBillingYearMonth(tx) {
+            if (tx.simulationBillingMonth) {
+                const parts = tx.simulationBillingMonth.split('-');
+                return { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10) };
+            }
+            if (tx.registered && (tx.billingMonth || tx.payMonth)) {
+                const bMonth = tx.billingMonth || tx.payMonth;
+                const cleanB = String(bMonth).replace(/\//g, '-');
+                if (cleanB.includes('-')) {
+                    const parts = cleanB.split('-');
+                    return { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10) };
+                }
+            }
+            const txDate = tx.date || tx.useDate || '';
+            const dInfo = parseJSTDateInfo(txDate);
+            if (dInfo) {
+                let y = dInfo.year;
+                let m = (dInfo.day <= 5) ? dInfo.month + 1 : dInfo.month + 2;
+                while (m > 12) { m -= 12; y++; }
+                return { year: y, month: m };
+            }
+            return null;
+        }
+
+        function getBonusBillingMonth(dateStr) {
+            const dInfo = parseJSTDateInfo(dateStr);
+            if (!dInfo) return 0;
+            const month = dInfo.month, day = dInfo.day;
+            if ((month === 6 && day >= 6) || (month > 6 && month < 12) || (month === 12 && day <= 5)) return 1; 
+            return 8; 
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
+
+            const loanFetchUrl = `${GAS_URL}?type=loan`;
+            const creditFetchUrl = `${GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}`;
+
+            Promise.all([
+                fetch(loanFetchUrl).then(res => res.json()),
+                fetch(creditFetchUrl).then(res => res.json())
+            ])
+            .then(([loanData, creditData]) => {
+                
+                // 1. ローン残高の処理
+                let loanBalance = 0;
+                if (Array.isArray(loanData) && loanData.length > 0) {
+                    loanBalance = Number(loanData[0]?.balance || 0);
+                }
+                
+                const loanTotalEl = document.getElementById('dash-loan-total');
+                const cardBalAEl = document.getElementById('dash-card-balance-a');
+                if (loanTotalEl) loanTotalEl.innerText = `¥${loanBalance.toLocaleString()}`;
+                if (cardBalAEl) cardBalAEl.innerText = `¥${loanBalance.toLocaleString()}`;
+                
+                const loanRate = Math.round((loanBalance / TOTAL_LOAN_LIMIT) * 100);
+                const progressBar = document.getElementById('dash-loan-progress');
+                if (progressBar) progressBar.style.width = `${Math.min(loanRate, 100)}%`;
+
+                // 2. クレジット計算処理
+                let nextPaymentTotal = 0; 
+                let unconfirmedTotal = 0; 
+                
+                const now = new Date();
+                const currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+                if (Array.isArray(creditData)) {
+                    creditData.forEach(tx => {
+                        if (!tx) return;
+                        const amount = Number(tx.amount) || Number(tx.price) || 0;
+                        const months = parseInt(tx.months) || parseInt(tx.payCount) || 1;
+                        const type = tx.currentType || tx.type || tx.payType || '1回払';
+                        const isRegistered = tx.registered || tx.isRegistered || false;
+                        const dateStr = tx.date || tx.useDate || '';
+
+                        unconfirmedTotal += amount; 
+                        
+                        const isInstallment = isRegistered && (months > 1 || type.includes('分割') || type.includes('リボ'));
+
+                        if (isInstallment) {
+                            const ym = getBillingYearMonth(tx);
+                            if (ym) {
+                                const monthly = Math.floor(amount / months);
+                                let targetCardDate = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth(), 1);
+                                let diff = (targetCardDate.getFullYear() - ym.year) * 12 + (targetCardDate.getMonth() + 1 - ym.month);
+                                if (diff >= 0 && diff < months) {
+                                    nextPaymentTotal += monthly; 
+                                }
+                            }
+                        } else {
+                            let m = 0;
+                            if (type.includes('ボーナス')) {
+                                m = getBonusBillingMonth(dateStr); 
+                            } else {
+                                const ym = getBillingYearMonth(tx);
+                                if (ym) m = ym.month;
+                            }
+                            if (m === (currentBaseDate.getMonth() + 1)) {
+                                nextPaymentTotal += amount; 
+                            }
+                        }
+                    });
+                }
+
+                // 3. クレジット計算結果の画面反映
+                const creditTotalEl = document.getElementById('dash-credit-total');
+                if (creditTotalEl) creditTotalEl.innerText = `¥${nextPaymentTotal.toLocaleString()}`;
+
+                const jalAmountEl = document.getElementById('dash-jal-amount');
+                const jalRemainEl = document.getElementById('dash-jal-remain');
+                if (jalAmountEl) jalAmountEl.innerText = `¥${nextPaymentTotal.toLocaleString()}`;
+                if (jalRemainEl) jalRemainEl.innerText = `枠残高: ¥${Math.max(JAL_CARD_LIMIT - unconfirmedTotal, 0).toLocaleString()}`;
+                
+                const totalCreditRemainEl = document.getElementById('dash-credit-remain');
+                if (totalCreditRemainEl) {
+                    const totalRemain = (JAL_CARD_LIMIT + SUB_CARD_LIMIT) - unconfirmedTotal; 
+                    totalCreditRemainEl.innerText = `¥${Math.max(totalRemain, 0).toLocaleString()}`;
+                }
+
+            })
+            .catch(err => console.error("データ読み込みエラー:", err));
+        });
+    </script>
+</body>
+</html>
