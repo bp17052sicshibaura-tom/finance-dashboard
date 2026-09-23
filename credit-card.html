@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <!-- スマホでの勝手なズームを防ぎ、セーフエリア（ノッチ等）に対応 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Finance Dashboard | クレカ明細</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -16,7 +15,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); }
         
-        /* 共通サイドバー & オーバーレイ */
         .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.2s; }
         .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: #090d16; border-right: 1px solid var(--border-color); z-index: 1000; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; }
         .sidebar.open { left: 0; }
@@ -37,7 +35,6 @@
         h1 { font-size: 24px; font-weight: 700; line-height: 1.3; }
         h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; }
 
-        /* 上部レイアウト */
         .top-flex { display: flex; gap: var(--grid-gap); flex-wrap: wrap; margin-bottom: 32px; }
         .credit-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px 30px; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 100%; max-width: 400px; aspect-ratio: 1.586; display: flex; flex-direction: column; justify-content: space-between; }
         .credit-card::before { content: ''; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%); pointer-events: none; }
@@ -59,19 +56,16 @@
         .mini-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
         .mini-val { font-size: 18px; font-weight: 700; }
 
-        /* テーブルレスポンシブ化 */
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; margin-top: 10px; }
-        .statement-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; } /* 最低幅を確保 */
+        .statement-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; } 
         .statement-table th, .statement-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: middle; white-space: nowrap; }
         .amount-col { text-align: right; font-weight: 600; }
         
-        /* フォームコントロール */
         .select-custom { background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 13px; outline: none; cursor: pointer; }
         .select-custom:focus { border-color: var(--accent-credit); }
         .div-months-wrap { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
         .billing-month-select { padding: 4px 6px; font-size: 11px; margin-top: 6px; border-color: #475569; color: var(--accent-loan); background: rgba(15, 23, 42, 0.5); }
         
-        /* ボタン類 */
         .action-btn { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-credit); color: var(--accent-credit); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; justify-content: center; min-width: 70px; }
         .action-btn:hover { background: var(--accent-credit); color: #000; }
         .action-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: var(--border-color) !important; color: var(--text-sub) !important; background: transparent !important; }
@@ -83,7 +77,6 @@
 
         .controls-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
 
-        /* スマホ向け CSS オーバーライド */
         @media (max-width: 1023px) {
             .menu-toggle { top: 12px; left: 12px; width: 40px; height: 40px; }
             .main-wrapper { padding: 70px 16px 30px; }
@@ -122,7 +115,6 @@
                 <h1>Credit Card Statement 
                     <span>クレジットカード当月利用明細・支払い方法変更設定</span>
                     <span id="debug-sheet-name" style="color: #fb923c; font-size: 13px; font-weight: bold; display: block; margin-top: 8px;">
-                        🔍 GAS読込シート: 判定中...
                     </span>
                 </h1>
             </header>
@@ -267,7 +259,6 @@
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
         
-        // スマホ幅の場合は初期で閉じておく
         if (window.innerWidth < 1024) {
             document.body.classList.remove('sidebar-open');
         } else if(document.body.classList.contains('sidebar-open')) {
@@ -287,25 +278,52 @@
 
         function loadStatementsFromSheet() {
             const tbody = document.getElementById('statement-tbody');
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> データ読み込み中...</td></tr>`;
-            if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
-
-            const listSheet = encodeURIComponent("クレカ明細一覧");
-            const splitSheet = encodeURIComponent("クレカ分割DB");
-            fetch(`${GAS_URL}?listSheet=${listSheet}&splitSheet=${splitSheet}&_=${new Date().getTime()}`)
-                .then(res => res.json())
-                .then(data => {
-                    dbStatements = Array.isArray(data) ? data : [];
-                    const debugEl = document.getElementById('debug-sheet-name');
-                    if (debugEl && dbStatements.length > 0 && dbStatements[0].debugSourceSheet) {
-                        debugEl.innerText = `🔍 読込: ${dbStatements[0].debugSourceSheet}`;
-                    }
+            
+            // キャッシュから高速表示
+            const cachedData = localStorage.getItem('creditCardData');
+            if (cachedData) {
+                try {
+                    dbStatements = JSON.parse(cachedData);
                     renderStatements();
                     calculateTotals();
                     applyFilter();
+                } catch(e) {
+                    console.error("キャッシュのパースエラー", e);
+                }
+            } else {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> データを読み込み中...</td></tr>`;
+            }
+
+            if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
+
+            // 裏側で最新データを取得
+            const listSheet = encodeURIComponent("クレカ明細一覧");
+            const splitSheet = encodeURIComponent("クレカ分割DB");
+            fetch(`${GAS_URL}?listSheet=${listSheet}&splitSheet=${splitSheet}&_=${new Date().getTime()}`)
+                .then(res => { if(!res.ok) throw new Error('ネットワークエラー'); return res.json(); })
+                .then(data => {
+                    const newData = Array.isArray(data) ? data : [];
+                    
+                    // 差分があれば更新
+                    if (JSON.stringify(dbStatements) !== JSON.stringify(newData)) {
+                        dbStatements = newData;
+                        localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
+                        
+                        const debugEl = document.getElementById('debug-sheet-name');
+                        if (debugEl && dbStatements.length > 0 && dbStatements[0].debugSourceSheet) {
+                            debugEl.innerText = `🔍 読込: ${dbStatements[0].debugSourceSheet}`;
+                        }
+                        
+                        renderStatements();
+                        calculateTotals();
+                        applyFilter();
+                    }
                 })
                 .catch(err => {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--accent-loan); padding: 40px;">読み込みに失敗しました。</td></tr>`;
+                    console.error("通信エラー:", err);
+                    if (dbStatements.length === 0 && tbody) {
+                        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--accent-loan); padding: 40px;"><i class="fa-solid fa-circle-exclamation"></i> 読み込みに失敗しました。</td></tr>`;
+                    }
                 });
         }
 
@@ -488,8 +506,14 @@
                     }
                     const badge = document.getElementById(`row-${id}`)?.querySelector('.badge-payment');
                     if (badge) { badge.innerText = selectedType === '分割払い' ? `分割 ${targetMonths}ヶ月` : selectedType; badge.className = 'badge-payment changed'; }
+                    
                     const tx = dbStatements.find(t => String(t.id) === String(id));
-                    if (tx) { tx.registered = true; tx.currentType = selectedType; tx.months = String(targetMonths); tx.billingMonth = selectedBillingMonth; }
+                    if (tx) { 
+                        tx.registered = true; tx.currentType = selectedType; tx.months = String(targetMonths); tx.billingMonth = selectedBillingMonth; 
+                    }
+                    
+                    // 🌟 キャッシュも最新化
+                    localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
                     calculateTotals(); 
                 } else throw new Error(result.message);
             })

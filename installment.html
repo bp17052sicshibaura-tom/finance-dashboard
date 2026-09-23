@@ -165,15 +165,43 @@
         overlay.addEventListener('click', () => { sidebar.classList.remove('open'); document.body.classList.remove('sidebar-open'); overlay.classList.remove('show'); });
 
         function loadStatementsFromSheet() {
+            const loadingMsg = document.getElementById('loading-msg');
+            const contentArea = document.getElementById('content-area');
+            
+            // キャッシュから高速表示
+            const cachedData = localStorage.getItem('creditCardData');
+            if (cachedData) {
+                try {
+                    dbStatements = JSON.parse(cachedData);
+                    if (loadingMsg) loadingMsg.style.display = 'none';
+                    if (contentArea) contentArea.style.display = 'block';
+                    processData();
+                } catch(e) {
+                    console.error("キャッシュのパースエラー", e);
+                }
+            }
+
+            if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
+
+            // 裏側で最新データを取得
             fetch(`${GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}&_=${new Date().getTime()}`)
                 .then(res => res.json())
                 .then(data => {
-                    dbStatements = Array.isArray(data) ? data : [];
-                    document.getElementById('loading-msg').style.display = 'none';
-                    document.getElementById('content-area').style.display = 'block';
-                    processData();
+                    const newData = Array.isArray(data) ? data : [];
+                    
+                    if (JSON.stringify(dbStatements) !== JSON.stringify(newData)) {
+                        dbStatements = newData;
+                        localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
+                        if (loadingMsg) loadingMsg.style.display = 'none';
+                        if (contentArea) contentArea.style.display = 'block';
+                        processData();
+                    }
                 })
-                .catch(err => document.getElementById('loading-msg').innerHTML = `<i class="fa-solid fa-circle-exclamation" style="color:var(--accent-loan)"></i> 読み込み失敗`);
+                .catch(err => {
+                    if (dbStatements.length === 0 && loadingMsg) {
+                        loadingMsg.innerHTML = `<i class="fa-solid fa-circle-exclamation" style="color:var(--accent-loan)"></i> 読み込み失敗`;
+                    }
+                });
         }
 
         function parseJSTDateInfo(dateStr) {
