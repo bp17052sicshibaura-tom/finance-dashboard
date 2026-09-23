@@ -2,69 +2,75 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Finance Dashboard | 分割・ボーナス管理</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {
-            --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8;
-            --accent-credit: #38bdf8; --border-color: #334155; --sidebar-width: 260px; --grid-gap: 24px;
-            --accent-loan: #fb923c; --accent-repay: #4ade80;
-            --accent-bonus: #c084fc;
-        }
+        :root { --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --accent-credit: #38bdf8; --border-color: #334155; --sidebar-width: 260px; --grid-gap: 24px; --accent-loan: #fb923c; --accent-repay: #4ade80; --accent-bonus: #c084fc; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; }
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); }
         
-        /* 共通サイドバー */
-        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1000; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: #090d16; border-right: 1px solid var(--border-color); z-index: 999; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; }
+        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.2s; }
+        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: #090d16; border-right: 1px solid var(--border-color); z-index: 1000; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto;}
         .sidebar.open { left: 0; }
+        
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(2px); }
+        .sidebar-overlay.show { opacity: 1; visibility: visible; }
+
         .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
         .nav-item { display: flex; align-items: center; gap: 12px; color: var(--text-sub); padding: 14px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
         .nav-item:hover { color: var(--text-main); background: var(--bg-card); }
         .nav-item.active { background: var(--bg-card); color: var(--text-main); border-left: 4px solid var(--accent-bonus); }
 
         .main-wrapper { flex: 1; width: 100%; padding: 40px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        @media (min-width: 1024px) { body.sidebar-open .main-wrapper { margin-left: var(--sidebar-width); } }
+        @media (min-width: 1024px) { body.sidebar-open .main-wrapper { margin-left: var(--sidebar-width); } .sidebar-overlay { display: none !important; } }
         .container { max-width: 1200px; margin: 0 auto; padding-top: 40px; }
         header { margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
-        h1 { font-size: 24px; font-weight: 700; }
-        h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 4px; font-weight: 400; }
+        h1 { font-size: 24px; font-weight: 700; line-height: 1.3;}
+        h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; }
 
-        /* サマリーカード */
         .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
         .summary-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: center; }
         .summary-label { font-size: 13px; color: var(--text-sub); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .summary-value { font-size: 28px; font-weight: 700; color: var(--text-main); }
-        .val-split { color: var(--accent-credit); }
-        .val-bonus { color: var(--accent-bonus); }
-        .val-total { color: var(--accent-loan); }
+        .val-split { color: var(--accent-credit); } .val-bonus { color: var(--accent-bonus); } .val-total { color: var(--accent-loan); }
 
-        /* チャートエリア */
         .chart-section { background: var(--bg-card); border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); margin-bottom: 32px; }
         .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .chart-title { font-size: 16px; font-weight: 600; }
-        .chart-container { position: relative; height: 350px; width: 100%; }
+        
+        .chart-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .chart-container { position: relative; height: 350px; width: 100%; min-width: 600px; }
 
-        /* 明細テーブル */
-        .statement-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .statement-table th, .statement-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: middle; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
+        .statement-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+        .statement-table th, .statement-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: middle; white-space: nowrap; }
         .amount-col { text-align: right; font-weight: 600; }
         .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
         .badge.split { background: rgba(56, 189, 248, 0.15); color: var(--accent-credit); border: 1px solid rgba(56, 189, 248, 0.3); }
         .badge.bonus { background: rgba(192, 132, 252, 0.15); color: var(--accent-bonus); border: 1px solid rgba(192, 132, 252, 0.3); }
 
-        /* ローディング */
         #loading-msg { text-align: center; padding: 60px; color: var(--text-sub); font-size: 16px; }
-        
         .empty-state { text-align: center; padding: 40px; color: var(--text-sub); background: var(--bg-main); border-radius: 12px; border: 1px dashed var(--border-color); }
+
+        @media (max-width: 1023px) {
+            .menu-toggle { top: 12px; left: 12px; width: 40px; height: 40px; }
+            .main-wrapper { padding: 70px 16px 30px; }
+            .container { padding-top: 10px; }
+            h1 { font-size: 20px; }
+            .summary-grid { grid-template-columns: 1fr; gap: 12px; }
+            .summary-card { padding: 16px; }
+            .chart-section { padding: 16px; }
+            .statement-table { font-size: 12px; }
+            .statement-table th, .statement-table td { padding: 12px 10px; }
+        }
     </style>
 </head>
 <body class="sidebar-open">
 
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <button class="menu-toggle" id="menu-btn"><i class="fa-solid fa-bars"></i></button>
 
     <div class="sidebar" id="sidebar">
@@ -74,7 +80,6 @@
             <a href="simulation.html" class="nav-item"><i class="fa-solid fa-chart-line" style="color: var(--accent-repay);"></i>将来の返済計画</a>
             <a href="credit-card.html" class="nav-item"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>クレカ明細</a>
             <a href="credit-card-2.html" class="nav-item"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>サブクレカ明細</a>
-            <!-- 今回追加したメニュー -->
             <a href="installment.html" class="nav-item active"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
         </ul>
         <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v4.0</div>
@@ -88,10 +93,9 @@
                 </h1>
             </header>
 
-            <div id="loading-msg"><i class="fa-solid fa-spinner fa-spin"></i> スプレッドシートからデータを読み込み中...</div>
+            <div id="loading-msg"><i class="fa-solid fa-spinner fa-spin"></i> データを読み込み中...</div>
 
             <div id="content-area" style="display: none;">
-                <!-- サマリーウィジェット -->
                 <div class="summary-grid">
                     <div class="summary-card">
                         <div class="summary-label"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit)"></i> 分割払いの総残高 (予定)</div>
@@ -108,22 +112,22 @@
                     </div>
                 </div>
 
-                <!-- チャート -->
                 <div class="chart-section">
                     <div class="chart-header">
                         <div class="chart-title"><i class="fa-solid fa-chart-column"></i> 向こう12ヶ月の特別支払い推移</div>
                     </div>
-                    <div class="chart-container">
-                        <canvas id="burdenChart"></canvas>
+                    <div class="chart-scroll-wrapper">
+                        <div class="chart-container">
+                            <canvas id="burdenChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 明細一覧 -->
                 <div class="chart-section">
                     <div class="chart-header">
                         <div class="chart-title"><i class="fa-solid fa-list"></i> アクティブな分割・ボーナス一括明細</div>
                     </div>
-                    <div id="table-container">
+                    <div class="table-responsive">
                         <table class="statement-table">
                             <thead>
                                 <tr>
@@ -140,31 +144,28 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwipphBoGeLGpGJzUVxZIrHn_QPWGwVJnGWub9mCH5oHSgCL6VKXWEIrKb3p5cKV3NI/exec";
-        
-        let dbStatements = [];
-        let chartInstance = null;
+        let dbStatements = [], chartInstance = null;
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadStatementsFromSheet();
+        window.addEventListener('DOMContentLoaded', () => loadStatementsFromSheet());
+
+        /* サイドバー制御 */
+        const menuBtn = document.getElementById('menu-btn'), sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebar-overlay');
+        if (window.innerWidth < 1024) document.body.classList.remove('sidebar-open');
+        else if(document.body.classList.contains('sidebar-open')) sidebar.classList.add('open');
+
+        menuBtn.addEventListener('click', () => { 
+            sidebar.classList.toggle('open'); document.body.classList.toggle('sidebar-open');
+            if (window.innerWidth < 1024) overlay.classList.toggle('show');
         });
-
-        const menuBtn = document.getElementById('menu-btn');
-        const sidebar = document.getElementById('sidebar');
-        if(document.body.classList.contains('sidebar-open')) sidebar.classList.add('open');
-        menuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); document.body.classList.toggle('sidebar-open'); });
+        overlay.addEventListener('click', () => { sidebar.classList.remove('open'); document.body.classList.remove('sidebar-open'); overlay.classList.remove('show'); });
 
         function loadStatementsFromSheet() {
-            const listSheet = encodeURIComponent("クレカ明細一覧");
-            const splitSheet = encodeURIComponent("クレカ分割DB");
-            const cacheBusterUrl = `${GAS_URL}?listSheet=${listSheet}&splitSheet=${splitSheet}&_=${new Date().getTime()}`;
-
-            fetch(cacheBusterUrl)
+            fetch(`${GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}&_=${new Date().getTime()}`)
                 .then(res => res.json())
                 .then(data => {
                     dbStatements = Array.isArray(data) ? data : [];
@@ -172,269 +173,112 @@
                     document.getElementById('content-area').style.display = 'block';
                     processData();
                 })
-                .catch(err => {
-                    document.getElementById('loading-msg').innerHTML = `<i class="fa-solid fa-circle-exclamation" style="color:var(--accent-loan)"></i> データの読み込みに失敗しました。`;
-                });
+                .catch(err => document.getElementById('loading-msg').innerHTML = `<i class="fa-solid fa-circle-exclamation" style="color:var(--accent-loan)"></i> 読み込み失敗`);
         }
 
-        // 基本的な日付パース
         function parseJSTDateInfo(dateStr) {
             if (!dateStr) return null;
             let d = new Date(dateStr);
-            if (isNaN(d.getTime())) {
-                const clean = String(dateStr).split('T')[0].replace(/-/g, '/');
-                d = new Date(clean);
-            }
+            if (isNaN(d.getTime())) d = new Date(String(dateStr).split('T')[0].replace(/-/g, '/'));
             if (isNaN(d.getTime())) return null;
-            return {
-                year: d.getFullYear(),
-                month: d.getMonth() + 1,
-                day: d.getDate(),
-                formatted: `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
-            };
+            return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate(), formatted: `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}` };
         }
 
-        // 支払月（BillMonth）の取得
         function getBillingYearMonth(tx) {
             if (tx.registered && (tx.billingMonth || tx.payMonth)) {
-                const bMonth = tx.billingMonth || tx.payMonth;
-                const cleanB = String(bMonth).replace(/\//g, '-');
-                if (cleanB.includes('-')) {
-                    const parts = cleanB.split('-');
-                    return { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10) };
-                }
+                const bMonth = String(tx.billingMonth || tx.payMonth).replace(/\//g, '-');
+                if (bMonth.includes('-')) return { year: parseInt(bMonth.split('-')[0], 10), month: parseInt(bMonth.split('-')[1], 10) };
             }
-            const txDate = tx.date || tx.useDate || '';
-            const dInfo = parseJSTDateInfo(txDate);
+            const dInfo = parseJSTDateInfo(tx.date || tx.useDate || '');
             if (dInfo) {
-                let y = dInfo.year;
-                let m = (dInfo.day <= 5) ? dInfo.month + 1 : dInfo.month + 2;
+                let y = dInfo.year, m = (dInfo.day <= 5) ? dInfo.month + 1 : dInfo.month + 2;
                 while (m > 12) { m -= 12; y++; }
                 return { year: y, month: m };
             }
             return { year: new Date().getFullYear(), month: new Date().getMonth() + 1 };
         }
 
-        // ボーナス月の算出（年またぎを考慮）
         function getBonusPaymentYearMonth(dateStr) {
             const dInfo = parseJSTDateInfo(dateStr);
             if (!dInfo) return { year: new Date().getFullYear(), month: 1 };
-            
-            const month = dInfo.month;
-            const day = dInfo.day;
-            let targetYear = dInfo.year;
-            let targetMonth = 8;
-            
-            if ((month === 6 && day >= 6) || (month > 6 && month < 12) || (month === 12 && day <= 5)) {
-                targetMonth = 1; 
-                if (month >= 6) targetYear++; 
-            } else {
-                targetMonth = 8;
+            if ((dInfo.month === 6 && dInfo.day >= 6) || (dInfo.month > 6 && dInfo.month < 12) || (dInfo.month === 12 && dInfo.day <= 5)) {
+                return { year: dInfo.month >= 6 ? dInfo.year + 1 : dInfo.year, month: 1 };
             }
-            return { year: targetYear, month: targetMonth };
+            return { year: dInfo.year, month: 8 };
         }
 
         function processData() {
-            // 対象データの抽出（分割 or ボーナス）かつ DB登録済みのものを優先
-            const targetData = dbStatements.filter(tx => {
-                const type = tx.currentType || '';
-                return type === '分割払い' || type === 'ボーナス一括払い';
-            });
-
-            // 1. チャート用のタイムライン（当月から12ヶ月間）の構築
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth() + 1; // 1〜12
+            const targetData = dbStatements.filter(tx => tx.currentType === '分割払い' || tx.currentType === 'ボーナス一括払い');
+            const now = new Date(), currentYear = now.getFullYear(), currentMonth = now.getMonth() + 1;
             
-            let timelineLabels = [];
-            let splitData = new Array(12).fill(0);
-            let bonusData = new Array(12).fill(0);
-            let timelineKeys = []; // YYYY-MM形式での比較用
-
+            let timelineLabels = [], splitData = new Array(12).fill(0), bonusData = new Array(12).fill(0), timelineKeys = [];
             for (let i = 0; i < 12; i++) {
-                let m = currentMonth + i;
-                let y = currentYear;
+                let m = currentMonth + i, y = currentYear;
                 while (m > 12) { m -= 12; y++; }
                 timelineLabels.push(`${y}年${m}月`);
                 timelineKeys.push(`${y}-${String(m).padStart(2, '0')}`);
             }
 
-            let totalSplitRemaining = 0;
-            let totalBonusRemaining = 0;
-
+            let totalSplitRemaining = 0, totalBonusRemaining = 0;
             const tbody = document.getElementById('installment-tbody');
             tbody.innerHTML = '';
 
             if (targetData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">該当する分割・ボーナス払いの明細はありません</div></td></tr>`;
-                renderChart(timelineLabels, splitData, bonusData);
-                return;
+                tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">該当する明細はありません</div></td></tr>`;
+                renderChart(timelineLabels, splitData, bonusData); return;
             }
 
-            // データ集計とテーブル描画
             targetData.forEach(tx => {
-                const type = tx.currentType;
-                const amount = Number(tx.amount) || 0;
-                const months = parseInt(tx.months) || 1;
-                
-                let dateStr = tx.date || '';
-                const dInfo = parseJSTDateInfo(dateStr);
-                const displayDate = dInfo ? dInfo.formatted : dateStr;
-                
-                let monthlyAmount = amount;
-                let periodText = '';
-                let isBonus = (type === 'ボーナス一括払い');
-                let badgeClass = isBonus ? 'badge bonus' : 'badge split';
-                let badgeText = isBonus ? 'ボーナス一括' : `分割 ${months}回`;
+                const amount = Number(tx.amount) || 0, months = parseInt(tx.months) || 1, isBonus = (tx.currentType === 'ボーナス一括払い');
+                const displayDate = parseJSTDateInfo(tx.date)?.formatted || tx.date || '';
+                let monthlyAmount = amount, periodText = '';
 
                 if (isBonus) {
-                    const ym = getBonusPaymentYearMonth(dateStr);
-                    const key = `${ym.year}-${String(ym.month).padStart(2, '0')}`;
+                    const ym = getBonusPaymentYearMonth(tx.date);
                     periodText = `${ym.year}年${ym.month}月4日`;
-                    
-                    // チャート用データへの割り当て
-                    const tIndex = timelineKeys.indexOf(key);
-                    if (tIndex !== -1) {
-                        bonusData[tIndex] += amount;
-                    }
-                    // 残高（現在月以降の支払いなら残高に含める）
-                    if (ym.year > currentYear || (ym.year === currentYear && ym.month >= currentMonth)) {
-                        totalBonusRemaining += amount;
-                    }
-
+                    const tIndex = timelineKeys.indexOf(`${ym.year}-${String(ym.month).padStart(2, '0')}`);
+                    if (tIndex !== -1) bonusData[tIndex] += amount;
+                    if (ym.year > currentYear || (ym.year === currentYear && ym.month >= currentMonth)) totalBonusRemaining += amount;
                 } else {
                     const ym = getBillingYearMonth(tx);
                     monthlyAmount = Math.floor(amount / months);
-                    
-                    let startYear = ym.year;
-                    let startMonth = ym.month;
-                    let endYear = startYear;
-                    let endMonth = startMonth + months - 1;
+                    let endYear = ym.year, endMonth = ym.month + months - 1;
                     while (endMonth > 12) { endMonth -= 12; endYear++; }
+                    periodText = `${ym.year}/${String(ym.month).padStart(2, '0')} 〜 ${endYear}/${String(endMonth).padStart(2, '0')}`;
                     
-                    periodText = `${startYear}/${String(startMonth).padStart(2, '0')} 〜 ${endYear}/${String(endMonth).padStart(2, '0')}`;
-
-                    // 分割の各月への割り当て
                     for (let i = 0; i < months; i++) {
-                        let targetM = startMonth + i;
-                        let targetY = startYear;
-                        while (targetM > 12) { targetM -= 12; targetY++; }
-                        
-                        const key = `${targetY}-${String(targetM).padStart(2, '0')}`;
-                        const tIndex = timelineKeys.indexOf(key);
-                        if (tIndex !== -1) {
-                            splitData[tIndex] += monthlyAmount;
-                        }
-
-                        // 残高計算（現在月以降の分だけ合算）
-                        if (targetY > currentYear || (targetY === currentYear && targetM >= currentMonth)) {
-                            totalSplitRemaining += monthlyAmount;
-                        }
+                        let tM = ym.month + i, tY = ym.year;
+                        while (tM > 12) { tM -= 12; tY++; }
+                        const tIndex = timelineKeys.indexOf(`${tY}-${String(tM).padStart(2, '0')}`);
+                        if (tIndex !== -1) splitData[tIndex] += monthlyAmount;
+                        if (tY > currentYear || (tY === currentYear && tM >= currentMonth)) totalSplitRemaining += monthlyAmount;
                     }
                 }
 
-                // 行の追加
-                tbody.insertAdjacentHTML('beforeend', `
-                    <tr>
-                        <td style="font-weight: 500;">${displayDate}</td>
-                        <td><strong>${tx.content}</strong></td>
-                        <td><span class="${badgeClass}">${badgeText}</span></td>
-                        <td class="amount-col">¥${amount.toLocaleString()}</td>
-                        <td class="amount-col" style="color: var(--text-sub);">
-                            ${isBonus ? '---' : '¥' + monthlyAmount.toLocaleString()}
-                        </td>
-                        <td style="font-size: 12px; color: var(--text-sub);">${periodText}</td>
-                    </tr>
-                `);
+                tbody.insertAdjacentHTML('beforeend', `<tr><td style="font-weight: 500;">${displayDate}</td><td><strong style="white-space: normal; display: block; max-width: 250px;">${tx.content || ''}</strong></td><td><span class="badge ${isBonus ? 'bonus':'split'}">${isBonus ? 'ボーナス一括' : `分割 ${months}回`}</span></td><td class="amount-col">¥${amount.toLocaleString()}</td><td class="amount-col" style="color: var(--text-sub);">${isBonus ? '---' : '¥' + monthlyAmount.toLocaleString()}</td><td style="font-size: 12px; color: var(--text-sub);">${periodText}</td></tr>`);
             });
 
-            // サマリーの更新
             document.getElementById('sum-split').innerText = `¥${totalSplitRemaining.toLocaleString()}`;
             document.getElementById('sum-bonus').innerText = `¥${totalBonusRemaining.toLocaleString()}`;
 
-            // 最も負担が大きい月の計算
-            let maxBurden = 0;
-            let maxIndex = 0;
-            for(let i=0; i<12; i++) {
-                let currentMonthTotal = splitData[i] + bonusData[i];
-                if (currentMonthTotal > maxBurden) {
-                    maxBurden = currentMonthTotal;
-                    maxIndex = i;
-                }
-            }
-
+            let maxBurden = 0, maxIndex = 0;
+            for(let i=0; i<12; i++) { if (splitData[i] + bonusData[i] > maxBurden) { maxBurden = splitData[i] + bonusData[i]; maxIndex = i; } }
             if (maxBurden > 0) {
                 document.getElementById('max-burden-month').innerText = timelineLabels[maxIndex];
                 document.getElementById('max-burden-val').innerText = `計 ¥${maxBurden.toLocaleString()}`;
             }
-
-            // チャート描画
             renderChart(timelineLabels, splitData, bonusData);
         }
 
         function renderChart(labels, splitData, bonusData) {
-            const ctx = document.getElementById('burdenChart').getContext('2d');
-            
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
-
-            chartInstance = new Chart(ctx, {
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(document.getElementById('burdenChart').getContext('2d'), {
                 type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '分割払い 負担額',
-                            data: splitData,
-                            backgroundColor: '#38bdf8', // accent-credit
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'ボーナス一括 負担額',
-                            data: bonusData,
-                            backgroundColor: '#c084fc', // accent-bonus
-                            borderRadius: 4
-                        }
-                    ]
-                },
+                data: { labels: labels, datasets: [{ label: '分割払い', data: splitData, backgroundColor: '#38bdf8', borderRadius: 4 }, { label: 'ボーナス一括', data: bonusData, backgroundColor: '#c084fc', borderRadius: 4 }] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#f8fafc' }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) { label += ': '; }
-                                    if (context.parsed.y !== null) {
-                                        label += new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY' }).format(context.parsed.y);
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            stacked: true,
-                            ticks: { color: '#94a3b8' },
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                        },
-                        y: {
-                            stacked: true,
-                            ticks: { 
-                                color: '#94a3b8',
-                                callback: function(value) { return '¥' + value.toLocaleString(); }
-                            },
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                        }
-                    }
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#f8fafc' } }, tooltip: { mode: 'index', intersect: false, callbacks: { label: ctx => `${ctx.dataset.label}: ¥${ctx.parsed.y.toLocaleString()}` } } },
+                    scales: { x: { stacked: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { stacked: true, ticks: { color: '#94a3b8', callback: v => '¥'+v.toLocaleString() }, grid: { color: 'rgba(255,255,255,0.05)' } } }
                 }
             });
         }

@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- スマホでの勝手なズームを防ぎ、セーフエリア（ノッチ等）に対応 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Finance Dashboard | クレカ明細</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,75 +14,94 @@
             --accent-loan: #fb923c; --accent-repay: #4ade80;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; }
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); }
         
-        /* 共通サイドバー */
-        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1000; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: #090d16; border-right: 1px solid var(--border-color); z-index: 999; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; }
+        /* 共通サイドバー & オーバーレイ */
+        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.2s; }
+        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: #090d16; border-right: 1px solid var(--border-color); z-index: 1000; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; }
         .sidebar.open { left: 0; }
+        
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(2px); }
+        .sidebar-overlay.show { opacity: 1; visibility: visible; }
+
         .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
         .nav-item { display: flex; align-items: center; gap: 12px; color: var(--text-sub); padding: 14px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
         .nav-item:hover { color: var(--text-main); background: var(--bg-card); }
         .nav-item.active { background: var(--bg-card); color: var(--text-main); border-left: 4px solid var(--accent-credit); }
 
-        .main-wrapper { flex: 1; width: 100%; padding: 40px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        @media (min-width: 1024px) { body.sidebar-open .main-wrapper { margin-left: var(--sidebar-width); } }
+        .main-wrapper { flex: 1; width: 100%; padding: 40px 20px 40px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        @media (min-width: 1024px) { body.sidebar-open .main-wrapper { margin-left: var(--sidebar-width); } .sidebar-overlay { display: none !important; } }
+        
         .container { max-width: 1200px; margin: 0 auto; padding-top: 40px; }
         header { margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
-        h1 { font-size: 24px; font-weight: 700; }
-        h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 4px; font-weight: 400; }
+        h1 { font-size: 24px; font-weight: 700; line-height: 1.3; }
+        h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; }
 
         /* 上部レイアウト */
         .top-flex { display: flex; gap: var(--grid-gap); flex-wrap: wrap; margin-bottom: 32px; }
-        .credit-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 30px; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 100%; max-width: 400px; aspect-ratio: 1.586; display: flex; flex-direction: column; justify-content: space-between; }
-        .credit-card::before { content: ''; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%); }
+        .credit-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px 30px; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 100%; max-width: 400px; aspect-ratio: 1.586; display: flex; flex-direction: column; justify-content: space-between; }
+        .credit-card::before { content: ''; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%); pointer-events: none; }
         .card-brand { display: flex; justify-content: space-between; z-index: 1; }
-        
         .card-logo-txt { font-style: italic; font-weight: 700; color: #e2e8f0; letter-spacing: 1px; }
         .jcb-logo { display: flex; gap: 2px; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
         .jcb-b { color: #38bdf8; } .jcb-r { color: #fb923c; } .jcb-g { color: #4ade80; }
-        
-        .card-number { font-size: 18px; letter-spacing: 3px; font-weight: 500; color: #f1f5f9; font-family: monospace; margin-top: 20px; z-index: 1; }
+        .card-number { font-size: 18px; letter-spacing: 3px; font-weight: 500; color: #f1f5f9; font-family: monospace; margin-top: 16px; z-index: 1; }
         .card-holder { display: flex; justify-content: space-between; align-items: flex-end; z-index: 1; }
 
         .status-block-group { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: var(--grid-gap); }
         .section-box { background: var(--bg-card); border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); }
-        .progress-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+        .progress-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
         .meter-container { background: #334155; border-radius: 6px; height: 12px; overflow: hidden; }
         .meter-bar { height: 100%; background: linear-gradient(90deg, var(--accent-credit) 0%, #3b82f6 100%); width: 0%; transition: width 0.5s ease-out; }
         
-        .summary-mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .summary-mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; }
         .mini-card { background: var(--bg-main); border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; }
         .mini-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
         .mini-val { font-size: 18px; font-weight: 700; }
 
-        /* 明細テーブル */
-        .statement-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .statement-table th, .statement-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: middle; }
+        /* テーブルレスポンシブ化 */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; margin-top: 10px; }
+        .statement-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 800px; } /* 最低幅を確保 */
+        .statement-table th, .statement-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: middle; white-space: nowrap; }
         .amount-col { text-align: right; font-weight: 600; }
         
         /* フォームコントロール */
-        .select-custom { background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 10px; border-radius: 6px; font-size: 12px; outline: none; cursor: pointer; }
+        .select-custom { background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 13px; outline: none; cursor: pointer; }
         .select-custom:focus { border-color: var(--accent-credit); }
         .div-months-wrap { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
+        .billing-month-select { padding: 4px 6px; font-size: 11px; margin-top: 6px; border-color: #475569; color: var(--accent-loan); background: rgba(15, 23, 42, 0.5); }
         
-        .billing-month-select { padding: 2px 4px; font-size: 11px; margin-top: 4px; border-color: #475569; color: var(--accent-loan); background: rgba(15, 23, 42, 0.5); }
-        
-        /* 保存ボタン */
-        .action-btn { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-credit); color: var(--accent-credit); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; justify-content: center; min-width: 70px; }
+        /* ボタン類 */
+        .action-btn { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-credit); color: var(--accent-credit); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; justify-content: center; min-width: 70px; }
         .action-btn:hover { background: var(--accent-credit); color: #000; }
         .action-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: var(--border-color) !important; color: var(--text-sub) !important; background: transparent !important; }
-        
-        /* 更新用ボタン（登録済みの場合） */
         .action-btn.update-btn { border-color: var(--accent-repay); color: var(--accent-repay); background: rgba(74, 222, 128, 0.1); }
         .action-btn.update-btn:hover { background: var(--accent-repay); color: #000; }
 
         .badge-payment { padding: 4px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; background: #334155; color: var(--text-main); transition: all 0.3s; }
         .badge-payment.changed { background: rgba(251, 146, 60, 0.15); color: var(--accent-loan); border: 1px solid rgba(251, 146, 60, 0.3); }
+
+        .controls-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
+
+        /* スマホ向け CSS オーバーライド */
+        @media (max-width: 1023px) {
+            .menu-toggle { top: 12px; left: 12px; width: 40px; height: 40px; }
+            .main-wrapper { padding: 70px 16px 30px; }
+            .container { padding-top: 10px; }
+            h1 { font-size: 20px; }
+            .top-flex { flex-direction: column; gap: 20px; }
+            .credit-card { height: 210px; aspect-ratio: unset; margin: 0 auto; }
+            .status-block-group { min-width: 100%; }
+            .section-box { padding: 16px; }
+            .summary-mini-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .statement-table { font-size: 12px; }
+            .statement-table th, .statement-table td { padding: 12px 10px; }
+        }
     </style>
 </head>
 <body class="sidebar-open">
 
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <button class="menu-toggle" id="menu-btn"><i class="fa-solid fa-bars"></i></button>
 
     <div class="sidebar" id="sidebar">
@@ -90,7 +110,8 @@
             <a href="loan-history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-loan);"></i>カードローン実績・同期</a>
             <a href="simulation.html" class="nav-item"><i class="fa-solid fa-chart-line" style="color: var(--accent-repay);"></i>将来の返済計画</a>
             <a href="credit-card.html" class="nav-item active"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>クレカ明細</a>
-	    <a href="credit-card-2.html" class="nav-item"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>サブクレカ明細</a>
+            <a href="credit-card-2.html" class="nav-item"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>サブクレカ明細</a>
+            <a href="installment.html" class="nav-item"><i class="fa-solid fa-layer-group" style="color: #c084fc;"></i>分割・ボーナス管理</a>
         </ul>
         <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v4.0</div>
     </div>
@@ -100,7 +121,7 @@
             <header>
                 <h1>Credit Card Statement 
                     <span>クレジットカード当月利用明細・支払い方法変更設定</span>
-                    <span id="debug-sheet-name" style="color: #fb923c; font-size: 14px; font-weight: bold; display: block; margin-top: 8px;">
+                    <span id="debug-sheet-name" style="color: #fb923c; font-size: 13px; font-weight: bold; display: block; margin-top: 8px;">
                         🔍 GAS読込シート: 判定中...
                     </span>
                 </h1>
@@ -122,8 +143,8 @@
                 <div class="status-block-group">
                     <div class="section-box">
                         <div class="progress-info">
-                            <div id="usage-rate-txt">当月未確定請求額（枠使用率: 0.0%）</div>
-                            <div style="font-size:24px; font-weight:700;"><span id="unconfirmed-total">¥0</span> <span style="font-size:13px; font-weight:400; color:var(--text-sub)">/ ¥800,000</span></div>
+                            <div id="usage-rate-txt" style="font-size: 13px;">当月未確定請求額（枠使用率: 0.0%）</div>
+                            <div style="font-size:22px; font-weight:700;"><span id="unconfirmed-total">¥0</span> <span style="font-size:13px; font-weight:400; color:var(--text-sub)">/ ¥800k</span></div>
                         </div>
                         <div class="meter-container"><div class="meter-bar"></div></div>
                     </div>
@@ -165,43 +186,47 @@
                 </div>
             </div>
             
-            <br>
-            <label style="color: #94a3b8; font-size: 12px;">支払月で絞り込み：</label>
-            <select id="filter-month" class="select-custom">
-                <option value="">すべて</option>
-            </select> <button id="filter-btn" class="action-btn">絞り込み</button>
+            <div class="controls-row">
+                <div>
+                    <label style="color: #94a3b8; font-size: 12px; margin-right: 4px;">支払月で絞込:</label>
+                    <select id="filter-month" class="select-custom">
+                        <option value="">すべて</option>
+                    </select>
+                </div>
+                <button id="filter-btn" class="action-btn">絞り込み</button>
+                <button onclick="exportToCSV()" style="padding: 8px 12px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                    📊 CSV出力
+                </button>
+                <button type="button" onclick="resetSort()" style="padding: 8px 12px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
+                    <i class="fa-solid fa-arrow-rotate-left"></i> ソート解除
+                </button>
+            </div>
 
-            <button onclick="exportToCSV()" style="padding: 6px 12px; background-color: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; margin-left: 10px; font-size: 12px; font-weight: 600;">
-                📊 計算明細をCSV出力
-            </button>
-        
-            <button type="button" onclick="resetSort()" style="margin-left: 8px; padding: 6px 12px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
-                <i class="fa-solid fa-arrow-rotate-left"></i> ソート解除
-            </button>
-
-            <div class="section-box" style="margin-top: 20px;">
-                <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;"><i class="fa-solid fa-list-check" style="color: var(--accent-credit)"></i> 最近の利用明細と支払いタイプ変更</div>
-                <p style="font-size:12px; color:var(--text-sub); margin-bottom:20px;">
-                    ※高速道路の利用など請求が遅れる場合は、利用日下の「支払月」を手動で調整してください。登録後でも再変更・上書き更新が可能です。
+            <div class="section-box">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;"><i class="fa-solid fa-list-check" style="color: var(--accent-credit)"></i> 最近の利用明細と支払いタイプ変更</div>
+                <p style="font-size:12px; color:var(--text-sub); margin-bottom:16px;">
+                    ※請求が遅れる場合は、利用日下の「支払月」を手動で調整してください。
                 </p>
-                <table class="statement-table">
-                    <thead>
-                        <tr>
-                            <th style="cursor: pointer; user-select: none; width: 120px;" onclick="toggleSort('date')">
-                                利用日 / 支払月 <i class="fa-solid fa-sort" id="sort-icon-date" style="margin-left: 4px; color: var(--text-sub);"></i>
-                            </th>
-                            <th>ご利用店名・内容</th>
-                            <th style="text-align: right; cursor: pointer; user-select: none;" onclick="toggleSort('amount')">
-                                金額 <i class="fa-solid fa-sort" id="sort-icon-amount" style="margin-left: 4px; color: var(--text-sub);"></i>
-                            </th>
-                            <th>現在の設定</th>
-                            <th>支払い期間（いつからいつまで）</th>
-                            <th>支払い方法の変更選択</th>
-                            <th style="text-align: center;">アクション</th>
-                        </tr>
-                    </thead>
-                    <tbody id="statement-tbody"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="statement-table">
+                        <thead>
+                            <tr>
+                                <th style="cursor: pointer; user-select: none;" onclick="toggleSort('date')">
+                                    利用日 / 支払月 <i class="fa-solid fa-sort" id="sort-icon-date" style="margin-left: 4px; color: var(--text-sub);"></i>
+                                </th>
+                                <th>ご利用店名・内容</th>
+                                <th style="text-align: right; cursor: pointer; user-select: none;" onclick="toggleSort('amount')">
+                                    金額 <i class="fa-solid fa-sort" id="sort-icon-amount" style="margin-left: 4px; color: var(--text-sub);"></i>
+                                </th>
+                                <th>現在の設定</th>
+                                <th>支払い期間（予定）</th>
+                                <th>支払い方法変更</th>
+                                <th style="text-align: center;">アクション</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statement-tbody"></tbody>
+                    </table>
+                </div>
             </div>
 
         </div>
@@ -218,9 +243,7 @@
             loadStatementsFromSheet();
             
             const filterBtn = document.getElementById('filter-btn');
-            if (filterBtn) {
-                filterBtn.addEventListener('click', applyFilter);
-            }
+            if (filterBtn) filterBtn.addEventListener('click', applyFilter);
         });
 
         function initMonthFilter() {
@@ -239,90 +262,78 @@
             }
         }
 
+        /* サイドバー & オーバーレイ制御 */
         const menuBtn = document.getElementById('menu-btn');
         const sidebar = document.getElementById('sidebar');
-        if(document.body.classList.contains('sidebar-open')) sidebar.classList.add('open');
-        menuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); document.body.classList.toggle('sidebar-open'); });
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        // スマホ幅の場合は初期で閉じておく
+        if (window.innerWidth < 1024) {
+            document.body.classList.remove('sidebar-open');
+        } else if(document.body.classList.contains('sidebar-open')) {
+            sidebar.classList.add('open');
+        }
+
+        menuBtn.addEventListener('click', () => { 
+            sidebar.classList.toggle('open'); 
+            document.body.classList.toggle('sidebar-open');
+            if (window.innerWidth < 1024) overlay.classList.toggle('show');
+        });
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            document.body.classList.remove('sidebar-open');
+            overlay.classList.remove('show');
+        });
 
         function loadStatementsFromSheet() {
             const tbody = document.getElementById('statement-tbody');
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> スプレッドシートから明細データを読み込み中...</td></tr>`;
-
-            if (!GAS_URL || GAS_URL.includes('XXXXX')) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color: var(--accent-loan);"><i class="fa-solid fa-circle-exclamation"></i> GASのURLが正しく設定されていません。</td></tr>`;
-                return;
-            }
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> データ読み込み中...</td></tr>`;
+            if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
 
             const listSheet = encodeURIComponent("クレカ明細一覧");
             const splitSheet = encodeURIComponent("クレカ分割DB");
-            const cacheBusterUrl = `${GAS_URL}?listSheet=${listSheet}&splitSheet=${splitSheet}&_=${new Date().getTime()}`;
-
-            fetch(cacheBusterUrl)
-                .then(res => { if (!res.ok) throw new Error('ネットワークエラーが発生しました'); return res.json(); })
+            fetch(`${GAS_URL}?listSheet=${listSheet}&splitSheet=${splitSheet}&_=${new Date().getTime()}`)
+                .then(res => res.json())
                 .then(data => {
-                    if (data && data.status === "error") throw new Error(data.message);
                     dbStatements = Array.isArray(data) ? data : [];
-                    
                     const debugEl = document.getElementById('debug-sheet-name');
-                    if (debugEl) {
-                        if (dbStatements.length > 0 && dbStatements[0].debugSourceSheet) {
-                            debugEl.innerText = `🔍 GASが実際に読み込んだシート: 「${dbStatements[0].debugSourceSheet}」`;
-                        } else {
-                            debugEl.innerText = `🔍 GASからシート名を取得できませんでした`;
-                        }
+                    if (debugEl && dbStatements.length > 0 && dbStatements[0].debugSourceSheet) {
+                        debugEl.innerText = `🔍 読込: ${dbStatements[0].debugSourceSheet}`;
                     }
-                    
                     renderStatements();
                     calculateTotals();
                     applyFilter();
                 })
                 .catch(err => {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--accent-loan); padding: 40px;"><i class="fa-solid fa-circle-exclamation"></i> データの読み込みに失敗しました。<br>${err.message}</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--accent-loan); padding: 40px;">読み込みに失敗しました。</td></tr>`;
                 });
         }
 
         function parseJSTDateInfo(dateStr) {
             if (!dateStr) return null;
             let d = new Date(dateStr);
-            if (isNaN(d.getTime())) {
-                const clean = String(dateStr).split('T')[0].replace(/-/g, '/');
-                d = new Date(clean);
-            }
+            if (isNaN(d.getTime())) d = new Date(String(dateStr).split('T')[0].replace(/-/g, '/'));
             if (isNaN(d.getTime())) return null;
-            return {
-                year: d.getFullYear(),
-                month: d.getMonth() + 1,
-                day: d.getDate(),
-                formatted: `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
-            };
+            return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate(), formatted: `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}` };
         }
 
-        // ★修正点：DB保存値（BillMonth）＝ 支払月（n+2月）に完全に統一
         function getBillingYearMonth(tx) {
             if (tx.simulationBillingMonth) {
                 const parts = tx.simulationBillingMonth.split('-');
                 return { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10) };
             }
-
             if (tx.registered && (tx.billingMonth || tx.payMonth)) {
-                const bMonth = tx.billingMonth || tx.payMonth;
-                const cleanB = String(bMonth).replace(/\//g, '-');
-                if (cleanB.includes('-')) {
-                    const parts = cleanB.split('-');
+                const bMonth = String(tx.billingMonth || tx.payMonth).replace(/\//g, '-');
+                if (bMonth.includes('-')) {
+                    const parts = bMonth.split('-');
                     return { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10) };
                 }
             }
-
-            const txDate = tx.date || tx.useDate || '';
-            const dInfo = parseJSTDateInfo(txDate);
+            const dInfo = parseJSTDateInfo(tx.date || tx.useDate || '');
             if (dInfo) {
                 let y = dInfo.year;
-                // n月6日〜n+1月5日の利用分は、(n+2)月が支払月（＝BillMonth）
                 let m = (dInfo.day <= 5) ? dInfo.month + 1 : dInfo.month + 2;
-                while (m > 12) { 
-                    m -= 12; 
-                    y++; 
-                }
+                while (m > 12) { m -= 12; y++; }
                 return { year: y, month: m };
             }
             return null;
@@ -332,59 +343,36 @@
             const currentType = tx.currentType || '1回払い';
             const isSplit = (currentType === '分割払い');
             const months = parseInt(tx.months) || 3;
-
-            // ym は「支払月（＝BillMonth）」
             const ym = getBillingYearMonth(tx);
 
             if (!isSplit) {
                 if (currentType === 'ボーナス一括払い') return '<span style="color:var(--text-sub); font-size:11px;">ボーナス月請求</span>';
                 if (!ym) return '<span style="color:var(--text-sub); font-size:11px;">一括請求</span>';
-                
-                // ★修正点：ym自体が支払月なのでそのまま表示
-                let payMonth = ym.month;
-                let payYear = ym.year;
-                
-                return `<span style="font-size:12px; font-weight:600; color:var(--accent-credit);">${payMonth}月4日 <span style="font-size:10px; font-weight:normal;">(支払日)</span></span><br><span style="font-size:10px; color:var(--text-sub);">(${payYear}/${String(payMonth).padStart(2, '0')}/04)</span>`;
+                return `<span style="font-size:12px; font-weight:600; color:var(--accent-credit);">${ym.month}月4日 <span style="font-size:10px; font-weight:normal;">(支払日)</span></span><br><span style="font-size:10px; color:var(--text-sub);">(${ym.year}/${String(ym.month).padStart(2, '0')}/04)</span>`;
             }
-
             if (!ym) return `<span style="font-size:11px;">全 ${months} 回</span>`;
-
-            let startYear = ym.year;
-            let startMonth = ym.month; // 支払月
-
+            let startYear = ym.year, startMonth = ym.month;
             let startDateObj = new Date(startYear, startMonth - 1, 4);
             let endDateObj = new Date(startYear, (startMonth - 1) + (months - 1), 4);
-
             const startStr = `${startDateObj.getMonth() + 1}月4日`;
             const endStr = `${endDateObj.getMonth() + 1}月4日`;
             const startFull = `${startDateObj.getFullYear()}/${String(startDateObj.getMonth() + 1).padStart(2, '0')}/04`;
             const endFull = `${endDateObj.getFullYear()}/${String(endDateObj.getMonth() + 1).padStart(2, '0')}/04`;
-
             return `<span style="font-size:12px; font-weight:600; color:var(--accent-credit);">${startStr} <span style="font-size:10px; font-weight:normal;">(支払日)</span> 〜 ${endStr}</span><br><span style="font-size:10px; color:var(--text-sub);">(${startFull} 〜 ${endFull})</span>`;
         }
 
         function updatePeriodPreview(id) {
             const row = document.getElementById(`row-${id}`);
             if (!row) return;
-
             const typeSelect = row.querySelector('.type-select');
             const monthsSelect = document.getElementById(`months-${id}`);
             const billingSelect = document.querySelector(`.billing-month-select[data-id="${id}"]`);
-            const periodCell = row.cells[4]; 
-
             const tx = dbStatements.find(t => String(t.id) === String(id));
             if (!tx) return;
-
-            let simulatedTx = { ...tx };
-            simulatedTx.currentType = typeSelect.value;
-            if (simulatedTx.currentType === '分割払い') {
-                simulatedTx.months = monthsSelect ? monthsSelect.value : 3;
-            }
-            if (billingSelect) {
-                simulatedTx.simulationBillingMonth = billingSelect.value;
-            }
-
-            periodCell.innerHTML = getInstallmentPeriodText(simulatedTx);
+            let simulatedTx = { ...tx, currentType: typeSelect.value };
+            if (simulatedTx.currentType === '分割払い') simulatedTx.months = monthsSelect ? monthsSelect.value : 3;
+            if (billingSelect) simulatedTx.simulationBillingMonth = billingSelect.value;
+            row.cells[4].innerHTML = getInstallmentPeriodText(simulatedTx);
         }
 
         function renderStatements(targetData = dbStatements) {
@@ -401,23 +389,15 @@
                 const isRegistered = !!tx.registered;
                 const months = parseInt(tx.months) || 3;
                 const isSplit = (currentType === '分割払い');
-                const txContent = tx.content || '名称不明の明細';
                 const txAmount = Number(tx.amount) || 0;
-                
                 const displayAmount = isSplit ? Math.floor(txAmount / months) : txAmount;
                 let subText = isSplit ? `<br><span style="font-size:10px; color:var(--text-sub);">(総額: ¥${txAmount.toLocaleString()} ÷ ${months}回)</span>` : '';
 
                 let txDateStr = tx.date || '----/--/--';
-                let baseYear = 2026, baseMonth = 1;
-                let defaultBy = 2026, defaultBm = 1;
-                
+                let baseYear = 2026, baseMonth = 1, defaultBy = 2026, defaultBm = 1;
                 const dInfo = parseJSTDateInfo(txDateStr);
                 if (dInfo) {
-                    txDateStr = dInfo.formatted;
-                    baseYear = dInfo.year;
-                    baseMonth = dInfo.month;
-                    
-                    // 初期値も支払月ベース(n+2)
+                    txDateStr = dInfo.formatted; baseYear = dInfo.year; baseMonth = dInfo.month;
                     defaultBm = (dInfo.day <= 5) ? dInfo.month + 1 : dInfo.month + 2;
                     defaultBy = dInfo.year;
                     while(defaultBm > 12) { defaultBm -= 12; defaultBy++; }
@@ -426,12 +406,7 @@
                 let currentBillingMonthStr = '';
                 if (isRegistered && (tx.billingMonth || tx.payMonth)) {
                     let bStr = String(tx.billingMonth || tx.payMonth).replace(/\//g, '-');
-                    let parts = bStr.split('-');
-                    if (parts.length >= 2) {
-                        currentBillingMonthStr = `${parts[0]}-${String(parts[1]).padStart(2, '0')}`;
-                    } else {
-                        currentBillingMonthStr = bStr;
-                    }
+                    currentBillingMonthStr = bStr.split('-').length >= 2 ? `${bStr.split('-')[0]}-${String(bStr.split('-')[1]).padStart(2, '0')}` : bStr;
                 } else {
                     currentBillingMonthStr = `${defaultBy}-${String(defaultBm).padStart(2, '0')}`;
                 }
@@ -439,63 +414,40 @@
                 let billingOptionsHtml = '';
                 let optionValues = [];
                 for(let i=0; i<=8; i++) {
-                    let optM = baseMonth + i;
-                    let optY = baseYear;
+                    let optM = baseMonth + i, optY = baseYear;
                     while(optM > 12) { optM -= 12; optY++; }
                     optionValues.push(`${optY}-${String(optM).padStart(2, '0')}`);
                 }
-                
-                if (!optionValues.includes(currentBillingMonthStr)) {
-                    optionValues.push(currentBillingMonthStr);
-                    optionValues.sort();
-                }
-
-                optionValues.forEach(val => {
-                    let parts = val.split('-');
-                    if(parts.length < 2) return;
-                    
-                    // ★修正点：val（2026-07など）の月部分をそのまま表示に使う
-                    let optM = parseInt(parts[1], 10);
-                    let isSelected = (val === currentBillingMonthStr) ? 'selected' : '';
-                    billingOptionsHtml += `<option value="${val}" ${isSelected}>${optM}月支払</option>`;
+                if (!optionValues.includes(currentBillingMonthStr)) optionValues.push(currentBillingMonthStr);
+                optionValues.sort().forEach(val => {
+                    let optM = parseInt(val.split('-')[1], 10);
+                    if(isNaN(optM)) return;
+                    billingOptionsHtml += `<option value="${val}" ${val === currentBillingMonthStr ? 'selected' : ''}>${optM}月支払</option>`;
                 });
 
                 const btnHtml = isRegistered 
-                ? `<button class="action-btn update-btn" id="btn-${txId}" onclick="submitPaymentChange('${txId}', '${txDateStr}', '${txContent}', ${txAmount})"><i class="fa-solid fa-arrows-rotate"></i> 更新</button>` 
-                : `<button class="action-btn" id="btn-${txId}" onclick="submitPaymentChange('${txId}', '${txDateStr}', '${txContent}', ${txAmount})">DBへ登録</button>`;
-
-                const monthsSelectHtml = `
-                    <div class="div-months-wrap" id="months-container-${txId}" style="display: ${isSplit ? 'inline-flex' : 'none'};">
-                        <select class="select-custom months-select" id="months-${txId}" data-id="${txId}">
-                            ${[3, 5, 6, 10, 12, 24].map(m => `<option value="${m}" ${months == m ? 'selected' : ''}>${m}回</option>`).join('')}
-                        </select>
-                    </div>
-                `;
+                ? `<button class="action-btn update-btn" id="btn-${txId}" onclick="submitPaymentChange('${txId}', '${txDateStr}', '${tx.content || ''}', ${txAmount})"><i class="fa-solid fa-arrows-rotate"></i> 更新</button>` 
+                : `<button class="action-btn" id="btn-${txId}" onclick="submitPaymentChange('${txId}', '${txDateStr}', '${tx.content || ''}', ${txAmount})">DBへ登録</button>`;
 
                 const tempTx = { ...tx, simulationBillingMonth: currentBillingMonthStr };
-                const periodHtml = getInstallmentPeriodText(tempTx);
-
                 tbody.insertAdjacentHTML('beforeend', `
                     <tr id="row-${txId}">
-                        <td>
-                            <div style="font-weight: 500;">${txDateStr}</div>
-                            <select class="select-custom billing-month-select" data-id="${txId}">
-                                ${billingOptionsHtml}
-                            </select>
-                        </td>
-                        <td><strong>${txContent}</strong></td>
-                        <td class="amount-col">
-                            <strong>¥${displayAmount.toLocaleString()}</strong>${subText}
-                        </td>
+                        <td><div style="font-weight: 500;">${txDateStr}</div><select class="select-custom billing-month-select" data-id="${txId}">${billingOptionsHtml}</select></td>
+                        <td><strong style="white-space: normal; display: block; max-width: 250px;">${tx.content || '名称不明'}</strong></td>
+                        <td class="amount-col"><strong>¥${displayAmount.toLocaleString()}</strong>${subText}</td>
                         <td><span class="badge-payment ${isRegistered ? 'changed':''}">${isSplit ? `分割 ${months}ヶ月` : currentType}</span></td>
-                        <td>${periodHtml}</td>
+                        <td>${getInstallmentPeriodText(tempTx)}</td>
                         <td>
                             <select class="select-custom type-select" data-id="${txId}">
                                 <option value="1回払い" ${!isSplit && currentType !== 'ボーナス一括払い' ? 'selected' : ''}>1回払い</option>
                                 <option value="分割払い" ${isSplit ? 'selected' : ''}>分割払い</option>
                                 <option value="ボーナス一括払い" ${currentType === 'ボーナス一括払い' ? 'selected' : ''}>ボーナス一括</option>
                             </select>
-                            ${monthsSelectHtml}
+                            <div class="div-months-wrap" id="months-container-${txId}" style="display: ${isSplit ? 'inline-flex' : 'none'};">
+                                <select class="select-custom months-select" id="months-${txId}" data-id="${txId}">
+                                    ${[3, 5, 6, 10, 12, 24].map(m => `<option value="${m}" ${months == m ? 'selected' : ''}>${m}回</option>`).join('')}
+                                </select>
+                            </div>
                         </td>
                         <td style="text-align: center;">${btnHtml}</td>
                     </tr>
@@ -504,398 +456,159 @@
 
             document.querySelectorAll('.type-select').forEach(select => {
                 select.addEventListener('change', (e) => {
-                    const id = e.target.dataset.id;
-                    const container = document.getElementById(`months-container-${id}`);
-                    container.style.display = (e.target.value === '分割払い') ? 'inline-flex' : 'none';
-                    updatePeriodPreview(id); 
+                    document.getElementById(`months-container-${e.target.dataset.id}`).style.display = (e.target.value === '分割払い') ? 'inline-flex' : 'none';
+                    updatePeriodPreview(e.target.dataset.id); 
                 });
             });
-
-            document.querySelectorAll('.months-select, .billing-month-select').forEach(select => {
-                select.addEventListener('change', (e) => { updatePeriodPreview(e.target.dataset.id); });
-            });
+            document.querySelectorAll('.months-select, .billing-month-select').forEach(select => select.addEventListener('change', (e) => updatePeriodPreview(e.target.dataset.id)));
         }
 
         function submitPaymentChange(id, date, content, amount) {
-            const typeSelect = document.querySelector(`.type-select[data-id="${id}"]`);
-            const selectedType = typeSelect ? typeSelect.value : "1回払い";
-            const monthsSelect = document.getElementById(`months-${id}`);
-            const billingSelect = document.querySelector(`.billing-month-select[data-id="${id}"]`);
+            const selectedType = document.querySelector(`.type-select[data-id="${id}"]`)?.value || "1回払い";
             const btn = document.getElementById(`btn-${id}`);
-            
             let targetMonths = "1";
-            if (selectedType === '分割払い') { 
-                targetMonths = monthsSelect ? monthsSelect.value : "3"; 
-            } else if (selectedType === 'ボーナス一括払い') { 
-                targetMonths = "ボーナス一括"; 
-            }
+            if (selectedType === '分割払い') targetMonths = document.getElementById(`months-${id}`)?.value || "3";
+            else if (selectedType === 'ボーナス一括払い') targetMonths = "ボーナス一括";
 
-            const selectedBillingMonth = billingSelect ? billingSelect.value : "";
-            const isUpdate = btn && btn.classList.contains('update-btn');
+            const selectedBillingMonth = document.querySelector(`.billing-month-select[data-id="${id}"]`)?.value || "";
+            const isUpdate = btn?.classList.contains('update-btn');
 
-            const payload = {
-                action: "register_credit_installment", // 強制上書きアクション
-                sheetName: "クレカ分割DB", 
-                overwrite: true, 
-                isUpdate: isUpdate, 
-                transactionId: String(id),
-                date: date,
-                content: content,
-                totalAmount: amount,
-                paymentType: selectedType,
-                months: targetMonths,
-                billingMonth: selectedBillingMonth // 例: 7月支払ならそのまま "2026-07" を送信
-            };
-
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 送信中...`;
-            }
+            if (btn) { btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> 送信中...`; }
 
             fetch(GAS_URL, { 
-                method: 'POST', 
-                headers: {
-                    'Content-Type': 'text/plain',
-                },
-                body: JSON.stringify(payload) 
+                method: 'POST', headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ action: "register_credit_installment", sheetName: "クレカ分割DB", overwrite: true, isUpdate: isUpdate, transactionId: String(id), date: date, content: content, totalAmount: amount, paymentType: selectedType, months: targetMonths, billingMonth: selectedBillingMonth }) 
             })
             .then(res => res.json())
             .then(result => {
                 if (result.status === 'success') {
                     if (btn) { 
-                        btn.innerHTML = `<i class="fa-solid fa-check"></i> 完了`; 
-                        btn.classList.add('update-btn');
-                        
-                        setTimeout(() => {
-                            btn.disabled = false;
-                            btn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> 更新`;
-                        }, 1500);
+                        btn.innerHTML = `<i class="fa-solid fa-check"></i> 完了`; btn.classList.add('update-btn');
+                        setTimeout(() => { btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-arrows-rotate"></i> 更新`; }, 1500);
                     }
-                    
-                    const row = document.getElementById(`row-${id}`);
-                    const badge = row ? row.querySelector('.badge-payment') : null;
-                    if (badge) {
-                        badge.innerText = selectedType === '分割払い' ? `分割 ${targetMonths}ヶ月` : selectedType;
-                        badge.className = 'badge-payment changed';
-                    }
-
-                    const targetTx = dbStatements.find(tx => String(tx.id) === String(id));
-                    if (targetTx) {
-                        targetTx.registered = true;
-                        targetTx.currentType = selectedType;
-                        targetTx.months = String(targetMonths);
-                        targetTx.billingMonth = selectedBillingMonth;
-                    }
+                    const badge = document.getElementById(`row-${id}`)?.querySelector('.badge-payment');
+                    if (badge) { badge.innerText = selectedType === '分割払い' ? `分割 ${targetMonths}ヶ月` : selectedType; badge.className = 'badge-payment changed'; }
+                    const tx = dbStatements.find(t => String(t.id) === String(id));
+                    if (tx) { tx.registered = true; tx.currentType = selectedType; tx.months = String(targetMonths); tx.billingMonth = selectedBillingMonth; }
                     calculateTotals(); 
-                } else {
-                    alert('エラー: ' + result.message);
-                    if (btn) { 
-                        btn.disabled = false; 
-                        btn.innerHTML = isUpdate ? `<i class="fa-solid fa-arrows-rotate"></i> 更新` : `DBへ登録`; 
-                    }
-                }
+                } else throw new Error(result.message);
             })
             .catch(err => {
-                alert('通信に失敗しました。');
-                console.error(err);
-                if (btn) { 
-                    btn.disabled = false; 
-                    btn.innerHTML = isUpdate ? `<i class="fa-solid fa-arrows-rotate"></i> 更新` : `DBへ登録`; 
-                }
+                alert('エラー: ' + err.message);
+                if (btn) { btn.disabled = false; btn.innerHTML = isUpdate ? `<i class="fa-solid fa-arrows-rotate"></i> 更新` : `DBへ登録`; }
             });
         }
 
         function getBonusBillingMonth(dateStr) {
             const dInfo = parseJSTDateInfo(dateStr);
             if (!dInfo) return 0;
-            
-            const month = dInfo.month;
-            const day = dInfo.day;
-            if ((month === 6 && day >= 6) || (month > 6 && month < 12) || (month === 12 && day <= 5)) {
-                return 1; 
-            }
-            return 8; 
+            return ((dInfo.month === 6 && dInfo.day >= 6) || (dInfo.month > 6 && dInfo.month < 12) || (dInfo.month === 12 && dInfo.day <= 5)) ? 1 : 8; 
         }
 
         function getFilteredDataArray() {
-            const filterEl = document.getElementById('filter-month');
-            const filterMonthVal = filterEl ? filterEl.value : "";
-            
+            const targetMonth = parseInt(document.getElementById('filter-month')?.value, 10);
             let dataArray = Array.isArray(dbStatements) ? [...dbStatements] : Object.values(dbStatements);
+            if (!targetMonth) return dataArray;
 
-            if (!filterMonthVal) return dataArray;
-
-            const targetMonth = parseInt(filterMonthVal, 10);
             return dataArray.filter(tx => {
-                if (!tx) return false;
-                const months = parseInt(tx.months) || 1;
-                const type = tx.currentType || '1回払い';
-                const isRegistered = !!tx.registered;
-                const dateStr = tx.date || '';
-                const isInstallment = isRegistered && (months > 1 || type.includes('分割') || type.includes('リボ'));
-
+                const isInstallment = !!tx.registered && (parseInt(tx.months) > 1 || (tx.currentType||'').includes('分割') || (tx.currentType||'').includes('リボ'));
                 if (isInstallment) {
                     const ym = getBillingYearMonth(tx);
                     if (ym) {
-                        let payYear = ym.year;
-                        let payMonth = ym.month; // ymは支払月ベース
-
-                        for (let i = 0; i < months; i++) {
-                            let targetDateObj = new Date(payYear, (payMonth - 1) + i, 1);
-                            if ((targetDateObj.getMonth() + 1) === targetMonth) return true;
+                        for (let i = 0; i < (parseInt(tx.months) || 1); i++) {
+                            if (new Date(ym.year, (ym.month - 1) + i, 1).getMonth() + 1 === targetMonth) return true;
                         }
                     }
                     return false;
-                } else {
-                    let m = 0;
-                    if (type.includes('ボーナス')) {
-                        m = getBonusBillingMonth(dateStr);
-                    } else {
-                        const ym = getBillingYearMonth(tx);
-                        if (ym) {
-                            m = ym.month; // 支払月
-                        }
-                    }
-                    return m === targetMonth;
                 }
+                return ((tx.currentType||'').includes('ボーナス') ? getBonusBillingMonth(tx.date) : (getBillingYearMonth(tx)?.month || 0)) === targetMonth;
             });
         }
 
-        function renderSortedAndFiltered(customData = null) {
-            let data = customData ? [...customData] : getFilteredDataArray();
-
+        function renderSortedAndFiltered(data = getFilteredDataArray()) {
             if (currentSortKey) {
                 data.sort((a, b) => {
-                    let valA, valB;
-                    if (currentSortKey === 'date') {
-                        valA = new Date(a.date || '').getTime() || 0;
-                        valB = new Date(b.date || '').getTime() || 0;
-                    } else if (currentSortKey === 'amount') {
-                        valA = Number(a.amount) || 0;
-                        valB = Number(b.amount) || 0;
-                    }
+                    let valA = currentSortKey === 'date' ? new Date(a.date||'').getTime()||0 : Number(a.amount)||0;
+                    let valB = currentSortKey === 'date' ? new Date(b.date||'').getTime()||0 : Number(b.amount)||0;
                     return currentSortOrder === 1 ? valA - valB : valB - valA;
                 });
             }
-
             renderStatements(data);
         }
 
         function applyFilter() {
-            const filterEl = document.getElementById('filter-month');
-            const filterMonthVal = filterEl ? filterEl.value : "";
+            const targetMonth = parseInt(document.getElementById('filter-month')?.value, 10);
             calculateTotals(dbStatements); 
-
-            const filteredTotalEl = document.getElementById('filtered-month-total');
-            const filteredTitleEl = document.getElementById('filtered-month-title');
-            let dataArray = Array.isArray(dbStatements) ? dbStatements : Object.values(dbStatements);
-
-            if (!filterMonthVal) {
-                if (filteredTitleEl) filteredTitleEl.innerText = "未決済明細の総残高";
-                
-                const now = new Date();
-                const currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-                let totalAllAmount = 0;
-
-                dataArray.forEach(tx => {
-                    if (!tx) return;
-                    const amount = Number(tx.amount) || Number(tx.price) || 0;
-                    const months = parseInt(tx.months) || parseInt(tx.payCount) || 1;
-                    const type = tx.currentType || tx.type || tx.payType || '1回払';
-                    const isRegistered = tx.registered || tx.isRegistered || false;
-                    const isInstallment = isRegistered && (months > 1 || type.includes('分割') || type.includes('リボ'));
-
-                    if (isInstallment) {
-                        const ym = getBillingYearMonth(tx);
-                        if (ym) {
-                            const monthly = Math.floor(amount / months);
-                            let remainingMonthsCount = 0;
-                            let payYear = ym.year;
-                            let payMonth = ym.month;
-
-                            for (let i = 0; i < months; i++) {
-                                let payDate = new Date(payYear, (payMonth - 1) + i, 1);
-                                if (payDate >= currentBaseDate) remainingMonthsCount++;
-                            }
-                            totalAllAmount += (monthly * remainingMonthsCount);
-                        }
-                    } else {
-                        totalAllAmount += amount;
-                    }
-                });
-
-                if (filteredTotalEl) filteredTotalEl.innerText = `¥${totalAllAmount.toLocaleString()}`; 
-                renderSortedAndFiltered();
-                return;
-            }
-
-            const targetMonth = parseInt(filterMonthVal, 10);
-            let filteredTotalAmount = 0; 
-
             let dataToRender = getFilteredDataArray();
             
+            let totalAmount = 0;
             dataToRender.forEach(tx => {
-                const amount = Number(tx.amount) || Number(tx.price) || 0;
-                const months = parseInt(tx.months) || 1;
-                const type = tx.currentType || '1回払';
-                const isRegistered = tx.registered || false;
-                const isInstallment = isRegistered && (months > 1 || type.includes('分割'));
-
-                if (isInstallment) {
-                    filteredTotalAmount += Math.floor(amount / months);
-                } else {
-                    filteredTotalAmount += amount;
-                }
+                const amt = Number(tx.amount) || Number(tx.price) || 0;
+                const isInst = (tx.registered||false) && ((parseInt(tx.months)||1) > 1 || (tx.currentType||'').includes('分割'));
+                totalAmount += isInst ? Math.floor(amt / (parseInt(tx.months)||1)) : amt;
             });
 
-            if (filteredTitleEl) filteredTitleEl.innerText = `${targetMonth}月支払分 合計`;
-            if (filteredTotalEl) filteredTotalEl.innerText = `¥${filteredTotalAmount.toLocaleString()}`;
+            const titleEl = document.getElementById('filtered-month-title'), totalEl = document.getElementById('filtered-month-total');
+            if(titleEl) titleEl.innerText = targetMonth ? `${targetMonth}月支払分 合計` : "表示中の総残高(全月)";
+            if(totalEl) totalEl.innerText = `¥${totalAmount.toLocaleString()}`;
             
             renderSortedAndFiltered(dataToRender);
         }
 
         function calculateTotals(targetData = dbStatements) {
-            let nextPaymentTotal = 0; 
-            let unconfirmedTotal = 0; 
-            let bonusTotal = 0; 
-            let splitMonthly = [0, 0, 0, 0, 0]; 
-            
-            const now = new Date();
-            const currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
+            let nextPaymentTotal = 0, unconfirmedTotal = 0, bonusTotal = 0, splitMonthly = [0,0,0,0,0];
+            const now = new Date(), currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
             for (let i = 0; i < 5; i++) {
-                let d = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth() + i, 1);
-                let labelEl = document.getElementById(`label-${i + 1}`);
-                if (labelEl) labelEl.innerText = `${d.getMonth() + 1}月 支払`;
+                const el = document.getElementById(`label-${i + 1}`);
+                if (el) el.innerText = `${new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth() + i, 1).getMonth() + 1}月 支払`;
             }
 
-            let dataArray = Array.isArray(targetData) ? targetData : Object.values(targetData);
-
-            dataArray.forEach(tx => {
+            (Array.isArray(targetData) ? targetData : Object.values(targetData)).forEach(tx => {
                 if (!tx) return;
-                
                 const amount = Number(tx.amount) || Number(tx.price) || 0;
-                const months = parseInt(tx.months) || parseInt(tx.payCount) || 1;
                 const type = tx.currentType || tx.type || tx.payType || '1回払';
-                const isRegistered = tx.registered || tx.isRegistered || false;
-                const dateStr = tx.date || tx.useDate || '';
-
+                const isInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || type.includes('分割') || type.includes('リボ'));
                 unconfirmedTotal += amount;
                 if (type.includes('ボーナス')) bonusTotal += amount;
                 
-                const isInstallment = isRegistered && (months > 1 || type.includes('分割') || type.includes('リボ'));
-
                 if (isInstallment) {
                     const ym = getBillingYearMonth(tx);
                     if (ym) {
-                        const monthly = Math.floor(amount / months);
-                        let payYear = ym.year;
-                        let payMonth = ym.month;
-
+                        const monthly = Math.floor(amount / (parseInt(tx.months)||1));
                         for (let i = 0; i < 5; i++) {
-                            let targetCardDate = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth() + i, 1);
-                            let diff = (targetCardDate.getFullYear() - payYear) * 12 + (targetCardDate.getMonth() + 1 - payMonth);
-                            if (diff >= 0 && diff < months) {
-                                splitMonthly[i] += monthly; 
-                                if (i === 0) nextPaymentTotal += monthly; 
-                            }
+                            const d = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth() + i, 1);
+                            const diff = (d.getFullYear() - ym.year) * 12 + (d.getMonth() + 1 - ym.month);
+                            if (diff >= 0 && diff < (parseInt(tx.months)||1)) { splitMonthly[i] += monthly; if(i===0) nextPaymentTotal += monthly; }
                         }
                     }
                 } else {
-                    let m = 0;
-                    if (type.includes('ボーナス')) {
-                        m = getBonusBillingMonth(dateStr); 
-                    } else {
-                        const ym = getBillingYearMonth(tx);
-                        if (ym) {
-                            m = ym.month;
-                        }
-                    }
-                    if (m === (currentBaseDate.getMonth() + 1)) nextPaymentTotal += amount; 
+                    const m = type.includes('ボーナス') ? getBonusBillingMonth(tx.date||tx.useDate||'') : (getBillingYearMonth(tx)?.month || 0);
+                    if (m === currentBaseDate.getMonth() + 1) nextPaymentTotal += amount; 
                 }
             });
 
-            const totalEl = document.getElementById('unconfirmed-total');
-            if (totalEl) totalEl.innerText = `¥${nextPaymentTotal.toLocaleString()}`;
-            const bonusEl = document.getElementById('bonus-total-val');
-            if (bonusEl) bonusEl.innerText = `¥${bonusTotal.toLocaleString()}`;
-
-            for (let i = 0; i < 5; i++) {
-                const splitEl = document.getElementById(`split-${i + 1}`);
-                if (splitEl) splitEl.innerText = `¥${splitMonthly[i].toLocaleString()}`;
-            }
-
-            const limit = 800000;
-            const percent = Math.min((unconfirmedTotal / limit) * 100, 100);
-            const barEl = document.querySelector('.meter-bar');
-            if (barEl) barEl.style.width = `${percent}%`;
-            const rateTxtEl = document.getElementById('usage-rate-txt');
-            if (rateTxtEl) rateTxtEl.innerText = `当月未確定請求額（枠使用率: ${percent.toFixed(1)}%）`;
+            if (document.getElementById('unconfirmed-total')) document.getElementById('unconfirmed-total').innerText = `¥${nextPaymentTotal.toLocaleString()}`;
+            if (document.getElementById('bonus-total-val')) document.getElementById('bonus-total-val').innerText = `¥${bonusTotal.toLocaleString()}`;
+            for (let i = 0; i < 5; i++) { if (document.getElementById(`split-${i+1}`)) document.getElementById(`split-${i+1}`).innerText = `¥${splitMonthly[i].toLocaleString()}`; }
+            const percent = Math.min((unconfirmedTotal / 800000) * 100, 100);
+            if (document.querySelector('.meter-bar')) document.querySelector('.meter-bar').style.width = `${percent}%`;
+            if (document.getElementById('usage-rate-txt')) document.getElementById('usage-rate-txt').innerText = `当月未確定請求額（枠使用率: ${percent.toFixed(1)}%）`;
         }
 
         function toggleSort(key) {
-            if (currentSortKey === key) {
-                currentSortOrder = (currentSortOrder === 1) ? -1 : (currentSortOrder === -1 ? 0 : 1);
-                if (currentSortOrder === 0) currentSortKey = null;
-            } else {
-                currentSortKey = key;
-                currentSortOrder = 1;
-            }
-
-            const iconDate = document.getElementById('sort-icon-date');
-            const iconAmount = document.getElementById('sort-icon-amount');
-            if (iconDate) iconDate.className = "fa-solid fa-sort" + (currentSortKey === 'date' ? (currentSortOrder === 1 ? " fa-sort-up" : " fa-sort-down") : "");
-            if (iconAmount) iconAmount.className = "fa-solid fa-sort" + (currentSortKey === 'amount' ? (currentSortOrder === 1 ? " fa-sort-up" : " fa-sort-down") : "");
-
-            renderSortedAndFiltered();
-        }
-
-        function resetSort() {
-            currentSortKey = null;
-            currentSortOrder = 0;
-            const iconDate = document.getElementById('sort-icon-date');
-            const iconAmount = document.getElementById('sort-icon-amount');
-            if (iconDate) iconDate.className = "fa-solid fa-sort";
-            if (iconAmount) iconAmount.className = "fa-solid fa-sort";
-
-            renderSortedAndFiltered();
-        }
-
-        function exportToCSV() {
-            let dataToExport = getFilteredDataArray();
-            if (dataToExport.length === 0) {
-                alert('出力するデータがありません。');
-                return;
-            }
-
-            let csvContent = "\uFEFF" + "利用日,内容,金額,支払い方法,回数,請求日\r\n";
-            dataToExport.forEach(tx => {
-                let date = tx.date || '';
-                const dInfo = parseJSTDateInfo(date);
-                if (dInfo) date = dInfo.formatted;
-
-                let contentStr = tx.content != null ? String(tx.content) : '';
-                let content = `"${contentStr.replace(/"/g, '""')}"`;
-                
-                let amount = Number(tx.amount) || 0;
-                let type = tx.currentType || '1回払い';
-                let months = tx.months || '1';
-                
-                let ym = getBillingYearMonth(tx);
-                let billing = ym ? `${ym.year}/${String(ym.month).padStart(2, '0')}/04` : '';
-
-                csvContent += `${date},${content},${amount},${type},${months},${billing}\r\n`;
+            currentSortOrder = currentSortKey === key ? (currentSortOrder === 1 ? -1 : (currentSortOrder === -1 ? 0 : 1)) : 1;
+            currentSortKey = currentSortOrder === 0 ? null : key;
+            ['date','amount'].forEach(k => {
+                const el = document.getElementById(`sort-icon-${k}`);
+                if(el) el.className = `fa-solid fa-sort${currentSortKey === k ? (currentSortOrder === 1 ? " fa-sort-up" : " fa-sort-down") : ""}`;
             });
-
-            let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `credit_statement_${new Date().toISOString().slice(0, 10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            renderSortedAndFiltered();
+        }
+        function resetSort() { currentSortKey = null; currentSortOrder = 0; ['date','amount'].forEach(k => { const el = document.getElementById(`sort-icon-${k}`); if(el) el.className = "fa-solid fa-sort"; }); renderSortedAndFiltered(); }
+        function exportToCSV() {
+            let data = getFilteredDataArray(); if(!data.length) return alert('データがありません。');
+            let csv = "\uFEFF利用日,内容,金額,支払い方法,回数,支払月\r\n" + data.map(tx => `${parseJSTDateInfo(tx.date||'')?.formatted||''},"${(tx.content||'').replace(/"/g, '""')}",${Number(tx.amount)||0},${tx.currentType||'1回払い'},${tx.months||'1'},${getBillingYearMonth(tx) ? `${getBillingYearMonth(tx).year}/${String(getBillingYearMonth(tx).month).padStart(2,'0')}/04` : ''}`).join("\r\n");
+            let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = `credit_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
         }
     </script>
 </body>
