@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Dashboard | ダッシュボード</title>
+    <title>Finance Dashboard | ダッシュボード (Debug版)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -34,7 +34,6 @@
             position: relative;
         }
 
-        /* 背景のにぎやかし（アンビエントライト） */
         .ambient-bg {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
@@ -46,7 +45,6 @@
                 radial-gradient(circle at 50% 90%, rgba(244, 63, 94, 0.05) 0%, transparent 50%);
         }
         
-        /* トップナビゲーション（ホテルライクなタブ） */
         .top-navbar {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 70px;
@@ -101,7 +99,6 @@
         .nav-item:hover { color: var(--text-main); }
         .nav-item.active { color: var(--text-main); }
 
-        /* タブのアクティブインジケーター（下線） */
         .nav-item::after {
             content: '';
             position: absolute;
@@ -118,11 +115,10 @@
         .nav-item.active::after { background: var(--accent-credit); box-shadow: 0 -2px 10px rgba(56, 189, 248, 0.4); }
         .nav-item.active.revo::after { background: #c084fc; box-shadow: 0 -2px 10px rgba(192, 132, 252, 0.4); }
 
-        /* メインコンテンツエリア */
         .main-wrapper { 
             flex: 1; 
             width: 100%; 
-            padding: 110px 20px 60px 20px; /* ナビバー分の余白（70px + 余白）を下げる */
+            padding: 110px 20px 60px 20px; 
             display: flex;
             justify-content: center;
         }
@@ -136,7 +132,9 @@
         h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
         h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; letter-spacing: 0; }
         
-        /* ガラス風カード */
+        /* デバッグログ用 */
+        #debug-log { background: #000; color: #0f0; font-family: monospace; padding: 12px; margin-bottom: 24px; border-radius: 8px; font-size: 12px; overflow-x: auto; max-height: 250px; overflow-y: auto; border: 1px solid #333; line-height: 1.5; }
+
         .glass-panel {
             background: var(--bg-card);
             backdrop-filter: blur(16px);
@@ -151,7 +149,6 @@
             box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
         }
 
-        /* サマリー */
         .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--grid-gap); margin-bottom: 40px; }
         .summary-card { padding: 28px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
         .summary-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 4px 0 0 4px; }
@@ -165,14 +162,12 @@
         .progress-bar-container { background: rgba(0,0,0,0.3); border-radius: 8px; height: 8px; width: 100%; margin-top: 12px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
         .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-loan), #f97316); border-radius: 8px; width: 0%; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        /* メイングリッド */
         .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--grid-gap); }
         .section-box { padding: 28px; display: flex; flex-direction: column; }
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.3px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; }
         
         .visual-card-list { display: flex; flex-direction: column; gap: 16px; flex: 1; }
         
-        /* 内部カード */
         .visual-card { 
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%); 
             border-radius: 16px; 
@@ -198,12 +193,10 @@
         .vc-amount { font-size: 22px; font-weight: 800; text-align: right; margin: 12px 0; letter-spacing: -0.5px; }
         .vc-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-sub); font-weight: 500; }
 
-        /* 追加ウィジェット専用スタイル */
         .status-badge { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4); }
         .progress-mini-bg { height: 6px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; margin-top: 8px; }
         .progress-mini-fill { height: 100%; border-radius: 4px; }
         
-        /* レスポンシブ対応（スマホでタブをスクロール可能に） */
         @media (max-width: 900px) {
             .top-navbar { padding: 0 20px; overflow-x: auto; white-space: nowrap; }
             .navbar-brand { margin-right: 32px; }
@@ -213,10 +206,8 @@
 </head>
 <body>
 
-    <!-- 背景装飾 -->
     <div class="ambient-bg"></div>
 
-    <!-- 新しいトップナビゲーション（ホテルライクタブ） -->
     <nav class="top-navbar">
         <div class="navbar-brand">
             Finance Dashboard <span class="version">v5.0</span>
@@ -233,34 +224,34 @@
     <div class="main-wrapper">
         <div class="container">
             <header>
-                <h1>Asset & Debt Overview <span>財務・ライフスタイル ダッシュボード</span></h1>
+                <h1>Asset & Debt Overview <span>財務・ライフスタイル ダッシュボード</span>
+                    <span id="debug-sheet-name" style="color: #fb923c; font-size: 13px; font-weight: bold; display: block; margin-top: 8px;">🔍 データ通信状況: 確認中...</span>
+                </h1>
             </header>
 
-            <!-- サマリーエリア -->
+            <!-- デバッグ用ログ表示エリア -->
+            <div id="debug-log">==== ダッシュボード デバッグログ開始 ====</div>
+
             <div class="summary-grid">
                 <div class="summary-card glass-panel credit">
                     <div class="card-label"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit)"></i> クレジット次月請求額</div>
-                    <div class="card-value" id="dash-credit-total">¥0</div>
+                    <div class="card-value" id="dash-credit-total"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px;"></i></div>
                 </div>
                 <div class="summary-card glass-panel loan">
                     <div class="card-label"><i class="fa-solid fa-hand-holding-dollar" style="color: var(--accent-loan)"></i> カードローン残高合計</div>
-                    <div class="card-value" id="dash-loan-total">¥0</div>
+                    <div class="card-value" id="dash-loan-total"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px;"></i></div>
                     <div class="progress-bar-container"><div class="progress-bar" id="dash-loan-progress"></div></div>
                 </div>
                 <div class="summary-card glass-panel asset">
                     <div class="card-label"><i class="fa-solid fa-wallet" style="color: var(--accent-repay)"></i> 現在の利用枠残高 (合算)</div>
-                    <div class="card-value" id="dash-credit-remain">¥0</div>
+                    <div class="card-value" id="dash-credit-remain"><i class="fa-solid fa-spinner fa-spin" style="font-size: 24px;"></i></div>
                 </div>
             </div>
 
-            <!-- メインエリア（3カラム） -->
             <div class="main-grid">
-                
-                <!-- カラム1：クレジットカード -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-regular fa-credit-card" style="color: var(--accent-credit)"></i> Credit Cards</div>
                     <div class="visual-card-list">
-                        
                         <div class="visual-card credit-blue">
                             <div class="vc-header">
                                 <div>JAL CARD CLUB-A</div>
@@ -269,26 +260,23 @@
                             <div class="vc-amount" id="dash-jal-amount"><i class="fa-solid fa-spinner fa-spin" style="font-size: 16px;"></i></div>
                             <div class="vc-footer">
                                 <span id="dash-jal-remain">枠残高: 読込中...</span>
+                                <span>次回の支払: 5日</span>
+                            </div>
+                        </div>
+                        <div class="visual-card credit-purple">
+                            <div class="vc-header">
+                                <div>SUB CARD (VISA)</div>
+                                <div style="color:var(--text-sub); font-family: monospace; font-size: 12px;">VISA •••• 9876</div>
+                            </div>
+                            <div class="vc-amount" id="dash-sub-amount"><i class="fa-solid fa-spinner fa-spin" style="font-size: 16px;"></i></div>
+                            <div class="vc-footer">
+                                <span id="dash-sub-remain">枠残高: 読込中...</span>
                                 <span>次回の支払: 10日</span>
                             </div>
                         </div>
-
-                        <div class="visual-card credit-purple">
-                            <div class="vc-header">
-                                <div>SECOND CARD GOLD</div>
-                                <div style="color:var(--text-sub); font-family: monospace; font-size: 12px;">VISA •••• 8823</div>
-                            </div>
-                            <div class="vc-amount" id="dash-sub-amount">¥0</div>
-                            <div class="vc-footer">
-                                <span id="dash-sub-remain">枠残高: ¥500,000</span>
-                                <span>次回の支払: --/--</span>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
 
-                <!-- カラム2：ローン -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan)"></i> Card Loans</div>
                     <div class="visual-card-list">
@@ -306,12 +294,9 @@
                     </div>
                 </div>
 
-                <!-- カラム3：ライフスタイル・目標（余白を賑やかに） -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-solid fa-layer-group" style="color: var(--text-sub)"></i> Lifestyle & Goals</div>
                     <div class="visual-card-list">
-                        
-                        <!-- マイルウィジェット -->
                         <div class="visual-card miles-box">
                             <div class="vc-header" style="margin-bottom: 8px;">
                                 <div>JAL Mileage Bank</div>
@@ -330,8 +315,6 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- 学習トラッカーウィジェット -->
                         <div class="visual-card study-box">
                             <div class="vc-header">
                                 <div>Network Specialist Exam</div>
@@ -348,8 +331,6 @@
                                 <div style="font-size: 10px; color: var(--text-sub); margin-top: 6px; text-align: right; font-weight: 500;">1.5 hrs completed</div>
                             </div>
                         </div>
-
-                        <!-- 食事準備ウィジェット -->
                         <div class="visual-card meal-box" style="min-height: auto; padding: 16px 24px;">
                             <div class="vc-header" style="margin-bottom: 8px;">
                                 <div>Meal Prep (Dinner & Bento)</div>
@@ -359,24 +340,55 @@
                                 <i class="fa-solid fa-bowl-food" style="color: var(--accent-meal); margin-right: 6px;"></i> 豚肉と厚揚げの炒め物
                             </div>
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
     <script>
-        // メインクレカ・ローンGASのURL
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyX1eLqAdfVihQppHz-_UZuSTjW1RsLqVpbpf8_Ua9fnZeWelY4ztPki52JkWv3tH3k/exec";
+        const MAIN_GAS_URL = "https://script.google.com/macros/s/AKfycbwfWEubTmiBkfAfEICduM6pOa-Jb2_A0FcRFAWbcGbRtvo_clhz2WZHDWOsnVIQvvv7/exec";
+        const SUB_GAS_URL = "https://script.google.com/macros/s/AKfycbwfWEubTmiBkfAfEICduM6pOa-Jb2_A0FcRFAWbcGbRtvo_clhz2WZHDWOsnVIQvvv7/exec";
         
-        // 各種上限枠の定義
         const TOTAL_LOAN_LIMIT = 4500000;
         const JAL_CARD_LIMIT = 800000;
         const SUB_CARD_LIMIT = 500000;
 
-        // 計算用ヘルパー関数
+        const SUB_SHEET_LIST = "サブクレカ明細"; 
+        const SUB_SHEET_SPLIT = "サブクレカ分割DB";
+
+        // デバッグ出力用関数
+        function logDebug(msg) {
+            const el = document.getElementById('debug-log');
+            if (el) {
+                const time = new Date().toLocaleTimeString('ja-JP');
+                el.innerHTML += `<br>[${time}] ${msg}`;
+                el.scrollTop = el.scrollHeight; // 自動スクロール
+            }
+            console.log(msg);
+        }
+
+        function renderDashboardUI(data) {
+            const { loanBalance, mainNextPayment, mainUnconfirmed, subNextPayment, subUnconfirmed } = data;
+
+            document.getElementById('dash-loan-total').innerText = `¥${loanBalance.toLocaleString()}`;
+            document.getElementById('dash-card-balance-a').innerText = `¥${loanBalance.toLocaleString()}`;
+            const loanRate = Math.round((loanBalance / TOTAL_LOAN_LIMIT) * 100);
+            document.getElementById('dash-loan-progress').style.width = `${Math.min(loanRate, 100)}%`;
+
+            const totalNextPayment = mainNextPayment + subNextPayment;
+            document.getElementById('dash-credit-total').innerText = `¥${totalNextPayment.toLocaleString()}`;
+
+            document.getElementById('dash-jal-amount').innerText = `¥${mainNextPayment.toLocaleString()}`;
+            document.getElementById('dash-jal-remain').innerText = `枠残高: ¥${Math.max(JAL_CARD_LIMIT - mainUnconfirmed, 0).toLocaleString()}`;
+
+            document.getElementById('dash-sub-amount').innerText = `¥${subNextPayment.toLocaleString()}`;
+            document.getElementById('dash-sub-remain').innerText = `枠残高: ¥${Math.max(SUB_CARD_LIMIT - subUnconfirmed, 0).toLocaleString()}`;
+            
+            const totalRemain = Math.max(JAL_CARD_LIMIT - mainUnconfirmed, 0) + Math.max(SUB_CARD_LIMIT - subUnconfirmed, 0);
+            document.getElementById('dash-credit-remain').innerText = `¥${totalRemain.toLocaleString()}`;
+        }
+
         function parseJSTDateInfo(dateStr) {
             if (!dateStr) return null;
             let d = new Date(dateStr);
@@ -421,51 +433,69 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
+            logDebug("キャッシュを強制クリアしました (テスト用)。");
+            localStorage.removeItem('dashboardSummaryData');
 
-            const loanFetchUrl = `${GAS_URL}?type=loan`;
-            const creditFetchUrl = `${GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}`;
+            // 安全なFetch関数（デバッグ付き）
+            const safeFetch = (url, name) => {
+                logDebug(`[${name}] Fetch開始: ${url.substring(0, 100)}...`);
+                return fetch(url).then(res => {
+                    logDebug(`[${name}] レスポンス受信: ${res.status} ${res.statusText}`);
+                    if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+                    return res.text();
+                }).then(text => {
+                    logDebug(`[${name}] テキスト取得完了 (文字数: ${text.length})`);
+                    try {
+                        const json = JSON.parse(text);
+                        if (json && json.status === 'error') {
+                            logDebug(`[${name}] ❌ GAS側エラー: ${json.message}`);
+                            return [];
+                        }
+                        const arr = Array.isArray(json) ? json : [];
+                        logDebug(`[${name}] 抽出データ件数: ${arr.length} 件`);
+                        return arr;
+                    } catch(e) {
+                        logDebug(`[${name}] ❌ JSONパースエラー: ${e.message}`);
+                        return [];
+                    }
+                }).catch(err => {
+                    logDebug(`[${name}] ❌ 通信エラー: ${err.message}`);
+                    return [];
+                });
+            };
 
             Promise.all([
-                fetch(loanFetchUrl).then(res => res.json()),
-                fetch(creditFetchUrl).then(res => res.json())
+                safeFetch(`${MAIN_GAS_URL}?type=loan`, 'ローン'),
+                safeFetch(`${MAIN_GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}`, 'メインクレカ'),
+                safeFetch(`${SUB_GAS_URL}?listSheet=${encodeURIComponent(SUB_SHEET_LIST)}&splitSheet=${encodeURIComponent(SUB_SHEET_SPLIT)}`, 'サブクレカ')
             ])
-            .then(([loanData, creditData]) => {
-                
-                // 1. ローン残高の処理
+            .then(([loanData, mainCreditData, subCreditData]) => {
+                logDebug("全データのFetchが完了しました。計算処理を開始します。");
+                document.getElementById('debug-sheet-name').innerText = "🔍 データ通信完了（ログを確認してください）";
+
                 let loanBalance = 0;
                 if (Array.isArray(loanData) && loanData.length > 0) {
                     loanBalance = Number(loanData[0]?.balance || 0);
+                    logDebug(`ローン残高取得: ¥${loanBalance}`);
                 }
-                
-                const loanTotalEl = document.getElementById('dash-loan-total');
-                const cardBalAEl = document.getElementById('dash-card-balance-a');
-                if (loanTotalEl) loanTotalEl.innerText = `¥${loanBalance.toLocaleString()}`;
-                if (cardBalAEl) cardBalAEl.innerText = `¥${loanBalance.toLocaleString()}`;
-                
-                const loanRate = Math.round((loanBalance / TOTAL_LOAN_LIMIT) * 100);
-                const progressBar = document.getElementById('dash-loan-progress');
-                if (progressBar) progressBar.style.width = `${Math.min(loanRate, 100)}%`;
-
-                // 2. クレジット計算処理
-                let nextPaymentTotal = 0; 
-                let unconfirmedTotal = 0; 
                 
                 const now = new Date();
                 const currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-                if (Array.isArray(creditData)) {
-                    creditData.forEach(tx => {
-                        if (!tx) return;
+                let mainNextPayment = 0; 
+                let mainUnconfirmed = 0; 
+
+                if (Array.isArray(mainCreditData)) {
+                    mainCreditData.forEach(tx => {
+                        if (!tx || tx.status === 'error') return;
                         const amount = Number(tx.amount) || Number(tx.price) || 0;
                         const months = parseInt(tx.months) || parseInt(tx.payCount) || 1;
                         const type = tx.currentType || tx.type || tx.payType || '1回払';
                         const isRegistered = tx.registered || tx.isRegistered || false;
-                        const dateStr = tx.date || tx.useDate || '';
-
-                        unconfirmedTotal += amount; 
                         
-                        const isInstallment = isRegistered && (months > 1 || type.includes('分割') || type.includes('リボ'));
+                        mainUnconfirmed += amount; 
+                        
+                        const isInstallment = isRegistered && (months > 1 || type.includes('分割'));
 
                         if (isInstallment) {
                             const ym = getBillingYearMonth(tx);
@@ -473,42 +503,66 @@
                                 const monthly = Math.floor(amount / months);
                                 let targetCardDate = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth(), 1);
                                 let diff = (targetCardDate.getFullYear() - ym.year) * 12 + (targetCardDate.getMonth() + 1 - ym.month);
-                                if (diff >= 0 && diff < months) {
-                                    nextPaymentTotal += monthly; 
-                                }
+                                if (diff >= 0 && diff < months) mainNextPayment += monthly; 
                             }
                         } else {
-                            let m = 0;
-                            if (type.includes('ボーナス')) {
-                                m = getBonusBillingMonth(dateStr); 
-                            } else {
-                                const ym = getBillingYearMonth(tx);
-                                if (ym) m = ym.month;
+                            let m = type.includes('ボーナス') ? getBonusBillingMonth(tx.date || tx.useDate || '') : (getBillingYearMonth(tx)?.month || 0);
+                            if (m === (currentBaseDate.getMonth() + 1)) mainNextPayment += amount; 
+                        }
+                    });
+                    logDebug(`メインクレカ計算完了: 請求予定 ¥${mainNextPayment}, 未確定合計 ¥${mainUnconfirmed}`);
+                }
+
+                let subNextPayment = 0; 
+                let subUnconfirmed = 0; 
+                let subRevoBalance = 0;
+
+                if (Array.isArray(subCreditData)) {
+                    subCreditData.forEach(tx => {
+                        if (!tx || tx.status === 'error') return;
+                        const amount = Number(tx.amount) || Number(tx.price) || 0;
+                        const months = parseInt(tx.months) || 1;
+                        const type = tx.currentType || tx.type || '1回払';
+                        
+                        subUnconfirmed += amount; 
+
+                        if (type.includes('リボ')) {
+                            subRevoBalance += amount;
+                        } else if ((tx.registered||tx.isRegistered) && months > 1) {
+                            const ym = getBillingYearMonth(tx);
+                            if (ym) {
+                                const monthly = Math.floor(amount / months);
+                                let targetCardDate = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth(), 1);
+                                let diff = (targetCardDate.getFullYear() - ym.year) * 12 + (targetCardDate.getMonth() + 1 - ym.month);
+                                if (diff >= 0 && diff < months) subNextPayment += monthly;
                             }
-                            if (m === (currentBaseDate.getMonth() + 1)) {
-                                nextPaymentTotal += amount; 
-                            }
+                        } else {
+                            let m = type.includes('ボーナス') ? getBonusBillingMonth(tx.date || tx.useDate || '') : (getBillingYearMonth(tx)?.month || 0);
+                            if (m === (currentBaseDate.getMonth() + 1)) subNextPayment += amount; 
                         }
                     });
                 }
 
-                // 3. クレジット計算結果の画面反映
-                const creditTotalEl = document.getElementById('dash-credit-total');
-                if (creditTotalEl) creditTotalEl.innerText = `¥${nextPaymentTotal.toLocaleString()}`;
-
-                const jalAmountEl = document.getElementById('dash-jal-amount');
-                const jalRemainEl = document.getElementById('dash-jal-remain');
-                if (jalAmountEl) jalAmountEl.innerText = `¥${nextPaymentTotal.toLocaleString()}`;
-                if (jalRemainEl) jalRemainEl.innerText = `枠残高: ¥${Math.max(JAL_CARD_LIMIT - unconfirmedTotal, 0).toLocaleString()}`;
-                
-                const totalCreditRemainEl = document.getElementById('dash-credit-remain');
-                if (totalCreditRemainEl) {
-                    const totalRemain = (JAL_CARD_LIMIT + SUB_CARD_LIMIT) - unconfirmedTotal; 
-                    totalCreditRemainEl.innerText = `¥${Math.max(totalRemain, 0).toLocaleString()}`;
+                if (subRevoBalance > 0) {
+                    let rPrincipal = 10000;
+                    let rApr = 15.0;
+                    let interest = Math.floor(subRevoBalance * (rApr / 100) / 12);
+                    let principal = Math.min(subRevoBalance, rPrincipal);
+                    subNextPayment += (principal + interest);
+                    logDebug(`サブリボ計算: 残高 ¥${subRevoBalance} -> 今回請求分 ¥${principal + interest} 加算`);
                 }
+                logDebug(`サブクレカ計算完了: 請求予定 ¥${subNextPayment}, 未確定合計 ¥${subUnconfirmed}`);
+
+                const summaryData = { loanBalance, mainNextPayment, mainUnconfirmed, subNextPayment, subUnconfirmed };
+                localStorage.setItem('dashboardSummaryData', JSON.stringify(summaryData));
+                renderDashboardUI(summaryData);
+                logDebug("画面の描画処理が正常に完了しました。");
 
             })
-            .catch(err => console.error("データ読み込みエラー:", err));
+            .catch(err => {
+                logDebug(`❌ 統合エラー: ${err.message}`);
+                console.error("データ統合エラー:", err);
+            });
         });
     </script>
 </body>
