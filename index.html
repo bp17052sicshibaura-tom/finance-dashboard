@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <!-- PWA用設定 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0b1121">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Finance Dashboard | ダッシュボード (Debug版)</title>
@@ -213,11 +218,11 @@
             Finance Dashboard <span class="version">v5.0</span>
         </div>
         <ul class="nav-list">
-            <a href="index.html" class="nav-item active"><i class="fa-solid fa-chart-pie"></i> ダッシュボード</a>
-            <a href="loan-history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> ローン実績</a>
-            <a href="simulation.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> 返済計画</a>
-            <a href="credit-card.html" class="nav-item"><i class="fa-solid fa-credit-card"></i> メインクレカ</a>
-            <a href="credit-card-2.html" class="nav-item revo"><i class="fa-brands fa-cc-visa"></i> サブクレカ(リボ)</a>
+           <a href="index.html" class="nav-item active"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
+            <a href="simulation.html" class="nav-item"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan);"></i>カードローン実績・計画</a>
+            <a href="credit-card.html" class="nav-item"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>メインクレカ</a>
+            <a href="credit-card-2.html" class="nav-item"><i class="fa-brands fa-cc-visa" style="color: var(--accent-credit);"></i>サブクレカ(リボ)</a>
+            <a href="installment.html" class="nav-item"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
         </ul>
     </nav>
 
@@ -564,6 +569,17 @@
                 console.error("データ統合エラー:", err);
             });
         });
+    </script>
+
+    <script>
+        // PWA Service Workerの登録
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker 登録成功', reg.scope))
+                    .catch(err => console.log('Service Worker 登録失敗', err));
+            });
+        }
     </script>
 </body>
 </html>
