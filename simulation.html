@@ -168,13 +168,12 @@
                 </div>
             </div>
 
-            <!-- ★ タブを「実績」→「シミュレーション」の順に変更 -->
             <div class="tabs-container">
                 <button class="tab-btn active" onclick="switchTab('tab-history', this)"><i class="fa-solid fa-clock-rotate-left"></i> 過去の利用実績・手動同期</button>
                 <button class="tab-btn" onclick="switchTab('tab-sim', this)"><i class="fa-solid fa-chart-line"></i> 将来の返済計画シミュレーション</button>
             </div>
 
-            <!-- タブ1: 実績履歴・手動入力 (最初から表示) -->
+            <!-- タブ1: 実績履歴・手動入力 -->
             <div id="tab-history" class="tab-content active">
                 <div class="section-box" style="margin-bottom: 24px; padding: 20px;">
                     <div style="font-size: 15px; font-weight: 600; margin-bottom: 8px;"><i class="fa-solid fa-pen-to-square" style="color: var(--accent-loan);"></i> 実績の登録・残高の直接修正</div>
@@ -226,7 +225,23 @@
                     </div>
                 </div>
 
-                <!-- ★ グラフ追加 -->
+                <!-- ★ ボーナス返済設定 -->
+                <div class="section-box" style="margin-bottom: 24px; padding: 20px;">
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">
+                        <i class="fa-solid fa-sack-dollar" style="color: var(--accent-loan);"></i> ボーナス月増額設定
+                    </div>
+                    <div class="input-grid" style="grid-template-columns: 1fr 1fr; margin-top: 8px;">
+                        <div class="filter-group">
+                            <label for="bonus-summer">夏 (7月) 増額分 (円)</label>
+                            <input type="number" id="bonus-summer" class="form-control" placeholder="例: 100000" value="0">
+                        </div>
+                        <div class="filter-group">
+                            <label for="bonus-winter">冬 (12月) 増額分 (円)</label>
+                            <input type="number" id="bonus-winter" class="form-control" placeholder="例: 100000" value="0">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="section-box" style="margin-bottom: 24px;">
                     <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">
                         <i class="fa-solid fa-chart-column" style="color: var(--accent-loan)"></i> 返済予定グラフ (元金・利息割合)
@@ -264,29 +279,22 @@
         
         let currentActualBalance = 0;
         let monthlyRepayments = {};
-        let loanChartInstance = null; // グラフ用変数
+        let loanChartInstance = null;
 
-        // タブ切り替え処理
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             btn.classList.add('active');
-
-            // グラフのサイズを再計算
-            if (tabId === 'tab-sim' && loanChartInstance) {
-                loanChartInstance.resize();
-            }
+            if (tabId === 'tab-sim' && loanChartInstance) loanChartInstance.resize();
         }
 
-        // サイドバー制御
         const menuBtn = document.getElementById('menu-btn'), sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebar-overlay');
         if (window.innerWidth < 1024) document.body.classList.remove('sidebar-open');
         else if(document.body.classList.contains('sidebar-open')) sidebar.classList.add('open');
         menuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); document.body.classList.toggle('sidebar-open'); if (window.innerWidth < 1024) overlay.classList.toggle('show'); });
         overlay.addEventListener('click', () => { sidebar.classList.remove('open'); document.body.classList.remove('sidebar-open'); overlay.classList.remove('show'); });
 
-        // 入力フォーム制御
         document.getElementById('repay-date').value = new Date().toISOString().split('T')[0];
         document.getElementById('repay-type').addEventListener('change', (e) => {
             const label = document.getElementById('amount-label');
@@ -296,7 +304,6 @@
             else { label.innerText = "返済額 (円)"; input.placeholder = "例: 65000"; }
         });
 
-        // 営業日・次回引落日計算
         const holidays2026 = ["2026/01/01", "2026/01/02", "2026/01/03", "2026/01/12", "2026/02/11", "2026/02/23", "2026/02/24", "2026/03/20", "2026/04/29", "2026/05/03", "2026/05/04", "2026/05/05", "2026/05/06", "2026/07/20", "2026/08/11", "2026/09/21", "2026/09/22", "2026/09/23", "2026/10/12", "2026/11/03", "2026/11/23", "2026/12/23"];
         function getNextBusinessDay(date) {
             let d = new Date(date);
@@ -317,6 +324,10 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('calc-next-date').innerText = calculateNextRepaymentDate();
+
+            // ボーナス入力値変更イベント
+            document.getElementById('bonus-summer').addEventListener('input', runSimulation);
+            document.getElementById('bonus-winter').addEventListener('input', runSimulation);
 
             if (!MAIN_GAS_URL || MAIN_GAS_URL.includes('XXXXX')) return;
 
@@ -396,27 +407,33 @@
                 return;
             }
 
+            const bonusSummer = Number(document.getElementById('bonus-summer').value) || 0;
+            const bonusWinter = Number(document.getElementById('bonus-winter').value) || 0;
+
             let count = 1, totalInterest = 0, lastRepayAmount = DEFAULT_REPAYMENT;
             const now = new Date(); let currentYear = now.getFullYear(), currentMonth = now.getMonth();
             if (now > getNextBusinessDay(new Date(currentYear, currentMonth, 8))) currentMonth += 1;
 
-            // グラフ用の配列
             let chartLabels = [];
             let chartPrincipalData = [];
             let chartInterestData = [];
 
             while (balance > 0 && count <= 240) {
                 let exactRepayDate = getNextBusinessDay(new Date(currentYear, currentMonth + (count - 1), 8));
-                const monthKey = `${exactRepayDate.getFullYear()}/${String(exactRepayDate.getMonth() + 1).padStart(2, '0')}`;
+                const exactMonth = exactRepayDate.getMonth() + 1;
+                const monthKey = `${exactRepayDate.getFullYear()}/${String(exactMonth).padStart(2, '0')}`;
                 const dateDisplay = `${monthKey}/08 (${['日', '月', '火', '水', '木', '金', '土'][exactRepayDate.getDay()]})`;
+                
+                let bonusAdd = (exactMonth === 7) ? bonusSummer : (exactMonth === 12) ? bonusWinter : 0;
+                
                 const monthlyInterest = Math.floor(balance * (ANNUAL_INTEREST_RATE / 12));
                 totalInterest += monthlyInterest;
-                let beforeBalance = balance;
                 
                 if (monthlyRepayments[monthKey] !== undefined) lastRepayAmount = monthlyRepayments[monthKey];
                 else monthlyRepayments[monthKey] = lastRepayAmount;
 
                 let currentRepay = lastRepayAmount;
+                let beforeBalance = balance;
                 let nextBalance = beforeBalance + monthlyInterest - currentRepay;
                 let isFinalRow = false;
                 
@@ -426,12 +443,10 @@
                     isFinalRow = true; 
                 }
 
-                // グラフ用データ追加
                 let principalPay = isFinalRow ? beforeBalance : (currentRepay - monthlyInterest);
-                chartLabels.push(`${exactRepayDate.getFullYear()}年${exactRepayDate.getMonth() + 1}月`);
-                chartPrincipalData.push(principalPay);
-                chartInterestData.push(monthlyInterest);
+                let monthTotalPrincipal = principalPay;
 
+                // 1. 定例返済行の描画
                 let selectHtml = `<select class="repay-select" data-month="${monthKey}">`;
                 for (let val = 50000; val <= 100000; val += 5000) { selectHtml += `<option value="${val}" ${val === currentRepay ? 'selected' : ''}>${val.toLocaleString()} 円</option>`; }
                 selectHtml += `</select>`;
@@ -448,18 +463,63 @@
                         </td>
                     </tr>
                 `);
-                
+
+                balance = nextBalance;
+
                 if (isFinalRow) { 
-                    document.getElementById('sim-finish-date').innerText = `${exactRepayDate.getFullYear()}年${exactRepayDate.getMonth() + 1}月`; 
+                    chartLabels.push(`${exactRepayDate.getFullYear()}年${exactMonth}月`);
+                    chartPrincipalData.push(monthTotalPrincipal);
+                    chartInterestData.push(monthlyInterest);
+                    document.getElementById('sim-finish-date').innerText = `${exactRepayDate.getFullYear()}年${exactMonth}月`; 
                     break; 
                 }
-                balance = nextBalance; 
+
+                // 2. ボーナス返済行の描画 (残高があり、ボーナス設定がある場合)
+                if (bonusAdd > 0 && balance > 0) {
+                    let beforeBonusBalance = balance;
+                    let bonusRepay = bonusAdd;
+                    let nextBonusBalance = beforeBonusBalance - bonusRepay;
+                    let isBonusFinal = false;
+
+                    if (nextBonusBalance <= 0) {
+                        bonusRepay = beforeBonusBalance;
+                        nextBonusBalance = 0;
+                        isBonusFinal = true;
+                    }
+                    
+                    monthTotalPrincipal += bonusRepay;
+
+                    tbody.insertAdjacentHTML('beforeend', `
+                        <tr class="${isBonusFinal ? '完済' : ''}" style="background: rgba(56, 189, 248, 0.05);">
+                            <td><strong style="color: var(--accent-credit);">★ ボーナス返済</strong><br><span style="color:var(--text-sub); font-size:11px;">${dateDisplay} (同日)</span></td>
+                            <td class="amount-col">¥${beforeBonusBalance.toLocaleString()}</td>
+                            <td class="amount-col" style="color: var(--text-sub);">-</td>
+                            <td style="text-align: center;"><span class="badge badge-finish" style="background: var(--accent-credit); color: #fff; font-size:12px;">¥${bonusRepay.toLocaleString()}</span></td>
+                            <td class="amount-col" style="color: ${isBonusFinal ? 'var(--accent-repay)' : 'var(--text-main)'};">
+                                ${isBonusFinal ? '<i class="fa-solid fa-circle-check"></i> 完済' : '¥' + nextBonusBalance.toLocaleString()}
+                            </td>
+                        </tr>
+                    `);
+
+                    balance = nextBonusBalance;
+                    if (isBonusFinal) {
+                        chartLabels.push(`${exactRepayDate.getFullYear()}年${exactMonth}月`);
+                        chartPrincipalData.push(monthTotalPrincipal);
+                        chartInterestData.push(monthlyInterest);
+                        document.getElementById('sim-finish-date').innerText = `${exactRepayDate.getFullYear()}年${exactMonth}月`; 
+                        break;
+                    }
+                }
+
+                chartLabels.push(`${exactRepayDate.getFullYear()}年${exactMonth}月`);
+                chartPrincipalData.push(monthTotalPrincipal);
+                chartInterestData.push(monthlyInterest);
+                
                 count++;
             }
             
             document.getElementById('sim-total-interest').innerText = `¥${totalInterest.toLocaleString()}`;
 
-            // グラフ描画
             if (loanChartInstance) loanChartInstance.destroy();
             loanChartInstance = new Chart(document.getElementById('loanChart').getContext('2d'), {
                 type: 'bar',
@@ -483,7 +543,6 @@
                 }
             });
 
-            // プルダウン変更イベントの再登録
             document.querySelectorAll('.repay-select').forEach(select => {
                 select.addEventListener('change', (e) => {
                     const mKey = e.target.dataset.month; monthlyRepayments[mKey] = Number(e.target.value);
@@ -497,7 +556,6 @@
             });
         }
 
-        // 履歴送信処理
         document.getElementById('submit-history-btn').addEventListener('click', (e) => {
             const btn = e.target;
             const dateEl = document.getElementById('repay-date'), amountEl = document.getElementById('repay-amount'), typeEl = document.getElementById('repay-type');
