@@ -111,13 +111,11 @@
     <div class="sidebar" id="sidebar">
         <ul class="nav-list">
             <a href="index.html" class="nav-item"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
-            <a href="loan-history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-loan);"></i>カードローン実績・同期</a>
-            <a href="simulation.html" class="nav-item"><i class="fa-solid fa-chart-line" style="color: var(--accent-repay);"></i>将来の返済計画</a>
-            <a href="credit-card.html" class="nav-item active"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>クレカ明細</a>
-            <a href="credit-card-2.html" class="nav-item"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>サブクレカ明細</a>
-            <a href="installment.html" class="nav-item"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
+            <a href="simulation.html" class="nav-item"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan);"></i>カードローン実績・計画</a>
+            <a href="credit-card.html" class="nav-item active"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>メインクレカ</a>
+            <a href="credit-card-2.html" class="nav-item"><i class="fa-brands fa-cc-visa" style="color: var(--accent-credit);"></i>サブクレカ(リボ)</a>
         </ul>
-        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v4.0</div>
+        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.0</div>
     </div>
 
     <div class="main-wrapper">
@@ -227,6 +225,16 @@
 
             <!-- タブ2: 日別推移 -->
             <div id="tab-daily" class="tab-content">
+                <div class="controls-row" style="margin-bottom: 16px;">
+                    <div>
+                        <label style="color: #94a3b8; font-size: 12px; margin-right: 4px;">集計対象フィルタ:</label>
+                        <select id="daily-filter" class="select-custom" onchange="renderDailyTab()">
+                            <option value="all">すべての利用 (分割・ボーナス等含む)</option>
+                            <option value="single">1回払いのみ (日常の生活費ペース)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="section-box" style="margin-bottom: 24px;">
                     <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;"><i class="fa-solid fa-chart-line" style="color: var(--accent-credit)"></i> 2か月間の日別利用額と翌月5日までの着地予想</div>
                     <div class="chart-scroll-wrapper">
@@ -257,6 +265,7 @@
     </div>
 
     <script>
+        // ★ 元の正しいGAS URLに戻しました
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyz2cF8wFCKfBU-BXSEdOQKa8TO5ir3vo9tpNQdb4aRTIzebLMNzuWgDRY0P-Ohkhhl/exec";
         let dbStatements = [];
         let currentSortKey = null;
@@ -276,6 +285,10 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             btn.classList.add('active');
+            
+            if(tabId === 'tab-daily' && dailyChartInstance) {
+                dailyChartInstance.resize();
+            }
         }
 
         /* サイドバー制御 */
@@ -546,6 +559,10 @@
             let totalAmount = 0;
             dataToRender.forEach(tx => {
                 const amt = Number(tx.amount) || Number(tx.price) || 0;
+                
+                // ★ バグ防止: キャンセル・返金などのマイナス明細は集計から除外
+                if (amt <= 0) return;
+
                 const isInst = (tx.registered||false) && ((parseInt(tx.months)||1) > 1 || (tx.currentType||'').includes('分割'));
                 totalAmount += isInst ? Math.floor(amt / (parseInt(tx.months)||1)) : amt;
             });
@@ -568,8 +585,13 @@
             (Array.isArray(targetData) ? targetData : Object.values(targetData)).forEach(tx => {
                 if (!tx) return;
                 const amount = Number(tx.amount) || Number(tx.price) || 0;
+                
+                // ★ バグ防止: マイナス・0円の明細は一切合算しない
+                if (amount <= 0) return;
+
                 const type = tx.currentType || tx.type || tx.payType || '1回払';
                 const isInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || type.includes('分割') || type.includes('リボ'));
+                
                 unconfirmedTotal += amount;
                 if (type.includes('ボーナス')) bonusTotal += amount;
                 
@@ -614,9 +636,12 @@
         }
 
         /* -----------------------------------------------------
-         * 新機能：日別実績と着地予想の計算・描画 (タブ2)
+         * 日別実績と着地予想の計算・描画 (タブ2)
          * ----------------------------------------------------- */
         function renderDailyTab() {
+            const filterEl = document.getElementById('daily-filter');
+            const filterValue = filterEl ? filterEl.value : 'all';
+
             const now = new Date(), y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
             let currStart, currEnd;
             if (d <= 5) {
@@ -633,10 +658,23 @@
             timeline.forEach(dt => { dailyMap[`${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')}`] = 0; });
 
             dbStatements.forEach(tx => {
+                let amt = Number(tx.amount || tx.price || 0);
+
+                // ★ バグ防止: マイナスの明細は予想・日別計算から完全除外
+                if (amt <= 0) return;
+
+                if (filterValue === 'single') {
+                    const type = tx.currentType || tx.type || tx.payType || '1回払い';
+                    const isInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || type.includes('分割') || type.includes('リボ'));
+                    if (isInstallment || type.includes('ボーナス')) {
+                        return; // この明細は集計に含めない
+                    }
+                }
+
                 const dInfo = parseJSTDateInfo(tx.date || tx.useDate || '');
                 if (dInfo) {
                     const key = `${dInfo.year}/${String(dInfo.month).padStart(2,'0')}/${String(dInfo.day).padStart(2,'0')}`;
-                    if (dailyMap[key] !== undefined) dailyMap[key] += Number(tx.amount || tx.price || 0);
+                    if (dailyMap[key] !== undefined) dailyMap[key] += amt;
                 }
             });
 
@@ -650,7 +688,6 @@
                 let val = dailyMap[key];
                 dailyBars.push(val);
 
-                // 6日ごとに累計リセット
                 if (dt.getTime() === currStart.getTime()) { currentCumSum = 0; currStartIdx = i; }
 
                 if (!todayPassed) {
@@ -662,7 +699,6 @@
                 if (key === todayKey) { todayPassed = true; todayIdx = i; }
             }
 
-            // 翌月5日までの着地予想（当月の平均ペースから算出）
             if (todayIdx >= currStartIdx && currStartIdx !== -1) {
                 let daysPassed = todayIdx - currStartIdx + 1;
                 let avgDaily = currentCumSum / daysPassed;
@@ -693,7 +729,6 @@
                 }
             });
 
-            // テーブル生成 (新しい日付順、未来日は省く)
             const dBody = document.getElementById('daily-tbody');
             dBody.innerHTML = '';
             let listEndIdx = todayIdx !== -1 ? todayIdx : timeline.length - 1;
