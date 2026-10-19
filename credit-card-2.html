@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Finance Dashboard | サブクレカ明細 (Debug版)</title>
+    <title>Finance Dashboard | サブクレカ明細</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,7 +29,7 @@
         .nav-item:hover { color: var(--text-main); background: var(--bg-card); }
         .nav-item.active { background: var(--bg-card); color: var(--text-main); border-left: 4px solid var(--accent-credit); }
 
-        .main-wrapper { flex: 1; width: 100%; padding: 40px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .main-wrapper { flex: 1; width: 100%; padding: 40px 20px 40px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         @media (min-width: 1024px) { body.sidebar-open .main-wrapper { margin-left: var(--sidebar-width); } .sidebar-overlay { display: none !important; } }
         
         .container { max-width: 1200px; margin: 0 auto; padding-top: 40px; }
@@ -123,7 +123,7 @@
             <a href="credit-card-2.html" class="nav-item active"><i class="fa-brands fa-cc-visa" style="color: var(--accent-credit);"></i>サブクレカ(リボ)</a>
             <a href="installment.html" class="nav-item"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
         </ul>
-        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v4.0</div>
+        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.0</div>
     </div>
 
     <div class="main-wrapper">
@@ -154,8 +154,9 @@
                 <div class="status-block-group">
                     <div class="section-box">
                         <div class="progress-info">
-                            <div id="usage-rate-txt" style="font-size: 13px;">当月未確定請求額（枠使用率: 0.0%）</div>
-                            <div style="font-size:22px; font-weight:700;"><span id="unconfirmed-total">¥0</span> <span style="font-size:13px; font-weight:400; color:var(--text-sub)">/ ¥500k</span></div>
+                            <!-- ▼ ここを「ご利用可能額」・「500,000」に修正 -->
+                            <div id="usage-rate-txt" style="font-size: 13px;">ご利用可能額（枠使用率: 0.0%）</div>
+                            <div style="font-size:22px; font-weight:700;"><span id="unconfirmed-total">¥0</span> <span style="font-size:13px; font-weight:400; color:var(--text-sub)">/ ¥500,000</span></div>
                         </div>
                         <div class="meter-container"><div class="meter-bar"></div></div>
                     </div>
@@ -203,6 +204,15 @@
                         <label style="color: #94a3b8; font-size: 12px; margin-right: 4px;">支払月で絞込:</label>
                         <select id="filter-month" class="select-custom">
                             <option value="">すべて</option>
+                        </select>
+                    </div>
+                    <!-- ▼ ここに「支払方法」フィルターを追加 -->
+                    <div>
+                        <label style="color: #94a3b8; font-size: 12px; margin-right: 4px; margin-left: 8px;">支払方法:</label>
+                        <select id="filter-type" class="select-custom">
+                            <option value="">すべて</option>
+                            <option value="single">1回払い</option>
+                            <option value="installment">分割・ボーナス</option>
                         </select>
                     </div>
                     <button id="filter-btn" class="action-btn">絞り込み</button>
@@ -440,7 +450,6 @@
                 });
         }
 
-        // 以降の処理（計算・描画）は変更なしでそのまま記載
         function parseJSTDateInfo(dateStr) {
             if (!dateStr) return null;
             let d = new Date(dateStr);
@@ -623,9 +632,27 @@
             return ((dInfo.month === 6 && dInfo.day >= 6) || (dInfo.month > 6 && dInfo.month < 12) || (dInfo.month === 12 && dInfo.day <= 5)) ? 1 : 8; 
         }
 
+        // ▼ 【修正】「支払方法」でのフィルター処理の追加
         function getFilteredDataArray() {
             const targetMonth = parseInt(document.getElementById('filter-month')?.value, 10);
+            const targetType = document.getElementById('filter-type')?.value;
             let dataArray = Array.isArray(dbStatements) ? [...dbStatements] : Object.values(dbStatements);
+
+            if (targetType) {
+                dataArray = dataArray.filter(tx => {
+                    const type = tx.currentType || tx.type || tx.payType || '1回払い';
+                    const isInstallment = (tx.registered||false) && ((parseInt(tx.months)||1) > 1 || type.includes('分割') || type.includes('リボ'));
+                    const isBonus = type.includes('ボーナス');
+                    
+                    if (targetType === 'single') {
+                        return !isInstallment && !isBonus; 
+                    } else if (targetType === 'installment') {
+                        return isInstallment || isBonus; 
+                    }
+                    return true;
+                });
+            }
+
             if (!targetMonth) return dataArray;
 
             return dataArray.filter(tx => {
@@ -655,25 +682,63 @@
             renderStatements(data);
         }
 
+        // ▼ 【修正】画面・CSVと完全一致させるための「合計」再計算処理
         function applyFilter() {
             const targetMonth = parseInt(document.getElementById('filter-month')?.value, 10);
             calculateTotals(dbStatements); 
             let dataToRender = getFilteredDataArray();
             
             let totalAmount = 0;
+            const now = new Date();
+            const currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
             dataToRender.forEach(tx => {
                 const amt = Number(tx.amount) || Number(tx.price) || 0;
-                const isInst = (tx.registered||false) && ((parseInt(tx.months)||1) > 1 || (tx.currentType||'').includes('分割'));
-                totalAmount += isInst ? Math.floor(amt / (parseInt(tx.months)||1)) : amt;
+                const currentType = tx.currentType || tx.type || tx.payType || '1回払い';
+                const isSplit = currentType.includes('分割');
+                const isRevo = currentType.includes('リボ');
+                const monthsCount = parseInt(tx.months) || 1;
+                
+                // 画面・CSVと同じ表示金額を算出（リボの場合は全額）
+                let displayAmount = amt;
+                if (isSplit && monthsCount > 0) {
+                    displayAmount = Math.floor(amt / monthsCount);
+                }
+
+                if (targetMonth) {
+                    // 〇月で絞り込んでいる場合：画面の金額をそのまま合算（キャンセル等のマイナスも合算）
+                    totalAmount += displayAmount;
+                } else {
+                    // 「すべて」表示の場合：全体の未払い残高を計算
+                    if (amt <= 0) {
+                        totalAmount += amt; // 返金などのマイナスはそのまま引く
+                    } else if (isSplit) {
+                        const ym = getBillingYearMonth(tx);
+                        if (ym) {
+                            const diff = (currentBaseDate.getFullYear() - ym.year) * 12 + (currentBaseDate.getMonth() + 1 - ym.month);
+                            const paidCount = Math.max(0, diff); 
+                            const remainingCount = Math.max(0, monthsCount - paidCount);
+                            totalAmount += (displayAmount * remainingCount);
+                        } else {
+                            totalAmount += amt;
+                        }
+                    } else if (isRevo) {
+                        totalAmount += amt;
+                    } else {
+                        totalAmount += amt;
+                    }
+                }
             });
 
-            const titleEl = document.getElementById('filtered-month-title'), totalEl = document.getElementById('filtered-month-total');
+            const titleEl = document.getElementById('filtered-month-title');
+            const totalEl = document.getElementById('filtered-month-total');
             if(titleEl) titleEl.innerText = targetMonth ? `${targetMonth}月支払分 合計` : "表示中の総残高(全月)";
             if(totalEl) totalEl.innerText = `¥${totalAmount.toLocaleString()}`;
             
             renderSortedAndFiltered(dataToRender);
         }
 
+        // ▼ 【修正】ご利用可能額・枠使用率・残金の計算処理
         function calculateTotals(targetData = dbStatements) {
             let nextPaymentTotal = 0, unconfirmedTotal = 0, bonusTotal = 0, splitMonthly = [0,0,0,0,0];
             const now = new Date(), currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -687,8 +752,38 @@
             (Array.isArray(targetData) ? targetData : Object.values(targetData)).forEach(tx => {
                 if (!tx) return;
                 const amount = Number(tx.amount) || Number(tx.price) || 0;
+                
+                // マイナス・0円の明細は一切合算しない
+                if (amount <= 0) return;
+
                 const type = tx.currentType || tx.type || tx.payType || '1回払';
-                unconfirmedTotal += amount;
+                const isInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || type.includes('分割') || type.includes('リボ'));
+                
+                let remainingAmount = amount;
+                
+                // 分割払いの場合、すでに支払った分の金額を総額から差し引く
+                if (type.includes('分割')) {
+                    const ym = getBillingYearMonth(tx);
+                    if (ym) {
+                        const totalMonths = parseInt(tx.months) || 1;
+                        const monthly = Math.floor(amount / totalMonths);
+                        
+                        let paidCount = (now.getFullYear() - ym.year) * 12 + ((now.getMonth() + 1) - ym.month);
+                        
+                        // 4日が引き落とし日のため、4日を過ぎていれば当月分も支払い完了とする
+                        if (now.getDate() > 4) {
+                            paidCount += 1;
+                        }
+                        
+                        if (paidCount < 0) paidCount = 0;
+                        if (paidCount > totalMonths) paidCount = totalMonths;
+                        
+                        remainingAmount = amount - (monthly * paidCount);
+                        if (remainingAmount < 0) remainingAmount = 0;
+                    }
+                }
+                
+                unconfirmedTotal += remainingAmount;
                 
                 if (type.includes('ボーナス')) {
                     bonusTotal += amount;
@@ -696,7 +791,7 @@
                 
                 if (type.includes('リボ')) {
                     revoTotalBalance += amount;
-                } else if ((tx.registered||tx.isRegistered||false) && (parseInt(tx.months)||1) > 1) {
+                } else if (type.includes('分割') && isInstallment) {
                     const ym = getBillingYearMonth(tx);
                     if (ym) {
                         const monthly = Math.floor(amount / (parseInt(tx.months)||1));
@@ -728,12 +823,16 @@
                 }
             }
 
-            if (document.getElementById('unconfirmed-total')) document.getElementById('unconfirmed-total').innerText = `¥${nextPaymentTotal.toLocaleString()}`;
+            // ご利用可能額（枠50万円から利用残高を差し引く）
+            const availableLimit = Math.max(1000000 - unconfirmedTotal, 0);
+
+            if (document.getElementById('unconfirmed-total')) document.getElementById('unconfirmed-total').innerText = `¥${availableLimit.toLocaleString()}`;
             if (document.getElementById('bonus-total-val')) document.getElementById('bonus-total-val').innerText = `¥${bonusTotal.toLocaleString()}`;
             for (let i = 0; i < 4; i++) { if (document.getElementById(`split-${i+1}`)) document.getElementById(`split-${i+1}`).innerText = `¥${splitMonthly[i].toLocaleString()}`; }
-            const percent = Math.min((unconfirmedTotal / 500000) * 100, 100);
+            
+            const percent = Math.min((unconfirmedTotal / 1000000) * 100, 100);
             if (document.querySelector('.meter-bar')) document.querySelector('.meter-bar').style.width = `${percent}%`;
-            if (document.getElementById('usage-rate-txt')) document.getElementById('usage-rate-txt').innerText = `当月未確定請求額（枠使用率: ${percent.toFixed(1)}%）`;
+            if (document.getElementById('usage-rate-txt')) document.getElementById('usage-rate-txt').innerText = `ご利用可能額（枠使用率: ${percent.toFixed(1)}%）`;
         }
 
         function renderDailyTab() {

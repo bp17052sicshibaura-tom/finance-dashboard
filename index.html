@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <!-- PWA用設定 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard | ダッシュボード</title>
+    
+    <!-- ★ PWA用設定 -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0b1121">
     <link rel="apple-touch-icon" href="icon-192.png">
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Dashboard | ダッシュボード (Debug版)</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -118,7 +119,6 @@
         
         .nav-item:hover::after { background: rgba(255, 255, 255, 0.2); }
         .nav-item.active::after { background: var(--accent-credit); box-shadow: 0 -2px 10px rgba(56, 189, 248, 0.4); }
-        .nav-item.active.revo::after { background: #c084fc; box-shadow: 0 -2px 10px rgba(192, 132, 252, 0.4); }
 
         .main-wrapper { 
             flex: 1; 
@@ -137,7 +137,6 @@
         h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
         h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; letter-spacing: 0; }
         
-        /* デバッグログ用 */
         #debug-log { background: #000; color: #0f0; font-family: monospace; padding: 12px; margin-bottom: 24px; border-radius: 8px; font-size: 12px; overflow-x: auto; max-height: 250px; overflow-y: auto; border: 1px solid #333; line-height: 1.5; }
 
         .glass-panel {
@@ -202,6 +201,29 @@
         .progress-mini-bg { height: 6px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; margin-top: 8px; }
         .progress-mini-fill { height: 100%; border-radius: 4px; }
         
+        /* ★ ゲーミフィケーション用バッジのスタイル */
+        .badge-container { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+        .achievement-badge { 
+            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px;
+            opacity: 0.4; filter: grayscale(100%); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            flex: 1; min-width: 140px;
+        }
+        /* 達成時（ロック解除）のスタイル */
+        .achievement-badge.unlocked { 
+            opacity: 1; filter: grayscale(0%); 
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+            border-color: rgba(250, 204, 21, 0.5); 
+            box-shadow: 0 4px 16px rgba(250, 204, 21, 0.15);
+        }
+        .badge-icon { 
+            font-size: 24px; color: #facc15; 
+            background: rgba(250, 204, 21, 0.1); padding: 12px; border-radius: 50%; 
+        }
+        .achievement-badge.unlocked .badge-icon { box-shadow: 0 0 12px rgba(250, 204, 21, 0.4); }
+        .badge-text-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+        .badge-text-desc { font-size: 10px; color: var(--text-sub); }
+
         @media (max-width: 900px) {
             .top-navbar { padding: 0 20px; overflow-x: auto; white-space: nowrap; }
             .navbar-brand { margin-right: 32px; }
@@ -254,6 +276,7 @@
             </div>
 
             <div class="main-grid">
+                <!-- クレジットカードセクション -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-regular fa-credit-card" style="color: var(--accent-credit)"></i> Credit Cards</div>
                     <div class="visual-card-list">
@@ -282,6 +305,7 @@
                     </div>
                 </div>
 
+                <!-- ローンセクション -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan)"></i> Card Loans</div>
                     <div class="visual-card-list">
@@ -298,7 +322,31 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- ★ Achievements (ゲーミフィケーション) セクション -->
+                <div class="section-box glass-panel">
+                    <div class="section-title"><i class="fa-solid fa-medal" style="color: #facc15"></i> Achievements</div>
+                    <div class="badge-container">
+                        <!-- バッジ1: 節約マスター -->
+                        <div class="achievement-badge" id="badge-saver">
+                            <div class="badge-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+                            <div>
+                                <div class="badge-text-title">節約マスター</div>
+                                <div class="badge-text-desc">次月クレカ請求額が<br>15万円以下を達成</div>
+                            </div>
+                        </div>
+                        <!-- バッジ2: 借入コントロール -->
+                        <div class="achievement-badge" id="badge-debt">
+                            <div class="badge-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div>
+                                <div class="badge-text-title">堅実なコントロール</div>
+                                <div class="badge-text-desc">ローン枠使用率が<br>80%未満を維持</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- ライフスタイル・ゴールセクション -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-solid fa-layer-group" style="color: var(--text-sub)"></i> Lifestyle & Goals</div>
                     <div class="visual-card-list">
@@ -392,6 +440,21 @@
             
             const totalRemain = Math.max(JAL_CARD_LIMIT - mainUnconfirmed, 0) + Math.max(SUB_CARD_LIMIT - subUnconfirmed, 0);
             document.getElementById('dash-credit-remain').innerText = `¥${totalRemain.toLocaleString()}`;
+
+            // ★ ゲーミフィケーションの判定ロジック
+            // 判定1: クレカの次月請求額の合計が15万円以下なら「節約マスター」バッジを点灯
+            if (totalNextPayment > 0 && totalNextPayment <= 150000) {
+                document.getElementById('badge-saver').classList.add('unlocked');
+            } else {
+                document.getElementById('badge-saver').classList.remove('unlocked');
+            }
+
+            // 判定2: カードローンの借入率が80%未満なら「コントロール」バッジを点灯
+            if (loanRate < 80) {
+                document.getElementById('badge-debt').classList.add('unlocked');
+            } else {
+                document.getElementById('badge-debt').classList.remove('unlocked');
+            }
         }
 
         function parseJSTDateInfo(dateStr) {
@@ -569,10 +632,8 @@
                 console.error("データ統合エラー:", err);
             });
         });
-    </script>
 
-    <script>
-        // PWA Service Workerの登録
+        // ★ PWA Service Workerの登録
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
