@@ -8,16 +8,133 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* =========================================
+           ベース変数 (デフォルト: ダークテーマ)
+        ========================================= */
         :root {
-            --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8;
-            --accent-credit: #38bdf8; --border-color: #334155; --sidebar-width: 260px; --grid-gap: 24px;
-            --accent-loan: #fb923c; --accent-repay: #4ade80; --accent-bonus: #c084fc;
+            --bg-main: #0f172a; 
+            --bg-card: #1e293b; 
+            --text-main: #f8fafc; 
+            --text-sub: #94a3b8;
+            --accent-credit: #38bdf8; 
+            --border-color: #334155; 
+            --sidebar-width: 260px; 
+            --grid-gap: 24px;
+            --accent-loan: #fb923c; 
+            --accent-repay: #4ade80; 
+            --accent-bonus: #c084fc;
+            --shadow-custom: 0 4px 12px rgba(0,0,0,0.3);
+            --card-shadow: 0 20px 40px rgba(0,0,0,0.4);
         }
+
+        /* =========================================
+           テーマ1: クリーン＆トラスト (ライト)
+        ========================================= */
+        body.theme-light {
+            --bg-main: #f8fafc; 
+            --bg-card: #ffffff; 
+            --text-main: #0f172a; 
+            --text-sub: #64748b;
+            --accent-credit: #0284c7; 
+            --border-color: #e2e8f0; 
+            --accent-loan: #ea580c;
+            --shadow-custom: 0 4px 6px rgba(0,0,0,0.05);
+            --card-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        body.theme-light .credit-card {
+            background: linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%);
+            border: none;
+        }
+
+        /* =========================================
+           テーマ2: ラグジュアリー (漆黒×金)
+        ========================================= */
+        body.theme-luxury {
+            --bg-main: #0a0a0a; 
+            --bg-card: #171717; 
+            --text-main: #f5f5f5; 
+            --text-sub: #a3a3a3;
+            --accent-credit: #d4af37; /* ゴールド */
+            --border-color: #333333; 
+            --accent-loan: #c0c0c0; /* シルバー */
+            --accent-repay: #b8860b;
+        }
+        body.theme-luxury .credit-card {
+            background: linear-gradient(135deg, #262626 0%, #000000 100%);
+            border: 1px solid #d4af37;
+        }
+        body.theme-luxury .card-logo-txt, body.theme-luxury .card-number, body.theme-luxury .card-holder div {
+            color: #d4af37 !important;
+        }
+        body.theme-luxury .jcb-logo { filter: sepia(1) hue-rotate(10deg) saturate(3); }
+
+        /* =========================================
+           テーマ3: グラスモーフィズム
+        ========================================= */
+        body.theme-glass {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0f172a 100%);
+            background-attachment: fixed;
+            --bg-main: transparent; 
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --text-main: #ffffff; 
+            --text-sub: #cbd5e1; 
+            --border-color: rgba(255, 255, 255, 0.15);
+            --shadow-custom: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        body.theme-glass .section-box, body.theme-glass .sidebar, body.theme-glass .mini-card, body.theme-glass .menu-toggle {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        body.theme-glass .credit-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        /* =========================================
+           テーマ4: ニューモーフィズム (ソフトUI)
+        ========================================= */
+        body.theme-neumorphism {
+            background: #e0e5ec;
+            --bg-main: #e0e5ec; 
+            --bg-card: #e0e5ec; 
+            --text-main: #2d3748; 
+            --text-sub: #718096;
+            --accent-credit: #3182ce; 
+            --border-color: transparent;
+            --shadow-custom: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff;
+        }
+        body.theme-neumorphism .section-box, body.theme-neumorphism .sidebar, body.theme-neumorphism .mini-card, body.theme-neumorphism .menu-toggle {
+            background: #e0e5ec;
+            box-shadow: var(--shadow-custom);
+            border: none;
+        }
+        body.theme-neumorphism .credit-card {
+            background: #e0e5ec;
+            box-shadow: 12px 12px 24px #a3b1c6, -12px -12px 24px #ffffff;
+            border: none;
+        }
+        body.theme-neumorphism .card-number, body.theme-neumorphism .card-logo-txt, body.theme-neumorphism .card-holder div {
+            color: #2d3748 !important;
+        }
+        body.theme-neumorphism .statement-table th, body.theme-neumorphism .statement-table td {
+            border-bottom: 1px solid #d1d9e6;
+        }
+        body.theme-neumorphism .select-custom {
+            box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff;
+            border: none;
+            background: transparent;
+        }
+
+
+        /* 基本リセットと共通スタイル */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); }
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); transition: background 0.3s, color 0.3s; }
         
-        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.2s; }
-        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: #090d16; border-right: 1px solid var(--border-color); z-index: 1000; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; }
+        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: var(--shadow-custom); transition: all 0.2s; }
+        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: var(--bg-card); border-right: 1px solid var(--border-color); z-index: 1000; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; }
         .sidebar.open { left: 0; }
         
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(2px); }
@@ -25,35 +142,38 @@
 
         .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
         .nav-item { display: flex; align-items: center; gap: 12px; color: var(--text-sub); padding: 14px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
-        .nav-item:hover { color: var(--text-main); background: var(--bg-card); }
-        .nav-item.active { background: var(--bg-card); color: var(--text-main); border-left: 4px solid var(--accent-credit); }
+        .nav-item:hover { color: var(--text-main); background: rgba(150,150,150,0.1); }
+        .nav-item.active { background: rgba(150,150,150,0.1); color: var(--text-main); border-left: 4px solid var(--accent-credit); }
 
         .main-wrapper { flex: 1; width: 100%; padding: 40px 20px 40px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         @media (min-width: 1024px) { body.sidebar-open .main-wrapper { margin-left: var(--sidebar-width); } .sidebar-overlay { display: none !important; } }
         
         .container { max-width: 1200px; margin: 0 auto; padding-top: 40px; }
-        header { margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+        
+        /* ヘッダーレイアウト変更（テーマセレクタ対応） */
+        header { margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
         h1 { font-size: 24px; font-weight: 700; line-height: 1.3; }
         h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; }
 
         .top-flex { display: flex; gap: var(--grid-gap); flex-wrap: wrap; margin-bottom: 24px; }
-        .credit-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px 30px; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 100%; max-width: 400px; aspect-ratio: 1.586; display: flex; flex-direction: column; justify-content: space-between; }
+        .credit-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px 30px; position: relative; overflow: hidden; box-shadow: var(--card-shadow); width: 100%; max-width: 400px; aspect-ratio: 1.586; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; }
         .credit-card::before { content: ''; position: absolute; top: -50%; right: -20%; width: 300px; height: 300px; background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%); pointer-events: none; }
         .card-brand { display: flex; justify-content: space-between; z-index: 1; }
-        .card-logo-txt { font-style: italic; font-weight: 700; color: #e2e8f0; letter-spacing: 1px; }
-        .jcb-logo { display: flex; gap: 2px; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; }
+        .card-logo-txt { font-style: italic; font-weight: 700; color: #e2e8f0; letter-spacing: 1px; transition: color 0.3s; }
+        .jcb-logo { display: flex; gap: 2px; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 800; transition: filter 0.3s; }
         .jcb-b { color: #38bdf8; } .jcb-r { color: #fb923c; } .jcb-g { color: #4ade80; }
-        .card-number { font-size: 18px; letter-spacing: 3px; font-weight: 500; color: #f1f5f9; font-family: monospace; margin-top: 16px; z-index: 1; }
+        .card-number { font-size: 18px; letter-spacing: 3px; font-weight: 500; color: #f1f5f9; font-family: monospace; margin-top: 16px; z-index: 1; transition: color 0.3s; }
         .card-holder { display: flex; justify-content: space-between; align-items: flex-end; z-index: 1; }
+        .card-holder div { transition: color 0.3s; color: #f1f5f9; }
 
         .status-block-group { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: var(--grid-gap); }
-        .section-box { background: var(--bg-card); border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); }
+        .section-box { background: var(--bg-card); border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); transition: all 0.3s; }
         .progress-info { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-        .meter-container { background: #334155; border-radius: 6px; height: 12px; overflow: hidden; }
+        .meter-container { background: rgba(150,150,150,0.2); border-radius: 6px; height: 12px; overflow: hidden; }
         .meter-bar { height: 100%; background: linear-gradient(90deg, var(--accent-credit) 0%, #3b82f6 100%); width: 0%; transition: width 0.5s ease-out; }
         
         .summary-mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px; }
-        .mini-card { background: var(--bg-main); border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; }
+        .mini-card { background: var(--bg-main); border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; transition: all 0.3s; }
         .mini-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; }
         .mini-val { font-size: 18px; font-weight: 700; }
 
@@ -71,27 +191,29 @@
         .statement-table th, .statement-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: middle; white-space: nowrap; }
         .amount-col { text-align: right; font-weight: 600; }
         
-        .select-custom { background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 13px; outline: none; cursor: pointer; }
+        .select-custom { background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 10px; border-radius: 6px; font-size: 13px; outline: none; cursor: pointer; transition: all 0.3s; }
         .select-custom:focus { border-color: var(--accent-credit); }
-        .div-months-wrap { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
-        .billing-month-select { padding: 4px 6px; font-size: 11px; margin-top: 6px; border-color: #475569; color: var(--accent-loan); background: rgba(15, 23, 42, 0.5); }
         
+        /* ニュートラルなバッジ */
+        .badge-payment { padding: 4px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; background: rgba(150,150,150,0.2); color: var(--text-main); transition: all 0.3s; }
+        .badge-payment.changed { background: rgba(251, 146, 60, 0.15); color: var(--accent-loan); border: 1px solid rgba(251, 146, 60, 0.3); }
+
         .action-btn { background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-credit); color: var(--accent-credit); padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; justify-content: center; min-width: 70px; }
-        .action-btn:hover { background: var(--accent-credit); color: #000; }
+        .action-btn:hover { background: var(--accent-credit); color: #fff; }
         .action-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: var(--border-color) !important; color: var(--text-sub) !important; background: transparent !important; }
         .action-btn.update-btn { border-color: var(--accent-repay); color: var(--accent-repay); background: rgba(74, 222, 128, 0.1); }
-        .action-btn.update-btn:hover { background: var(--accent-repay); color: #000; }
-
-        .badge-payment { padding: 4px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; background: #334155; color: var(--text-main); transition: all 0.3s; }
-        .badge-payment.changed { background: rgba(251, 146, 60, 0.15); color: var(--accent-loan); border: 1px solid rgba(251, 146, 60, 0.3); }
+        .action-btn.update-btn:hover { background: var(--accent-repay); color: #fff; }
 
         .controls-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
         .chart-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .div-months-wrap { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
+        .billing-month-select { padding: 4px 6px; font-size: 11px; margin-top: 6px; }
 
         @media (max-width: 1023px) {
             .menu-toggle { top: 12px; left: 12px; width: 40px; height: 40px; }
             .main-wrapper { padding: 70px 16px 30px; }
             .container { padding-top: 10px; }
+            header { flex-direction: column; gap: 12px; }
             h1 { font-size: 20px; }
             .top-flex { flex-direction: column; gap: 20px; }
             .credit-card { height: 210px; aspect-ratio: unset; margin: 0 auto; }
@@ -110,22 +232,35 @@
 
     <div class="sidebar" id="sidebar">
         <ul class="nav-list">
-            <a href="index.html" class="nav-item"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
-            <a href="simulation.html" class="nav-item"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan);"></i>カードローン実績・計画</a>
-            <a href="credit-card.html" class="nav-item active"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>メインクレカ</a>
-            <a href="credit-card-2.html" class="nav-item"><i class="fa-brands fa-cc-visa" style="color: var(--accent-credit);"></i>サブクレカ(リボ)</a>
-            <a href="installment.html" class="nav-item"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan);"></i>カードローン実績・計画</a>
+            <a href="#" class="nav-item active"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>メインクレカ</a>
+            <a href="#" class="nav-item"><i class="fa-brands fa-cc-visa" style="color: var(--accent-credit);"></i>サブクレカ(リボ)</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
         </ul>
-        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.0</div>
+        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.1</div>
     </div>
 
     <div class="main-wrapper">
         <div class="container">
             <header>
-                <h1>Credit Card Statement 
-                    <span>クレジットカード利用実績と支払いシミュレーション</span>
-                    <span id="debug-sheet-name" style="color: #fb923c; font-size: 13px; font-weight: bold; display: block; margin-top: 8px;"></span>
-                </h1>
+                <div>
+                    <h1>Credit Card Statement 
+                        <span>クレジットカード利用実績と支払いシミュレーション</span>
+                        <span id="debug-sheet-name" style="color: var(--accent-loan); font-size: 13px; font-weight: bold; display: block; margin-top: 8px;"></span>
+                    </h1>
+                </div>
+                <!-- ★ テーマスイッチャー追加 ★ -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-palette" style="color: var(--text-sub);"></i>
+                    <select id="theme-selector" class="select-custom" style="padding: 8px 12px; font-weight: 600;">
+                        <option value="default">ダークテーマ (標準)</option>
+                        <option value="theme-light">クリーン＆トラスト (ライト)</option>
+                        <option value="theme-luxury">プレミアム・ラグジュアリー (漆黒×金)</option>
+                        <option value="theme-glass">グラスモーフィズム (半透明)</option>
+                        <option value="theme-neumorphism">ニューモーフィズム (凹凸UI)</option>
+                    </select>
+                </div>
             </header>
 
             <div class="top-flex">
@@ -136,14 +271,14 @@
                     </div>
                     <div class="card-number">••••  ••••  ••••  3540</div>
                     <div class="card-holder">
-                        <div><div style="font-size:9px; color:var(--text-sub);">Card Holder</div><div style="font-size:13px; font-weight:600; text-transform: uppercase;">SYSTEM ENGINEER</div></div>
-                        <div><div style="font-size:9px; color:var(--text-sub);">Expires</div><div style="font-size:13px; font-weight:600;">08 / 29</div></div>
+                        <div><div style="font-size:9px; opacity:0.8;">Card Holder</div><div style="font-size:13px; font-weight:600; text-transform: uppercase;">SYSTEM ENGINEER</div></div>
+                        <div><div style="font-size:9px; opacity:0.8;">Expires</div><div style="font-size:13px; font-weight:600;">08 / 29</div></div>
                     </div>
                 </div>
 
                 <div class="status-block-group">
                     <div class="section-box">
-			<div class="progress-info">
+                        <div class="progress-info">
                             <div id="usage-rate-txt" style="font-size: 13px;">ご利用可能額（枠使用率: 0.0%）</div>
                             <div style="font-size:22px; font-weight:700;"><span id="unconfirmed-total">¥0</span> <span style="font-size:13px; font-weight:400; color:var(--text-sub)">/ ¥800,000</span></div>
                         </div>
@@ -189,13 +324,13 @@
             <div id="tab-statement" class="tab-content active">
                 <div class="controls-row">
                     <div>
-                        <label style="color: #94a3b8; font-size: 12px; margin-right: 4px;">支払月で絞込:</label>
+                        <label style="color: var(--text-sub); font-size: 12px; margin-right: 4px;">支払月で絞込:</label>
                         <select id="filter-month" class="select-custom">
                             <option value="">すべて</option>
                         </select>
                     </div>
                     <div>
-                        <label style="color: #94a3b8; font-size: 12px; margin-right: 4px; margin-left: 8px;">支払方法:</label>
+                        <label style="color: var(--text-sub); font-size: 12px; margin-right: 4px; margin-left: 8px;">支払方法:</label>
                         <select id="filter-type" class="select-custom">
                             <option value="">すべて</option>
                             <option value="single">1回払い</option>
@@ -236,7 +371,7 @@
             <div id="tab-daily" class="tab-content">
                 <div class="controls-row" style="margin-bottom: 16px;">
                     <div>
-                        <label style="color: #94a3b8; font-size: 12px; margin-right: 4px;">集計対象フィルタ:</label>
+                        <label style="color: var(--text-sub); font-size: 12px; margin-right: 4px;">集計対象フィルタ:</label>
                         <select id="daily-filter" class="select-custom" onchange="renderDailyTab()">
                             <option value="all">すべての利用 (分割・ボーナス等含む)</option>
                             <option value="single">1回払いのみ (日常の生活費ペース)</option>
@@ -280,40 +415,43 @@
         let currentSortOrder = 0; 
         let dailyChartInstance = null;
 
-        // ★ ビューカード方式の分割払い計算（実質年率12%）
-        function calculateViewCardInstallment(principal, months, apr = 12) {
-            if (months <= 1) return { total: principal, fee: 0, first: principal, second: 0 };
-            
-            // 月利
-            const monthlyRate = (apr / 100) / 12;
-            // PMT（均等払いの理論値）
-            const pmt = principal * monthlyRate / (1 - Math.pow(1 + monthlyRate, -months));
-            // 手数料総額 (PMT合計から元金を引いて切り捨て)
-            const totalFee = Math.floor(pmt * months - principal);
-            // 支払総額
-            const totalAmount = principal + totalFee;
-            
-            // 2回目以降の支払額 (100円未満切り捨て、最低1000円)
-            let secondPayment = Math.floor(totalAmount / months / 100) * 100;
-            if (secondPayment < 1000 && totalAmount > 1000) secondPayment = 1000;
-            
-            // 初回の支払額 (端数合算)
-            const firstPayment = totalAmount - (secondPayment * (months - 1));
-            
-            return {
-                total: totalAmount,
-                fee: totalFee,
-                first: firstPayment,
-                second: secondPayment
-            };
-        }
+        // ★ テーマ切り替えロジック ★
+        const themeSelector = document.getElementById('theme-selector');
+        const applyTheme = (themeName) => {
+            const themes = ['theme-light', 'theme-luxury', 'theme-glass', 'theme-neumorphism'];
+            themes.forEach(t => document.body.classList.remove(t));
+            if (themeName !== 'default') {
+                document.body.classList.add(themeName);
+            }
+            localStorage.setItem('selectedTheme', themeName);
+            themeSelector.value = themeName;
+            if (dailyChartInstance) renderDailyTab(); // グラフの色を再描画
+        };
+        themeSelector.addEventListener('change', (e) => applyTheme(e.target.value));
 
+        // 初期化処理
         window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('selectedTheme');
+            if (savedTheme) applyTheme(savedTheme);
+
             initMonthFilter();
             loadStatementsFromSheet();
             const filterBtn = document.getElementById('filter-btn');
             if (filterBtn) filterBtn.addEventListener('click', applyFilter);
         });
+
+        // ビューカード方式の分割払い計算（実質年率12%）
+        function calculateViewCardInstallment(principal, months, apr = 12) {
+            if (months <= 1) return { total: principal, fee: 0, first: principal, second: 0 };
+            const monthlyRate = (apr / 100) / 12;
+            const pmt = principal * monthlyRate / (1 - Math.pow(1 + monthlyRate, -months));
+            const totalFee = Math.floor(pmt * months - principal);
+            const totalAmount = principal + totalFee;
+            let secondPayment = Math.floor(totalAmount / months / 100) * 100;
+            if (secondPayment < 1000 && totalAmount > 1000) secondPayment = 1000;
+            const firstPayment = totalAmount - (secondPayment * (months - 1));
+            return { total: totalAmount, fee: totalFee, first: firstPayment, second: secondPayment };
+        }
 
         /* タブ切り替え */
         function switchTab(tabId, btn) {
@@ -321,10 +459,7 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             btn.classList.add('active');
-            
-            if(tabId === 'tab-daily' && dailyChartInstance) {
-                dailyChartInstance.resize();
-            }
+            if(tabId === 'tab-daily' && dailyChartInstance) { dailyChartInstance.resize(); }
         }
 
         /* サイドバー制御 */
@@ -350,16 +485,11 @@
 
         function loadStatementsFromSheet() {
             const tbody = document.getElementById('statement-tbody');
-            
-            // キャッシュから高速表示
             const cachedData = localStorage.getItem('creditCardData');
             if (cachedData) {
                 try {
                     dbStatements = JSON.parse(cachedData);
-                    renderStatements();
-                    calculateTotals();
-                    applyFilter();
-                    renderDailyTab();
+                    renderStatements(); calculateTotals(); applyFilter(); renderDailyTab();
                 } catch(e) { console.error(e); }
             } else {
                 if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> データを読み込み中...</td></tr>`;
@@ -367,7 +497,6 @@
 
             if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
 
-            // 最新データ取得
             fetch(`${GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}&_=${new Date().getTime()}`)
                 .then(res => { if(!res.ok) throw new Error('ネットワークエラー'); return res.json(); })
                 .then(data => {
@@ -377,11 +506,7 @@
                         localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
                         const debugEl = document.getElementById('debug-sheet-name');
                         if (debugEl && dbStatements.length > 0 && dbStatements[0].debugSourceSheet) debugEl.innerText = `🔍 読込: ${dbStatements[0].debugSourceSheet}`;
-                        
-                        renderStatements();
-                        calculateTotals();
-                        applyFilter();
-                        renderDailyTab();
+                        renderStatements(); calculateTotals(); applyFilter(); renderDailyTab();
                     }
                 })
                 .catch(err => {
@@ -449,15 +574,13 @@
             targetData.forEach(tx => {
                 const txId = tx.id || 'unknown', currentType = tx.currentType || '1回払い', isRegistered = !!tx.registered, months = parseInt(tx.months) || 3, isSplit = (currentType === '分割払い');
                 const txAmount = Number(tx.amount) || 0;
-                
-                // ★ ビューカード方式の計算を画面に適用
                 let displayAmount = txAmount;
                 let subText = '';
                 
                 if (isSplit && months > 1) {
                     const calc = calculateViewCardInstallment(txAmount, months, 12);
-                    subText = `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed #334155; text-align:right;">` +
-                              `<div style="font-size:11px; color:#fb923c; font-weight:600; margin-bottom:2px;">初回: ¥${calc.first.toLocaleString()}</div>` +
+                    subText = `<div style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--border-color); text-align:right;">` +
+                              `<div style="font-size:11px; color:var(--accent-loan); font-weight:600; margin-bottom:2px;">初回: ¥${calc.first.toLocaleString()}</div>` +
                               `<div style="font-size:11px; color:var(--text-sub); margin-bottom:2px;">2回目以降: ¥${calc.second.toLocaleString()} × ${months - 1}回</div>` +
                               `<div style="font-size:10px; color:var(--text-sub);">(総額: ¥${calc.total.toLocaleString()} / 手数料: ¥${calc.fee.toLocaleString()})</div></div>`;
                 }
@@ -567,10 +690,9 @@
             return ((dInfo.month === 6 && dInfo.day >= 6) || (dInfo.month > 6 && dInfo.month < 12) || (dInfo.month === 12 && dInfo.day <= 5)) ? 1 : 8; 
         }
 
-	function getFilteredDataArray() {
+        function getFilteredDataArray() {
             const targetMonth = parseInt(document.getElementById('filter-month')?.value, 10);
             const targetType = document.getElementById('filter-type')?.value; 
-            
             let dataArray = Array.isArray(dbStatements) ? [...dbStatements] : Object.values(dbStatements);
 
             if (targetType) {
@@ -578,7 +700,6 @@
                     const type = tx.currentType || tx.type || tx.payType || '1回払い';
                     const isInstallment = (tx.registered||false) && ((parseInt(tx.months)||1) > 1 || type.includes('分割') || type.includes('リボ'));
                     const isBonus = type.includes('ボーナス');
-                    
                     if (targetType === 'single') return !isInstallment && !isBonus;
                     else if (targetType === 'installment') return isInstallment || isBonus;
                     return true;
@@ -618,7 +739,6 @@
             const targetMonth = parseInt(document.getElementById('filter-month')?.value, 10);
             calculateTotals(dbStatements); 
             let dataToRender = getFilteredDataArray();
-            
             let totalAmount = 0;
             const now = new Date();
             const currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -630,7 +750,6 @@
                 const monthsCount = parseInt(tx.months) || 1;
 
                 if (targetMonth) {
-                    // ▼ 〇月で絞り込んでいる場合
                     if (isSplit && monthsCount > 1) {
                         const calc = calculateViewCardInstallment(amt, monthsCount, 12);
                         const ym = getBillingYearMonth(tx);
@@ -641,7 +760,6 @@
                         totalAmount += amt;
                     }
                 } else {
-                    // ▼ 「すべて」表示の場合
                     if (amt <= 0) {
                         totalAmount += amt; 
                     } else if (isSplit && monthsCount > 1) {
@@ -682,9 +800,7 @@
             (Array.isArray(targetData) ? targetData : Object.values(targetData)).forEach(tx => {
                 if (!tx) return;
                 const amount = Number(tx.amount) || Number(tx.price) || 0;
-                
                 if (amount <= 0) return;
-
                 const type = tx.currentType || tx.type || tx.payType || '1回払';
                 const isInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || type.includes('分割') || type.includes('リボ'));
                 
@@ -723,9 +839,7 @@
                 }
             });
 
-            // 80万枠から、全未決済総額（手数料込み）を引いて利用可能額を算出
             const availableLimit = Math.max(800000 - unconfirmedTotal, 0);
-
             if (document.getElementById('unconfirmed-total')) document.getElementById('unconfirmed-total').innerText = `¥${availableLimit.toLocaleString()}`;
             if (document.getElementById('bonus-total-val')) document.getElementById('bonus-total-val').innerText = `¥${bonusTotal.toLocaleString()}`;
             for (let i = 0; i < 4; i++) { if (document.getElementById(`split-${i+1}`)) document.getElementById(`split-${i+1}`).innerText = `¥${splitMonthly[i].toLocaleString()}`; }
@@ -751,6 +865,7 @@
             let a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = `credit_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
         }
 
+        // ★ グラフ描画（テーマカラー追従） ★
         function renderDailyTab() {
             const filterEl = document.getElementById('daily-filter');
             const filterValue = filterEl ? filterEl.value : 'all';
@@ -772,17 +887,12 @@
 
             dbStatements.forEach(tx => {
                 let amt = Number(tx.amount || tx.price || 0);
-
                 if (amt <= 0) return;
-
                 if (filterValue === 'single') {
                     const type = tx.currentType || tx.type || tx.payType || '1回払い';
                     const isInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || type.includes('分割') || type.includes('リボ'));
-                    if (isInstallment || type.includes('ボーナス')) {
-                        return; 
-                    }
+                    if (isInstallment || type.includes('ボーナス')) return; 
                 }
-
                 const dInfo = parseJSTDateInfo(tx.date || tx.useDate || '');
                 if (dInfo) {
                     const key = `${dInfo.year}/${String(dInfo.month).padStart(2,'0')}/${String(dInfo.day).padStart(2,'0')}`;
@@ -823,6 +933,12 @@
                 forecastLines = new Array(timeline.length).fill(null);
             }
 
+            // テーマに基づくグラフカラーの設定
+            const isLightMode = document.body.classList.contains('theme-light') || document.body.classList.contains('theme-neumorphism');
+            const chartTextColor = isLightMode ? '#64748b' : '#94a3b8';
+            const chartGridColor = isLightMode ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+            const barBgColor = isLightMode ? 'rgba(100, 116, 139, 0.3)' : 'rgba(148, 163, 184, 0.3)';
+
             if (dailyChartInstance) dailyChartInstance.destroy();
             dailyChartInstance = new Chart(document.getElementById('dailyTrendChart').getContext('2d'), {
                 type: 'bar',
@@ -831,13 +947,16 @@
                     datasets: [
                         { type: 'line', label: '予想着地', data: forecastLines, borderColor: '#fb923c', borderWidth: 2, borderDash: [4, 4], pointRadius: 0, fill: false, tension: 0 },
                         { type: 'line', label: '期間累計額', data: cumulativeLines, borderColor: '#38bdf8', borderWidth: 2, backgroundColor: 'rgba(56, 189, 248, 0.1)', fill: true, pointRadius: 2, tension: 0.2 },
-                        { type: 'bar', label: '日別利用額', data: dailyBars, backgroundColor: 'rgba(148, 163, 184, 0.3)', borderRadius: 2 }
+                        { type: 'bar', label: '日別利用額', data: dailyBars, backgroundColor: barBgColor, borderRadius: 2 }
                     ]
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { labels: { color: '#f8fafc' } }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ¥${Math.round(ctx.parsed.y).toLocaleString()}` } } },
-                    scales: { x: { ticks: { color: '#94a3b8', maxTicksLimit: 15 }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#94a3b8', callback: v => '¥'+v.toLocaleString() }, grid: { color: 'rgba(255,255,255,0.05)' } } }
+                    plugins: { legend: { labels: { color: chartTextColor } }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ¥${Math.round(ctx.parsed.y).toLocaleString()}` } } },
+                    scales: { 
+                        x: { ticks: { color: chartTextColor, maxTicksLimit: 15 }, grid: { color: chartGridColor } }, 
+                        y: { ticks: { color: chartTextColor, callback: v => '¥'+v.toLocaleString() }, grid: { color: chartGridColor } } 
+                    }
                 }
             });
 
@@ -849,7 +968,7 @@
                 let dateStr = `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')}`;
                 let dVal = dailyBars[i], cVal = cumulativeLines[i] !== null ? cumulativeLines[i] : 0;
                 let isCycleStart = (i === currStartIdx) || (i === 0);
-                let rowStyle = isCycleStart ? 'border-bottom: 2px solid var(--accent-credit); background: rgba(56, 189, 248, 0.05);' : '';
+                let rowStyle = isCycleStart ? `border-bottom: 2px solid var(--accent-credit); background: ${isLightMode ? 'rgba(56, 189, 248, 0.1)' : 'rgba(56, 189, 248, 0.05)'};` : '';
                 let dateLabel = isCycleStart ? `${dateStr} <span style="font-size:10px; color:var(--accent-credit); margin-left:4px;">(請求月 開始日)</span>` : dateStr;
 
                 dBody.insertAdjacentHTML('beforeend', `
