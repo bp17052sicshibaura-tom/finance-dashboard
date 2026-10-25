@@ -8,39 +8,45 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --accent-credit: #38bdf8; --border-color: #334155; --sidebar-width: 260px; --grid-gap: 24px; --accent-loan: #fb923c; --accent-repay: #4ade80; --accent-bonus: #c084fc; }
+        :root { --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --accent-credit: #38bdf8; --border-color: #334155; --sidebar-width: 260px; --grid-gap: 24px; --accent-loan: #fb923c; --accent-repay: #4ade80; --accent-bonus: #c084fc; --accent-modify: #a78bfa; --accent-revo: #f43f5e; --shadow-custom: 0 4px 12px rgba(0,0,0,0.3); --card-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        body.theme-light { --bg-main: #f8fafc; --bg-card: #ffffff; --text-main: #0f172a; --text-sub: #64748b; --accent-credit: #0284c7; --border-color: #e2e8f0; --accent-loan: #ea580c; --shadow-custom: 0 4px 6px rgba(0,0,0,0.05); --card-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        body.theme-luxury { --bg-main: #0a0a0a; --bg-card: #171717; --text-main: #f5f5f5; --text-sub: #a3a3a3; --accent-credit: #d4af37; --border-color: #333333; --accent-loan: #c0c0c0; --accent-repay: #b8860b; }
+        body.theme-glass { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0f172a 100%); background-attachment: fixed; --bg-main: transparent; --bg-card: rgba(255, 255, 255, 0.05); --text-main: #ffffff; --text-sub: #cbd5e1; --border-color: rgba(255, 255, 255, 0.15); --shadow-custom: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+        body.theme-glass .chart-section, body.theme-glass .summary-card, body.theme-glass .sidebar, body.theme-glass .menu-toggle { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        body.theme-neumorphism { background: #e0e5ec; --bg-main: #e0e5ec; --bg-card: #e0e5ec; --text-main: #2d3748; --text-sub: #718096; --accent-credit: #3182ce; --border-color: transparent; --shadow-custom: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff; }
+        body.theme-neumorphism .chart-section, body.theme-neumorphism .summary-card, body.theme-neumorphism .sidebar, body.theme-neumorphism .menu-toggle { background: #e0e5ec; box-shadow: var(--shadow-custom); border: none; }
+        body.theme-neumorphism .statement-table th, body.theme-neumorphism .statement-table td { border-bottom: 1px solid #d1d9e6; }
+        body.theme-neumorphism .select-custom { box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff; border: none; background: transparent; }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); }
-        
-        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.2s; }
-        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: #090d16; border-right: 1px solid var(--border-color); z-index: 1000; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto;}
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); transition: background 0.3s, color 0.3s; }
+        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: var(--shadow-custom); transition: all 0.2s; }
+        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: var(--bg-card); border-right: 1px solid var(--border-color); z-index: 1000; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto;}
         .sidebar.open { left: 0; }
-        
         .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(2px); }
         .sidebar-overlay.show { opacity: 1; visibility: visible; }
-
         .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
         .nav-item { display: flex; align-items: center; gap: 12px; color: var(--text-sub); padding: 14px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
-        .nav-item:hover { color: var(--text-main); background: var(--bg-card); }
-        .nav-item.active { background: var(--bg-card); color: var(--text-main); border-left: 4px solid var(--accent-bonus); }
+        .nav-item:hover { color: var(--text-main); background: rgba(150,150,150,0.1); }
+        .nav-item.active { background: rgba(150,150,150,0.1); color: var(--text-main); border-left: 4px solid var(--accent-bonus); }
 
-        .main-wrapper { flex: 1; width: 100%; padding: 40px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .main-wrapper { flex: 1; width: 100%; padding: 40px 20px 40px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         @media (min-width: 1024px) { body.sidebar-open .main-wrapper { margin-left: var(--sidebar-width); } .sidebar-overlay { display: none !important; } }
         .container { max-width: 1200px; margin: 0 auto; padding-top: 40px; }
-        header { margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
-        h1 { font-size: 24px; font-weight: 700; line-height: 1.3;}
+        header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
+        h1 { font-size: 24px; font-weight: 700; line-height: 1.3; margin:0;}
         h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; }
+        .select-custom { padding: 8px 12px; font-weight: 600; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none; cursor: pointer; transition: all 0.3s; }
 
         .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
-        .summary-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: center; }
+        .summary-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; justify-content: center; transition: all 0.3s;}
         .summary-label { font-size: 13px; color: var(--text-sub); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .summary-value { font-size: 28px; font-weight: 700; color: var(--text-main); }
         .val-split { color: var(--accent-credit); } .val-bonus { color: var(--accent-bonus); } .val-total { color: var(--accent-loan); }
 
-        .chart-section { background: var(--bg-card); border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); margin-bottom: 32px; }
+        .chart-section { background: var(--bg-card); border-radius: 16px; padding: 24px; border: 1px solid var(--border-color); margin-bottom: 32px; transition: all 0.3s;}
         .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .chart-title { font-size: 16px; font-weight: 600; }
-        
         .chart-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .chart-container { position: relative; height: 350px; width: 100%; min-width: 600px; }
 
@@ -59,6 +65,7 @@
             .menu-toggle { top: 12px; left: 12px; width: 40px; height: 40px; }
             .main-wrapper { padding: 70px 16px 30px; }
             .container { padding-top: 10px; }
+            header { flex-direction: column; gap: 12px; }
             h1 { font-size: 20px; }
             .summary-grid { grid-template-columns: 1fr; gap: 12px; }
             .summary-card { padding: 16px; }
@@ -69,7 +76,6 @@
     </style>
 </head>
 <body class="sidebar-open">
-
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
     <button class="menu-toggle" id="menu-btn"><i class="fa-solid fa-bars"></i></button>
 
@@ -81,15 +87,26 @@
             <a href="credit-card-2.html" class="nav-item"><i class="fa-brands fa-cc-visa" style="color: var(--accent-credit);"></i>サブクレカ(リボ)</a>
             <a href="installment.html" class="nav-item active"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
         </ul>
-        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v4.0</div>
+        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.1</div>
     </div>
 
     <div class="main-wrapper">
         <div class="container">
             <header>
-                <h1>Installment & Bonus Tracking 
-                    <span>分割払い・ボーナス一括払いの将来負担シミュレーション</span>
-                </h1>
+                <div>
+                    <h1>Installment & Bonus Tracking <br><span style="margin-top:4px;">分割払い・ボーナス一括払いの将来負担シミュレーション</span></h1>
+                </div>
+                <!-- ★ テーマスイッチャー -->
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-palette" style="color: var(--text-sub);"></i>
+                    <select id="theme-selector" class="select-custom">
+                        <option value="default">ダークテーマ (標準)</option>
+                        <option value="theme-light">クリーン＆トラスト (ライト)</option>
+                        <option value="theme-luxury">プレミアム (漆黒×金)</option>
+                        <option value="theme-glass">グラスモーフィズム</option>
+                        <option value="theme-neumorphism">ニューモーフィズム</option>
+                    </select>
+                </div>
             </header>
 
             <div id="loading-msg"><i class="fa-solid fa-spinner fa-spin"></i> データを読み込み中...</div>
@@ -150,24 +167,33 @@
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwipphBoGeLGpGJzUVxZIrHn_QPWGwVJnGWub9mCH5oHSgCL6VKXWEIrKb3p5cKV3NI/exec";
         let dbStatements = [], chartInstance = null;
 
-        window.addEventListener('DOMContentLoaded', () => loadStatementsFromSheet());
+        // ★ テーマ切り替えロジック ★
+        const themeSelector = document.getElementById('theme-selector');
+        const applyTheme = (themeName) => {
+            const themes = ['theme-light', 'theme-luxury', 'theme-glass', 'theme-neumorphism'];
+            themes.forEach(t => document.body.classList.remove(t));
+            if (themeName !== 'default') document.body.classList.add(themeName);
+            localStorage.setItem('selectedTheme', themeName);
+            if(themeSelector) themeSelector.value = themeName;
+            if (typeof processData === 'function' && chartInstance) processData();
+        };
+        if (themeSelector) themeSelector.addEventListener('change', (e) => applyTheme(e.target.value));
 
-        /* サイドバー制御 */
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('selectedTheme');
+            if (savedTheme) applyTheme(savedTheme);
+            loadStatementsFromSheet();
+        });
+
         const menuBtn = document.getElementById('menu-btn'), sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebar-overlay');
         if (window.innerWidth < 1024) document.body.classList.remove('sidebar-open');
         else if(document.body.classList.contains('sidebar-open')) sidebar.classList.add('open');
-
-        menuBtn.addEventListener('click', () => { 
-            sidebar.classList.toggle('open'); document.body.classList.toggle('sidebar-open');
-            if (window.innerWidth < 1024) overlay.classList.toggle('show');
-        });
+        menuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); document.body.classList.toggle('sidebar-open'); if (window.innerWidth < 1024) overlay.classList.toggle('show'); });
         overlay.addEventListener('click', () => { sidebar.classList.remove('open'); document.body.classList.remove('sidebar-open'); overlay.classList.remove('show'); });
 
         function loadStatementsFromSheet() {
             const loadingMsg = document.getElementById('loading-msg');
             const contentArea = document.getElementById('content-area');
-            
-            // キャッシュから高速表示
             const cachedData = localStorage.getItem('creditCardData');
             if (cachedData) {
                 try {
@@ -175,19 +201,15 @@
                     if (loadingMsg) loadingMsg.style.display = 'none';
                     if (contentArea) contentArea.style.display = 'block';
                     processData();
-                } catch(e) {
-                    console.error("キャッシュのパースエラー", e);
-                }
+                } catch(e) { console.error("キャッシュのパースエラー", e); }
             }
 
             if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
 
-            // 裏側で最新データを取得
             fetch(`${GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}&_=${new Date().getTime()}`)
                 .then(res => res.json())
                 .then(data => {
                     const newData = Array.isArray(data) ? data : [];
-                    
                     if (JSON.stringify(dbStatements) !== JSON.stringify(newData)) {
                         dbStatements = newData;
                         localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
@@ -298,14 +320,18 @@
         }
 
         function renderChart(labels, splitData, bonusData) {
+            const isLightMode = document.body.classList.contains('theme-light') || document.body.classList.contains('theme-neumorphism');
+            const chartTextColor = isLightMode ? '#64748b' : '#94a3b8';
+            const chartGridColor = isLightMode ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(document.getElementById('burdenChart').getContext('2d'), {
                 type: 'bar',
                 data: { labels: labels, datasets: [{ label: '分割払い', data: splitData, backgroundColor: '#38bdf8', borderRadius: 4 }, { label: 'ボーナス一括', data: bonusData, backgroundColor: '#c084fc', borderRadius: 4 }] },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#f8fafc' } }, tooltip: { mode: 'index', intersect: false, callbacks: { label: ctx => `${ctx.dataset.label}: ¥${ctx.parsed.y.toLocaleString()}` } } },
-                    scales: { x: { stacked: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { stacked: true, ticks: { color: '#94a3b8', callback: v => '¥'+v.toLocaleString() }, grid: { color: 'rgba(255,255,255,0.05)' } } }
+                    plugins: { legend: { labels: { color: chartTextColor } }, tooltip: { mode: 'index', intersect: false, callbacks: { label: ctx => `${ctx.dataset.label}: ¥${ctx.parsed.y.toLocaleString()}` } } },
+                    scales: { x: { stacked: true, ticks: { color: chartTextColor }, grid: { color: chartGridColor } }, y: { stacked: true, ticks: { color: chartTextColor, callback: v => '¥'+v.toLocaleString() }, grid: { color: chartGridColor } } }
                 }
             });
         }

@@ -2,258 +2,128 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Finance Dashboard | ダッシュボード</title>
-    
-    <!-- ★ PWA用設定 -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0b1121">
     <link rel="apple-touch-icon" href="icon-192.png">
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --bg-main: #0b1121; 
-            --bg-card: rgba(30, 41, 59, 0.65); 
-            --text-main: #f8fafc; 
-            --text-sub: #94a3b8;
-            --accent-credit: #38bdf8; 
-            --accent-loan: #fb923c; 
-            --accent-repay: #4ade80; 
-            --accent-miles: #f43f5e; 
-            --accent-study: #10b981;
-            --accent-meal: #f59e0b;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --grid-gap: 24px;
-        }
+        :root { --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --accent-credit: #38bdf8; --border-color: #334155; --sidebar-width: 260px; --grid-gap: 24px; --accent-loan: #fb923c; --accent-repay: #4ade80; --accent-bonus: #c084fc; --accent-miles: #f43f5e; --accent-study: #10b981; --accent-meal: #f59e0b; --shadow-custom: 0 4px 12px rgba(0,0,0,0.3); --card-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        body.theme-light { --bg-main: #f8fafc; --bg-card: #ffffff; --text-main: #0f172a; --text-sub: #64748b; --accent-credit: #0284c7; --border-color: #e2e8f0; --accent-loan: #ea580c; --shadow-custom: 0 4px 6px rgba(0,0,0,0.05); --card-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        body.theme-light .summary-card.credit::before, body.theme-light .summary-card.loan::before, body.theme-light .summary-card.asset::before { box-shadow: none; }
+        body.theme-luxury { --bg-main: #0a0a0a; --bg-card: #171717; --text-main: #f5f5f5; --text-sub: #a3a3a3; --accent-credit: #d4af37; --border-color: #333333; --accent-loan: #c0c0c0; --accent-repay: #b8860b; }
+        body.theme-glass { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0f172a 100%); background-attachment: fixed; --bg-main: transparent; --bg-card: rgba(255, 255, 255, 0.05); --text-main: #ffffff; --text-sub: #cbd5e1; --border-color: rgba(255, 255, 255, 0.15); --shadow-custom: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+        body.theme-glass .section-box, body.theme-glass .sidebar, body.theme-glass .menu-toggle, body.theme-glass .glass-panel { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        body.theme-neumorphism { background: #e0e5ec; --bg-main: #e0e5ec; --bg-card: #e0e5ec; --text-main: #2d3748; --text-sub: #718096; --accent-credit: #3182ce; --border-color: transparent; --shadow-custom: 8px 8px 16px #a3b1c6, -8px -8px 16px #ffffff; }
+        body.theme-neumorphism .section-box, body.theme-neumorphism .sidebar, body.theme-neumorphism .menu-toggle, body.theme-neumorphism .glass-panel { background: #e0e5ec; box-shadow: var(--shadow-custom); border: none; }
+        body.theme-neumorphism .select-custom { box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff; border: none; background: transparent; }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            font-family: 'Inter', 'Noto Sans JP', sans-serif; 
-            background-color: var(--bg-main);
-            color: var(--text-main); 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column;
-            overflow-x: hidden; 
-            position: relative;
-        }
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; position: relative; transition: background 0.3s, color 0.3s; }
+        .ambient-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; background: radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.07) 0%, transparent 40%), radial-gradient(circle at 85% 60%, rgba(192, 132, 252, 0.06) 0%, transparent 40%), radial-gradient(circle at 50% 90%, rgba(244, 63, 94, 0.05) 0%, transparent 50%); }
+        .menu-toggle { position: fixed; top: 20px; left: 20px; z-index: 1001; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); width: 44px; height: 44px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: var(--shadow-custom); transition: all 0.2s; }
+        .sidebar { position: fixed; top: 0; left: calc(-1 * var(--sidebar-width)); width: var(--sidebar-width); height: 100vh; background: var(--bg-card); border-right: 1px solid var(--border-color); z-index: 1000; padding: 80px 16px 20px 16px; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; }
+        .sidebar.open { left: 0; }
+        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s; backdrop-filter: blur(2px); }
+        .sidebar-overlay.show { opacity: 1; visibility: visible; }
+        .nav-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; color: var(--text-sub); padding: 14px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; text-decoration: none; transition: all 0.2s; }
+        .nav-item:hover { color: var(--text-main); background: rgba(150,150,150,0.1); }
+        .nav-item.active { background: rgba(150,150,150,0.1); color: var(--text-main); border-left: 4px solid var(--accent-credit); }
 
-        .ambient-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: -1;
-            overflow: hidden;
-            background: 
-                radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.07) 0%, transparent 40%),
-                radial-gradient(circle at 85% 60%, rgba(192, 132, 252, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 50% 90%, rgba(244, 63, 94, 0.05) 0%, transparent 50%);
-        }
-        
-        .top-navbar {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 70px;
-            background: rgba(9, 13, 22, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border-color);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            padding: 0 40px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        .navbar-brand {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-right: auto;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
-        }
-        
-        .navbar-brand .version {
-            font-size: 11px;
-            color: var(--text-sub);
-            font-weight: 500;
-        }
-
-        .nav-list {
-            list-style: none;
-            display: flex;
-            height: 100%;
-            gap: 32px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-sub);
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            position: relative;
-            height: 100%;
-            transition: color 0.3s ease;
-        }
-
-        .nav-item:hover { color: var(--text-main); }
-        .nav-item.active { color: var(--text-main); }
-
-        .nav-item::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: transparent;
-            border-radius: 3px 3px 0 0;
-            transition: background 0.3s ease;
-        }
-        
-        .nav-item:hover::after { background: rgba(255, 255, 255, 0.2); }
-        .nav-item.active::after { background: var(--accent-credit); box-shadow: 0 -2px 10px rgba(56, 189, 248, 0.4); }
-
-        .main-wrapper { 
-            flex: 1; 
-            width: 100%; 
-            padding: 110px 20px 60px 20px; 
-            display: flex;
-            justify-content: center;
-        }
-        
-        .container { 
-            width: 100%; 
-            max-width: 1300px; 
-        }
-        
-        header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
-        h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+        .main-wrapper { flex: 1; width: 100%; padding: 40px 20px 60px 20px; margin-left: 0; transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; justify-content: center; }
+        @media (min-width: 1024px) { body.sidebar-open .main-wrapper { margin-left: var(--sidebar-width); } .sidebar-overlay { display: none !important; } }
+        .container { width: 100%; max-width: 1300px; padding-top: 40px; }
+        header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 40px; border-bottom: 1px solid var(--border-color); padding-bottom: 24px; }
+        h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin: 0;}
         h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; letter-spacing: 0; }
-        
         #debug-log { background: #000; color: #0f0; font-family: monospace; padding: 12px; margin-bottom: 24px; border-radius: 8px; font-size: 12px; overflow-x: auto; max-height: 250px; overflow-y: auto; border: 1px solid #333; line-height: 1.5; }
-
-        .glass-panel {
-            background: var(--bg-card);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
-        }
-        .glass-panel:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
-        }
-
+        .glass-panel { background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--border-color); border-radius: 20px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; }
+        .glass-panel:hover { transform: translateY(-4px); box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3); }
         .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--grid-gap); margin-bottom: 40px; }
         .summary-card { padding: 28px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
         .summary-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; border-radius: 4px 0 0 4px; }
         .summary-card.credit::before { background-color: var(--accent-credit); box-shadow: 0 0 12px var(--accent-credit); }
         .summary-card.loan::before { background-color: var(--accent-loan); box-shadow: 0 0 12px var(--accent-loan); }
         .summary-card.asset::before { background-color: var(--accent-repay); box-shadow: 0 0 12px var(--accent-repay); }
-        
         .card-label { font-size: 14px; color: var(--text-sub); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-weight: 500; }
         .card-value { font-size: 36px; font-weight: 800; letter-spacing: -1px; text-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        
         .progress-bar-container { background: rgba(0,0,0,0.3); border-radius: 8px; height: 8px; width: 100%; margin-top: 12px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
         .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-loan), #f97316); border-radius: 8px; width: 0%; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
-
         .main-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--grid-gap); }
         .section-box { padding: 28px; display: flex; flex-direction: column; }
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.3px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; }
-        
         .visual-card-list { display: flex; flex-direction: column; gap: 16px; flex: 1; }
-        
-        .visual-card { 
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%); 
-            border-radius: 16px; 
-            padding: 24px; 
-            border: 1px solid rgba(255,255,255,0.05); 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-            min-height: 130px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+        .visual-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%); border-radius: 16px; padding: 24px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: space-between; min-height: 130px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s; }
         .visual-card:hover { transform: scale(1.02); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
-        
         .visual-card.credit-blue { border-left: 4px solid var(--accent-credit); }
         .visual-card.credit-purple { border-left: 4px solid #c084fc; }
         .visual-card.loan-orange { border-left: 4px solid var(--accent-loan); }
         .visual-card.miles-box { border-left: 4px solid var(--accent-miles); background: linear-gradient(135deg, rgba(244, 63, 94, 0.05) 0%, rgba(15, 23, 42, 0.8) 100%); }
         .visual-card.study-box { border-left: 4px solid var(--accent-study); background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.8) 100%); }
         .visual-card.meal-box { border-left: 4px solid var(--accent-meal); background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(15, 23, 42, 0.8) 100%); }
-        
         .vc-header { display: flex; justify-content: space-between; font-size: 15px; font-weight: 700; align-items: center; }
         .vc-amount { font-size: 22px; font-weight: 800; text-align: right; margin: 12px 0; letter-spacing: -0.5px; }
         .vc-footer { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-sub); font-weight: 500; }
-
         .status-badge { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4); }
         .progress-mini-bg { height: 6px; background: rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; margin-top: 8px; }
         .progress-mini-fill { height: 100%; border-radius: 4px; }
-        
-        /* ★ ゲーミフィケーション用バッジのスタイル */
         .badge-container { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
-        .achievement-badge { 
-            background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px;
-            opacity: 0.4; filter: grayscale(100%); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            flex: 1; min-width: 140px;
-        }
-        /* 達成時（ロック解除）のスタイル */
-        .achievement-badge.unlocked { 
-            opacity: 1; filter: grayscale(0%); 
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
-            border-color: rgba(250, 204, 21, 0.5); 
-            box-shadow: 0 4px 16px rgba(250, 204, 21, 0.15);
-        }
-        .badge-icon { 
-            font-size: 24px; color: #facc15; 
-            background: rgba(250, 204, 21, 0.1); padding: 12px; border-radius: 50%; 
-        }
+        .achievement-badge { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; opacity: 0.4; filter: grayscale(100%); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); flex: 1; min-width: 140px; }
+        .achievement-badge.unlocked { opacity: 1; filter: grayscale(0%); background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9)); border-color: rgba(250, 204, 21, 0.5); box-shadow: 0 4px 16px rgba(250, 204, 21, 0.15); }
+        .badge-icon { font-size: 24px; color: #facc15; background: rgba(250, 204, 21, 0.1); padding: 12px; border-radius: 50%; }
         .achievement-badge.unlocked .badge-icon { box-shadow: 0 0 12px rgba(250, 204, 21, 0.4); }
         .badge-text-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
         .badge-text-desc { font-size: 10px; color: var(--text-sub); }
-
-        @media (max-width: 900px) {
-            .top-navbar { padding: 0 20px; overflow-x: auto; white-space: nowrap; }
-            .navbar-brand { margin-right: 32px; }
-            .nav-list { gap: 24px; padding-right: 20px; }
+        .select-custom { padding: 8px 12px; font-weight: 600; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none; cursor: pointer; transition: all 0.3s; }
+        
+        @media (max-width: 1023px) {
+            .menu-toggle { top: 12px; left: 12px; width: 40px; height: 40px; }
+            .main-wrapper { padding: 70px 16px 30px; }
+            .container { padding-top: 10px; }
+            header { flex-direction: column; gap: 12px; }
+            h1 { font-size: 20px; }
+            .summary-grid { grid-template-columns: 1fr; gap: 12px; }
+            .summary-card { padding: 16px; }
         }
     </style>
 </head>
-<body>
+<body class="sidebar-open">
 
     <div class="ambient-bg"></div>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <button class="menu-toggle" id="menu-btn"><i class="fa-solid fa-bars"></i></button>
 
-    <nav class="top-navbar">
-        <div class="navbar-brand">
-            Finance Dashboard <span class="version">v5.0</span>
-        </div>
+    <div class="sidebar" id="sidebar">
         <ul class="nav-list">
-           <a href="index.html" class="nav-item active"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
+            <a href="index.html" class="nav-item active"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
             <a href="simulation.html" class="nav-item"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan);"></i>カードローン実績・計画</a>
             <a href="credit-card.html" class="nav-item"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>メインクレカ</a>
             <a href="credit-card-2.html" class="nav-item"><i class="fa-brands fa-cc-visa" style="color: var(--accent-credit);"></i>サブクレカ(リボ)</a>
             <a href="installment.html" class="nav-item"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
         </ul>
-    </nav>
+        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.1</div>
+    </div>
 
     <div class="main-wrapper">
         <div class="container">
             <header>
-                <h1>Asset & Debt Overview <span>財務・ライフスタイル ダッシュボード</span>
-                    <span id="debug-sheet-name" style="color: #fb923c; font-size: 13px; font-weight: bold; display: block; margin-top: 8px;">🔍 データ通信状況: 確認中...</span>
-                </h1>
+                <div>
+                    <h1>Asset & Debt Overview <br><span style="margin-top:4px;">財務・ライフスタイル ダッシュボード</span></h1>
+                    <span id="debug-sheet-name" style="color: var(--accent-loan); font-size: 13px; font-weight: bold; display: block; margin-top: 8px;">🔍 データ通信状況: 確認中...</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-palette" style="color: var(--text-sub);"></i>
+                    <select id="theme-selector" class="select-custom">
+                        <option value="default">ダークテーマ (標準)</option>
+                        <option value="theme-light">クリーン＆トラスト (ライト)</option>
+                        <option value="theme-luxury">プレミアム (漆黒×金)</option>
+                        <option value="theme-glass">グラスモーフィズム</option>
+                        <option value="theme-neumorphism">ニューモーフィズム</option>
+                    </select>
+                </div>
             </header>
 
             <!-- デバッグ用ログ表示エリア -->
@@ -276,7 +146,6 @@
             </div>
 
             <div class="main-grid">
-                <!-- クレジットカードセクション -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-regular fa-credit-card" style="color: var(--accent-credit)"></i> Credit Cards</div>
                     <div class="visual-card-list">
@@ -305,7 +174,6 @@
                     </div>
                 </div>
 
-                <!-- ローンセクション -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan)"></i> Card Loans</div>
                     <div class="visual-card-list">
@@ -323,11 +191,9 @@
                     </div>
                 </div>
                 
-                <!-- ★ Achievements (ゲーミフィケーション) セクション -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-solid fa-medal" style="color: #facc15"></i> Achievements</div>
                     <div class="badge-container">
-                        <!-- バッジ1: 節約マスター -->
                         <div class="achievement-badge" id="badge-saver">
                             <div class="badge-icon"><i class="fa-solid fa-piggy-bank"></i></div>
                             <div>
@@ -335,7 +201,6 @@
                                 <div class="badge-text-desc">次月クレカ請求額が<br>15万円以下を達成</div>
                             </div>
                         </div>
-                        <!-- バッジ2: 借入コントロール -->
                         <div class="achievement-badge" id="badge-debt">
                             <div class="badge-icon"><i class="fa-solid fa-shield-halved"></i></div>
                             <div>
@@ -346,7 +211,6 @@
                     </div>
                 </div>
 
-                <!-- ライフスタイル・ゴールセクション -->
                 <div class="section-box glass-panel">
                     <div class="section-title"><i class="fa-solid fa-layer-group" style="color: var(--text-sub)"></i> Lifestyle & Goals</div>
                     <div class="visual-card-list">
@@ -402,28 +266,35 @@
     <script>
         const MAIN_GAS_URL = "https://script.google.com/macros/s/AKfycbwfWEubTmiBkfAfEICduM6pOa-Jb2_A0FcRFAWbcGbRtvo_clhz2WZHDWOsnVIQvvv7/exec";
         const SUB_GAS_URL = "https://script.google.com/macros/s/AKfycbwfWEubTmiBkfAfEICduM6pOa-Jb2_A0FcRFAWbcGbRtvo_clhz2WZHDWOsnVIQvvv7/exec";
-        
-        const TOTAL_LOAN_LIMIT = 4500000;
-        const JAL_CARD_LIMIT = 800000;
-        const SUB_CARD_LIMIT = 500000;
+        const TOTAL_LOAN_LIMIT = 4500000; const JAL_CARD_LIMIT = 800000; const SUB_CARD_LIMIT = 500000;
+        const SUB_SHEET_LIST = "サブクレカ明細"; const SUB_SHEET_SPLIT = "サブクレカ分割DB";
 
-        const SUB_SHEET_LIST = "サブクレカ明細"; 
-        const SUB_SHEET_SPLIT = "サブクレカ分割DB";
+        // テーマ切り替え
+        const themeSelector = document.getElementById('theme-selector');
+        const applyTheme = (themeName) => {
+            const themes = ['theme-light', 'theme-luxury', 'theme-glass', 'theme-neumorphism'];
+            themes.forEach(t => document.body.classList.remove(t));
+            if (themeName !== 'default') document.body.classList.add(themeName);
+            localStorage.setItem('selectedTheme', themeName);
+            if(themeSelector) themeSelector.value = themeName;
+        };
+        if (themeSelector) themeSelector.addEventListener('change', (e) => applyTheme(e.target.value));
 
-        // デバッグ出力用関数
+        // サイドバー
+        const menuBtn = document.getElementById('menu-btn'), sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebar-overlay');
+        if (window.innerWidth < 1024) document.body.classList.remove('sidebar-open');
+        else if(document.body.classList.contains('sidebar-open')) sidebar.classList.add('open');
+        menuBtn.addEventListener('click', () => { sidebar.classList.toggle('open'); document.body.classList.toggle('sidebar-open'); if (window.innerWidth < 1024) overlay.classList.toggle('show'); });
+        overlay.addEventListener('click', () => { sidebar.classList.remove('open'); document.body.classList.remove('sidebar-open'); overlay.classList.remove('show'); });
+
         function logDebug(msg) {
             const el = document.getElementById('debug-log');
-            if (el) {
-                const time = new Date().toLocaleTimeString('ja-JP');
-                el.innerHTML += `<br>[${time}] ${msg}`;
-                el.scrollTop = el.scrollHeight; // 自動スクロール
-            }
+            if (el) { const time = new Date().toLocaleTimeString('ja-JP'); el.innerHTML += `<br>[${time}] ${msg}`; el.scrollTop = el.scrollHeight; }
             console.log(msg);
         }
 
         function renderDashboardUI(data) {
             const { loanBalance, mainNextPayment, mainUnconfirmed, subNextPayment, subUnconfirmed } = data;
-
             document.getElementById('dash-loan-total').innerText = `¥${loanBalance.toLocaleString()}`;
             document.getElementById('dash-card-balance-a').innerText = `¥${loanBalance.toLocaleString()}`;
             const loanRate = Math.round((loanBalance / TOTAL_LOAN_LIMIT) * 100);
@@ -431,61 +302,37 @@
 
             const totalNextPayment = mainNextPayment + subNextPayment;
             document.getElementById('dash-credit-total').innerText = `¥${totalNextPayment.toLocaleString()}`;
-
             document.getElementById('dash-jal-amount').innerText = `¥${mainNextPayment.toLocaleString()}`;
             document.getElementById('dash-jal-remain').innerText = `枠残高: ¥${Math.max(JAL_CARD_LIMIT - mainUnconfirmed, 0).toLocaleString()}`;
-
             document.getElementById('dash-sub-amount').innerText = `¥${subNextPayment.toLocaleString()}`;
             document.getElementById('dash-sub-remain').innerText = `枠残高: ¥${Math.max(SUB_CARD_LIMIT - subUnconfirmed, 0).toLocaleString()}`;
             
             const totalRemain = Math.max(JAL_CARD_LIMIT - mainUnconfirmed, 0) + Math.max(SUB_CARD_LIMIT - subUnconfirmed, 0);
             document.getElementById('dash-credit-remain').innerText = `¥${totalRemain.toLocaleString()}`;
 
-            // ★ ゲーミフィケーションの判定ロジック
-            // 判定1: クレカの次月請求額の合計が15万円以下なら「節約マスター」バッジを点灯
-            if (totalNextPayment > 0 && totalNextPayment <= 150000) {
-                document.getElementById('badge-saver').classList.add('unlocked');
-            } else {
-                document.getElementById('badge-saver').classList.remove('unlocked');
-            }
-
-            // 判定2: カードローンの借入率が80%未満なら「コントロール」バッジを点灯
-            if (loanRate < 80) {
-                document.getElementById('badge-debt').classList.add('unlocked');
-            } else {
-                document.getElementById('badge-debt').classList.remove('unlocked');
-            }
+            if (totalNextPayment > 0 && totalNextPayment <= 150000) document.getElementById('badge-saver').classList.add('unlocked');
+            else document.getElementById('badge-saver').classList.remove('unlocked');
+            if (loanRate < 80) document.getElementById('badge-debt').classList.add('unlocked');
+            else document.getElementById('badge-debt').classList.remove('unlocked');
         }
 
         function parseJSTDateInfo(dateStr) {
             if (!dateStr) return null;
             let d = new Date(dateStr);
-            if (isNaN(d.getTime())) {
-                const clean = String(dateStr).split('T')[0].replace(/-/g, '/');
-                d = new Date(clean);
-            }
+            if (isNaN(d.getTime())) d = new Date(String(dateStr).split('T')[0].replace(/-/g, '/'));
             if (isNaN(d.getTime())) return null;
             return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
         }
 
         function getBillingYearMonth(tx) {
-            if (tx.simulationBillingMonth) {
-                const parts = tx.simulationBillingMonth.split('-');
-                return { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10) };
-            }
+            if (tx.simulationBillingMonth) return { year: parseInt(tx.simulationBillingMonth.split('-')[0], 10), month: parseInt(tx.simulationBillingMonth.split('-')[1], 10) };
             if (tx.registered && (tx.billingMonth || tx.payMonth)) {
-                const bMonth = tx.billingMonth || tx.payMonth;
-                const cleanB = String(bMonth).replace(/\//g, '-');
-                if (cleanB.includes('-')) {
-                    const parts = cleanB.split('-');
-                    return { year: parseInt(parts[0], 10), month: parseInt(parts[1], 10) };
-                }
+                const bMonth = String(tx.billingMonth || tx.payMonth).replace(/\//g, '-');
+                if (bMonth.includes('-')) return { year: parseInt(bMonth.split('-')[0], 10), month: parseInt(bMonth.split('-')[1], 10) };
             }
-            const txDate = tx.date || tx.useDate || '';
-            const dInfo = parseJSTDateInfo(txDate);
+            const dInfo = parseJSTDateInfo(tx.date || tx.useDate || '');
             if (dInfo) {
-                let y = dInfo.year;
-                let m = (dInfo.day <= 5) ? dInfo.month + 1 : dInfo.month + 2;
+                let y = dInfo.year, m = (dInfo.day <= 5) ? dInfo.month + 1 : dInfo.month + 2;
                 while (m > 12) { m -= 12; y++; }
                 return { year: y, month: m };
             }
@@ -495,16 +342,16 @@
         function getBonusBillingMonth(dateStr) {
             const dInfo = parseJSTDateInfo(dateStr);
             if (!dInfo) return 0;
-            const month = dInfo.month, day = dInfo.day;
-            if ((month === 6 && day >= 6) || (month > 6 && month < 12) || (month === 12 && day <= 5)) return 1; 
-            return 8; 
+            return ((dInfo.month === 6 && dInfo.day >= 6) || (dInfo.month > 6 && dInfo.month < 12) || (dInfo.month === 12 && dInfo.day <= 5)) ? 1 : 8; 
         }
 
         window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('selectedTheme');
+            if (savedTheme) applyTheme(savedTheme);
+
             logDebug("キャッシュを強制クリアしました (テスト用)。");
             localStorage.removeItem('dashboardSummaryData');
 
-            // 安全なFetch関数（デバッグ付き）
             const safeFetch = (url, name) => {
                 logDebug(`[${name}] Fetch開始: ${url.substring(0, 100)}...`);
                 return fetch(url).then(res => {
@@ -512,24 +359,12 @@
                     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
                     return res.text();
                 }).then(text => {
-                    logDebug(`[${name}] テキスト取得完了 (文字数: ${text.length})`);
                     try {
                         const json = JSON.parse(text);
-                        if (json && json.status === 'error') {
-                            logDebug(`[${name}] ❌ GAS側エラー: ${json.message}`);
-                            return [];
-                        }
-                        const arr = Array.isArray(json) ? json : [];
-                        logDebug(`[${name}] 抽出データ件数: ${arr.length} 件`);
-                        return arr;
-                    } catch(e) {
-                        logDebug(`[${name}] ❌ JSONパースエラー: ${e.message}`);
-                        return [];
-                    }
-                }).catch(err => {
-                    logDebug(`[${name}] ❌ 通信エラー: ${err.message}`);
-                    return [];
-                });
+                        if (json && json.status === 'error') return [];
+                        return Array.isArray(json) ? json : [];
+                    } catch(e) { return []; }
+                }).catch(err => { return []; });
             };
 
             Promise.all([
@@ -541,106 +376,51 @@
                 logDebug("全データのFetchが完了しました。計算処理を開始します。");
                 document.getElementById('debug-sheet-name').innerText = "🔍 データ通信完了（ログを確認してください）";
 
-                let loanBalance = 0;
-                if (Array.isArray(loanData) && loanData.length > 0) {
-                    loanBalance = Number(loanData[0]?.balance || 0);
-                    logDebug(`ローン残高取得: ¥${loanBalance}`);
-                }
-                
-                const now = new Date();
-                const currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
-                let mainNextPayment = 0; 
-                let mainUnconfirmed = 0; 
-
+                let loanBalance = loanData.length > 0 ? Number(loanData[0]?.balance || 0) : 0;
+                const now = new Date(), currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                let mainNextPayment = 0, mainUnconfirmed = 0; 
                 if (Array.isArray(mainCreditData)) {
                     mainCreditData.forEach(tx => {
                         if (!tx || tx.status === 'error') return;
-                        const amount = Number(tx.amount) || Number(tx.price) || 0;
-                        const months = parseInt(tx.months) || parseInt(tx.payCount) || 1;
-                        const type = tx.currentType || tx.type || tx.payType || '1回払';
-                        const isRegistered = tx.registered || tx.isRegistered || false;
-                        
+                        const amount = Number(tx.amount) || Number(tx.price) || 0, months = parseInt(tx.months) || parseInt(tx.payCount) || 1, type = tx.currentType || tx.type || tx.payType || '1回払';
                         mainUnconfirmed += amount; 
-                        
-                        const isInstallment = isRegistered && (months > 1 || type.includes('分割'));
-
-                        if (isInstallment) {
+                        if ((tx.registered || tx.isRegistered || false) && (months > 1 || type.includes('分割'))) {
                             const ym = getBillingYearMonth(tx);
                             if (ym) {
-                                const monthly = Math.floor(amount / months);
-                                let targetCardDate = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth(), 1);
-                                let diff = (targetCardDate.getFullYear() - ym.year) * 12 + (targetCardDate.getMonth() + 1 - ym.month);
-                                if (diff >= 0 && diff < months) mainNextPayment += monthly; 
+                                let diff = (currentBaseDate.getFullYear() - ym.year) * 12 + (currentBaseDate.getMonth() + 1 - ym.month);
+                                if (diff >= 0 && diff < months) mainNextPayment += Math.floor(amount / months); 
                             }
                         } else {
-                            let m = type.includes('ボーナス') ? getBonusBillingMonth(tx.date || tx.useDate || '') : (getBillingYearMonth(tx)?.month || 0);
-                            if (m === (currentBaseDate.getMonth() + 1)) mainNextPayment += amount; 
+                            if ((type.includes('ボーナス') ? getBonusBillingMonth(tx.date || tx.useDate || '') : (getBillingYearMonth(tx)?.month || 0)) === (currentBaseDate.getMonth() + 1)) mainNextPayment += amount; 
                         }
                     });
-                    logDebug(`メインクレカ計算完了: 請求予定 ¥${mainNextPayment}, 未確定合計 ¥${mainUnconfirmed}`);
                 }
 
-                let subNextPayment = 0; 
-                let subUnconfirmed = 0; 
-                let subRevoBalance = 0;
-
+                let subNextPayment = 0, subUnconfirmed = 0, subRevoBalance = 0;
                 if (Array.isArray(subCreditData)) {
                     subCreditData.forEach(tx => {
                         if (!tx || tx.status === 'error') return;
-                        const amount = Number(tx.amount) || Number(tx.price) || 0;
-                        const months = parseInt(tx.months) || 1;
-                        const type = tx.currentType || tx.type || '1回払';
-                        
+                        const amount = Number(tx.amount) || Number(tx.price) || 0, months = parseInt(tx.months) || 1, type = tx.currentType || tx.type || '1回払';
                         subUnconfirmed += amount; 
-
-                        if (type.includes('リボ')) {
-                            subRevoBalance += amount;
+                        if (type.includes('リボ')) { subRevoBalance += amount;
                         } else if ((tx.registered||tx.isRegistered) && months > 1) {
                             const ym = getBillingYearMonth(tx);
                             if (ym) {
-                                const monthly = Math.floor(amount / months);
-                                let targetCardDate = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth(), 1);
-                                let diff = (targetCardDate.getFullYear() - ym.year) * 12 + (targetCardDate.getMonth() + 1 - ym.month);
-                                if (diff >= 0 && diff < months) subNextPayment += monthly;
+                                let diff = (currentBaseDate.getFullYear() - ym.year) * 12 + (currentBaseDate.getMonth() + 1 - ym.month);
+                                if (diff >= 0 && diff < months) subNextPayment += Math.floor(amount / months);
                             }
                         } else {
-                            let m = type.includes('ボーナス') ? getBonusBillingMonth(tx.date || tx.useDate || '') : (getBillingYearMonth(tx)?.month || 0);
-                            if (m === (currentBaseDate.getMonth() + 1)) subNextPayment += amount; 
+                            if ((type.includes('ボーナス') ? getBonusBillingMonth(tx.date || tx.useDate || '') : (getBillingYearMonth(tx)?.month || 0)) === (currentBaseDate.getMonth() + 1)) subNextPayment += amount; 
                         }
                     });
                 }
-
-                if (subRevoBalance > 0) {
-                    let rPrincipal = 10000;
-                    let rApr = 15.0;
-                    let interest = Math.floor(subRevoBalance * (rApr / 100) / 12);
-                    let principal = Math.min(subRevoBalance, rPrincipal);
-                    subNextPayment += (principal + interest);
-                    logDebug(`サブリボ計算: 残高 ¥${subRevoBalance} -> 今回請求分 ¥${principal + interest} 加算`);
-                }
-                logDebug(`サブクレカ計算完了: 請求予定 ¥${subNextPayment}, 未確定合計 ¥${subUnconfirmed}`);
-
+                if (subRevoBalance > 0) subNextPayment += (Math.min(subRevoBalance, 10000) + Math.floor(subRevoBalance * (15.0 / 100) / 12));
                 const summaryData = { loanBalance, mainNextPayment, mainUnconfirmed, subNextPayment, subUnconfirmed };
                 localStorage.setItem('dashboardSummaryData', JSON.stringify(summaryData));
                 renderDashboardUI(summaryData);
                 logDebug("画面の描画処理が正常に完了しました。");
-
-            })
-            .catch(err => {
-                logDebug(`❌ 統合エラー: ${err.message}`);
-                console.error("データ統合エラー:", err);
-            });
+            }).catch(err => console.error("データ統合エラー:", err));
         });
-
-        // ★ PWA Service Workerの登録
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker 登録成功', reg.scope))
-                    .catch(err => console.log('Service Worker 登録失敗', err));
-            });
-        }
     </script>
 </body>
 </html>
