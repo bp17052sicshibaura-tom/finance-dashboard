@@ -344,6 +344,9 @@
                     <button type="button" onclick="resetSort()" style="padding: 8px 12px; background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600;">
                         <i class="fa-solid fa-arrow-rotate-left"></i> ソート解除
                     </button>
+                    <button type="button" onclick="forceRefreshData(this)" style="padding: 8px 12px; background-color: var(--accent-credit); color: #000; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.2s;">
+                    <i class="fa-solid fa-rotate-right"></i> 最新データを取得
+                    </button>
                 </div>
 
                 <div class="section-box">
@@ -980,6 +983,65 @@
                 `);
             }
         }
+        // ★ 強制的にキャッシュをクリアして最新データを取得する関数
+function forceRefreshData(btn) {
+    const originalHtml = btn.innerHTML;
+    // ボタンをローディング状態に変更
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 取得中...';
+    btn.disabled = true;
+
+    // キャッシュを削除
+    localStorage.removeItem('creditCardData');
+    dbStatements = [];
+    
+    // テーブルをローディング表示にリセット
+    const tbody = document.getElementById('statement-tbody');
+    if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> 最新データを読み込み中...</td></tr>`;
+    }
+
+    if (!GAS_URL || GAS_URL.includes('XXXXX')) {
+        alert('GAS_URLが設定されていません');
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+        return;
+    }
+
+    // キャッシュ無効化のためのタイムスタンプを付与して再フェッチ
+    fetch(`${GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}&_=${new Date().getTime()}`)
+        .then(res => { 
+            if(!res.ok) throw new Error('ネットワークエラー'); 
+            return res.json(); 
+        })
+        .then(data => {
+            dbStatements = Array.isArray(data) ? data : [];
+            // 新しいデータをキャッシュに保存
+            localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
+            
+            // 画面の再描画
+            renderStatements();
+            calculateTotals();
+            applyFilter();
+            renderDailyTab();
+            
+            // ボタンを完了状態にしてから元に戻す
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> 更新完了';
+            setTimeout(() => { 
+                btn.innerHTML = originalHtml; 
+                btn.disabled = false; 
+            }, 2000);
+        })
+        .catch(err => {
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--accent-loan); padding: 40px;"><i class="fa-solid fa-circle-exclamation"></i> 読み込み失敗: ${err.message}</td></tr>`;
+            }
+            btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> エラー';
+            setTimeout(() => { 
+                btn.innerHTML = originalHtml; 
+                btn.disabled = false; 
+            }, 2000);
+        });
+}
     </script>
 </body>
 </html>
