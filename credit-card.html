@@ -165,14 +165,23 @@
                             <div id="usage-rate-txt" style="font-size: 13px;">ご利用可能額（枠使用率: 0.0%）</div>
                             <div style="font-size:22px; font-weight:700;"><span id="unconfirmed-total">¥0</span> <span style="font-size:13px; font-weight:400; color:var(--text-sub)">/ ¥800,000</span></div>
                         </div>
-                        <div class="meter-container"><div class="meter-bar"></div></div>
+                        <div class="meter-container"><div class="meter-bar" id="meter-bar-total"></div></div>
+                        
+                        
                     </div>
                     <div class="section-box">
-                        <div class="progress-info" style="margin-bottom: 0;">
+                        <div class="progress-info">
                             <div id="filtered-month-title" style="color: var(--text-sub); font-size: 14px;">未決済明細の総残高</div>
                             <div style="font-size:24px; font-weight:700; color: var(--text-main);">
                                 <span id="filtered-month-total">¥0</span>
                             </div>
+                        </div>
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border-color);">
+                            <div class="progress-info" style="margin-bottom: 10px;">
+                                <div id="viewcard-usage-txt" style="font-size: 13px;"><i class="fa-solid fa-credit-card" style="color: var(--accent-loan); margin-right: 4px;"></i>ビューカード使用枠（1回・ボーナス）</div>
+                                <div style="font-size:18px; font-weight:700;"><span id="viewcard-total">¥0</span> <span style="font-size:12px; font-weight:400; color:var(--text-sub)">/ ¥800,000</span></div>
+                            </div>
+                            <div class="meter-container"><div class="meter-bar" id="meter-bar-viewcard" style="background: linear-gradient(90deg, var(--accent-loan) 0%, #f97316 100%);"></div></div>
                         </div>
                     </div>
 
@@ -215,6 +224,7 @@
                         <select id="filter-type" class="select-custom">
                             <option value="">すべて</option>
                             <option value="single">1回払い</option>
+                            <option value="single_bonus">1回払いとボーナス払い</option>
                             <option value="installment">分割・ボーナス</option>
                         </select>
                     </div>
@@ -582,6 +592,7 @@
                     const isBonus = type.includes('ボーナス');
                     if (targetType === 'single') return !isInstallment && !isBonus;
                     else if (targetType === 'installment') return isInstallment || isBonus;
+                    else if (targetType === 'single_bonus') return !isInstallment; // 分割・リボ以外 (1回とボーナス)
                     return true;
                 });
             }
@@ -709,7 +720,7 @@
         }
 
         function calculateTotals(targetData = dbStatements) {
-            let nextPaymentTotal = 0, unconfirmedTotal = 0, bonusTotal = 0, splitMonthly = [0,0,0,0,0];
+            let nextPaymentTotal = 0, unconfirmedTotal = 0, bonusTotal = 0, splitMonthly = [0,0,0,0,0], viewcardTotal = 0;
             const now = new Date(), currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
             for (let i = 0; i < 4; i++) {
                 const el = document.getElementById(`label-${i + 1}`);
@@ -719,7 +730,11 @@
             (Array.isArray(targetData) ? targetData : Object.values(targetData)).forEach(tx => {
                 if (!tx) return;
                 const amount = Number(tx.amount) || Number(tx.price) || 0;
-                if (amount <= 0) return;
+                if (amount <= 0) {
+                    unconfirmedTotal += amount;
+                    viewcardTotal += amount;
+                    return;
+                }
                 const type = tx.currentType || tx.type || tx.payType || '1回払';
                 const isInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || type.includes('分割') || type.includes('リボ'));
                 
@@ -753,6 +768,7 @@
                     }
                 } else {
                     unconfirmedTotal += amount;
+                    viewcardTotal += amount; // 1回払いとボーナス払いを加算
                     const m = type.includes('ボーナス') ? getBonusBillingMonth(tx.date||tx.useDate||'') : (getBillingYearMonth(tx)?.month || 0);
                     if (m === currentBaseDate.getMonth() + 1) nextPaymentTotal += amount; 
                 }
@@ -761,10 +777,16 @@
             const availableLimit = Math.max(800000 - unconfirmedTotal, 0);
             if (document.getElementById('unconfirmed-total')) document.getElementById('unconfirmed-total').innerText = `¥${availableLimit.toLocaleString()}`;
             if (document.getElementById('bonus-total-val')) document.getElementById('bonus-total-val').innerText = `¥${bonusTotal.toLocaleString()}`;
+            if (document.getElementById('viewcard-total')) document.getElementById('viewcard-total').innerText = `¥${viewcardTotal.toLocaleString()}`;
             for (let i = 0; i < 4; i++) { if (document.getElementById(`split-${i+1}`)) document.getElementById(`split-${i+1}`).innerText = `¥${splitMonthly[i].toLocaleString()}`; }
             
             const percent = Math.min((unconfirmedTotal / 800000) * 100, 100);
-            if (document.querySelector('.meter-bar')) document.querySelector('.meter-bar').style.width = `${percent}%`;
+            if (document.getElementById('meter-bar-total')) document.getElementById('meter-bar-total').style.width = `${percent}%`;
+            else if (document.querySelector('.meter-bar')) document.querySelector('.meter-bar').style.width = `${percent}%`;
+            
+            const viewcardPercent = Math.min((viewcardTotal / 800000) * 100, 100);
+            if (document.getElementById('meter-bar-viewcard')) document.getElementById('meter-bar-viewcard').style.width = `${viewcardPercent}%`;
+
             if (document.getElementById('usage-rate-txt')) document.getElementById('usage-rate-txt').innerText = `ご利用可能額（枠使用率: ${percent.toFixed(1)}%）`;
         }
 
