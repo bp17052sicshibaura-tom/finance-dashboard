@@ -242,6 +242,37 @@
                         <i class="fa-solid fa-trash-can"></i> 選択した明細を削除
                     </button>
                 </div>
+<!-- ▼▼▼ ViewsNET反映管理リスト ▼▼▼ -->
+                <div class="section-box" id="viewsnet-section" style="margin-bottom: 24px; display: none; border-color: var(--accent-loan);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div style="font-size: 16px; font-weight: 600; color: var(--accent-loan);">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> ViewsNET 反映・管理リスト
+                            <span style="font-size: 12px; color: var(--text-sub); font-weight: 400; margin-left: 8px;">※自作システム上で変更した明細</span>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; color: var(--text-main); background: var(--bg-main); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); transition: all 0.2s;">
+                                <input type="checkbox" id="toggle-show-registered" onchange="renderSortedAndFiltered()" style="cursor: pointer;">
+                                ✅ 反映済みも表示する
+                            </label>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="statement-table">
+                            <thead>
+                                <tr>
+                                    <th>利用日</th>
+                                    <th>ご利用店名・内容</th>
+                                    <th style="text-align: right;">金額</th>
+                                    <th>変更後の支払方法</th>
+                                    <th>ViewsNET状態</th>
+                                    <th style="text-align: center;">アクション</th>
+                                </tr>
+                            </thead>
+                            <tbody id="viewsnet-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- ▲▲▲ 新規追加ここまで ▲▲▲ -->
 
                 <div class="section-box">
                     <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">最近の利用明細と支払いタイプ変更</div>
@@ -305,7 +336,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbzicpsy5svM8xd1wK7xqn5SMwIEzqmQnZ1XwZlTOvAI5NrW4Yy3IhfvhIH1wNg6F80/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbw6OpWl9K3wB-jDTGMB6ubjREM1RqbcOk10Vp9O8Yb5DkaOtru8JOLvtVGIl63fJEiU/exec";
         let dbStatements = [];
         let currentSortKey = null;
         let currentSortOrder = 0; 
@@ -624,6 +655,8 @@
                 });
             }
             renderStatements(data);
+	// ▼ この1行を追加（フィルタされたデータをViewsNET管理リストにも渡す）
+            renderChangedList(data);
         }
 
         
@@ -1067,6 +1100,114 @@ function forceRefreshData(btn) {
             }, 2000);
         });
 }
+// ▼ ViewsNET反映管理リストを描画する関数
+        function renderChangedList(data) {
+            const tbody = document.getElementById('viewsnet-tbody');
+            const section = document.getElementById('viewsnet-section');
+            const showRegistered = document.getElementById('toggle-show-registered')?.checked || false;
+            
+            // 支払い方法がシステム上で変更（登録）されたベースの明細
+            const baseChangedItems = data.filter(tx => !!tx.registered);
+
+            // 「自作システム上で変更したもの」自体がゼロ件なら、枠ごと非表示
+            if (baseChangedItems.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            tbody.innerHTML = '';
+
+            // チェックボックスの状態に応じて表示内容を絞り込む
+            const displayItems = showRegistered 
+                ? baseChangedItems 
+                : baseChangedItems.filter(tx => tx.viewsnetStatus !== 'registered');
+
+            // 未反映がゼロ件（すべて反映済みで、チェックを外している状態）の表示
+            if (displayItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-sub);"><i class="fa-solid fa-check-circle" style="color: var(--accent-repay); margin-right: 4px;"></i> 未反映の明細はありません（すべて反映済み）</td></tr>`;
+                return;
+            }
+
+            displayItems.forEach(tx => {
+                const txId = tx.id;
+                const txAmount = Number(tx.amount) || Number(tx.price) || 0;
+                // viewsnetStatusが無ければ未反映(pending)とする
+                const status = tx.viewsnetStatus || 'pending'; 
+                const isSplit = tx.currentType === '分割払い' || (tx.currentType && tx.currentType.includes('分割'));
+                const typeText = isSplit ? `分割 ${tx.months || 3}ヶ月` : (tx.currentType || '不明');
+
+                let txDateStr = tx.date || '----/--/--';
+                const dInfo = parseJSTDateInfo(txDateStr);
+                if (dInfo) txDateStr = dInfo.formatted;
+
+                // 登録済みなら行を少し暗くするスタイル
+                const rowStyle = status === 'registered' ? 'opacity: 0.5; background: rgba(150,150,150,0.05);' : '';
+                const selectStyle = status === 'registered' ? 'border-color: var(--accent-repay); color: var(--accent-repay);' : 'border-color: var(--accent-loan); color: var(--accent-loan); font-weight: 700;';
+
+                tbody.insertAdjacentHTML('beforeend', `
+                    <tr id="vn-row-${txId}" style="${rowStyle}">
+                        <td>${txDateStr}</td>
+                        <td><strong style="white-space: normal; display: block; max-width: 250px;">${tx.content || '名称不明'}</strong></td>
+                        <td class="amount-col">¥${txAmount.toLocaleString()}</td>
+                        <td><span class="badge-payment changed">${typeText}</span></td>
+                        <td>
+                            <select class="select-custom vn-status-select" data-id="${txId}" style="${selectStyle}">
+                                <option value="pending" ${status !== 'registered' ? 'selected' : ''}>⚠️ 未反映 (要変更)</option>
+                                <option value="registered" ${status === 'registered' ? 'selected' : ''}>✅ ViewsNET反映済み</option>
+                            </select>
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="action-btn" id="vn-btn-${txId}" onclick="updateViewsNetStatus('${txId}')">保存</button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        // ▼ ViewsNET反映状態をGASに保存する関数
+        function updateViewsNetStatus(id) {
+            const select = document.querySelector(`.vn-status-select[data-id="${id}"]`);
+            const btn = document.getElementById(`vn-btn-${id}`);
+            const status = select.value;
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>...`;
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ 
+                    action: "update_viewsnet_status", 
+                    sheetName: "クレカ分割DB", 
+                    transactionId: String(id), 
+                    viewsnetStatus: status 
+                })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    // ローカルデータを更新
+                    const tx = dbStatements.find(t => String(t.id) === String(id));
+                    if (tx) tx.viewsnetStatus = status;
+                    localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
+                    
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i>`;
+                    setTimeout(() => { 
+                        btn.disabled = false; 
+                        btn.innerHTML = '保存'; 
+                        renderSortedAndFiltered(); // 再描画してスタイル(色)を更新
+                    }, 1000);
+                } else {
+                    throw new Error(result.message);
+                }
+            })
+            .catch(err => {
+                alert('通信エラー: ' + err.message);
+                btn.disabled = false;
+                btn.innerHTML = '保存';
+            });
+        }
     </script>
 </body>
 </html>
