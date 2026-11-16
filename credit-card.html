@@ -94,20 +94,6 @@
         .div-months-wrap { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
         .billing-month-select { padding: 4px 6px; font-size: 11px; margin-top: 6px; }
 
-        @media (max-width: 1023px) {
-            .menu-toggle { top: 12px; left: 12px; width: 40px; height: 40px; }
-            .main-wrapper { padding: 70px 16px 30px; }
-            .container { padding-top: 10px; }
-            header { flex-direction: column; gap: 12px; }
-            h1 { font-size: 20px; }
-            .top-flex { flex-direction: column; gap: 20px; }
-            .credit-card { height: 210px; aspect-ratio: unset; margin: 0 auto; }
-            .status-block-group { min-width: 100%; }
-            .section-box { padding: 16px; }
-            .summary-mini-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-            .statement-table { font-size: 12px; min-width: 500px;}
-            .statement-table th, .statement-table td { padding: 12px 10px; }
-        }
 /* ▼▼▼ タブレット向け (768px 〜 1023px) ▼▼▼ */
         @media (max-width: 1023px) {
             .menu-toggle { top: 12px; left: 12px; width: 44px; height: 44px; }
@@ -134,7 +120,7 @@
             
             .top-flex { flex-direction: column; gap: 16px; margin-bottom: 16px; }
             /* クレカ画像をスマホの横幅に合わせて綺麗に縮小 */
-            .credit-card { max-width: 100%; aspect-ratio: 1.586; height: auto; margin: 0 auto; padding: 20px; }
+            .credit-card { max-width: 100%; aspect-ratio: 1.586;  margin: 0 auto; padding: 20px; }
             .status-block-group { min-width: 100%; }
             .section-box { padding: 16px; }
             .summary-mini-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -208,13 +194,27 @@
                 </div>
 
                 <div class="status-block-group">
+                    <!-- ▼▼▼ 新規追加: 次回請求額ブロック ▼▼▼ -->
+                    <div class="section-box" style="border: 1px solid var(--accent-repay); background: rgba(74, 222, 128, 0.05);">
+                        <div class="progress-info" style="margin-bottom: 0;">
+                            <div style="font-size: 14px; font-weight: 600; color: var(--accent-repay);">
+                                <i class="fa-solid fa-calendar-check"></i> 次回ご請求額 (<span id="next-billing-date-txt">--月--日</span> 予定)
+                            </div>
+                            <div style="font-size:24px; font-weight:700; color: var(--text-main);">
+                                <span id="next-billing-total">¥0</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-sub); text-align: right; margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
+                            内訳: 1回/ボーナス <span id="next-billing-single" style="font-weight:600; color:var(--text-main);">¥0</span> ＋ 分割 <span id="next-billing-split" style="font-weight:600; color:var(--text-main);">¥0</span>
+                        </div>
+                    </div>
+                    <!-- ▲▲▲ 新規追加ここまで ▲▲▲ -->
                     <div class="section-box">
                         <div class="progress-info">
                             <div id="usage-rate-txt" style="font-size: 13px;">ご利用可能額（枠使用率: 0.0%）</div>
                             <div style="font-size:22px; font-weight:700;"><span id="unconfirmed-total">¥0</span> <span style="font-size:13px; font-weight:400; color:var(--text-sub)">/ ¥800,000</span></div>
                         </div>
                         <div class="meter-container"><div class="meter-bar" id="meter-bar-total"></div></div>
-                        
                         
                     </div>
                     <div class="section-box">
@@ -540,8 +540,12 @@
             }
 
             targetData.forEach(tx => {
-                const txId = tx.id || 'unknown', currentType = tx.currentType || '1回払い', isRegistered = !!tx.registered, months = parseInt(tx.months) || 3, isSplit = (currentType === '分割払い');
-                const txAmount = Number(tx.amount) || 0;
+                const txId = tx.id || 'unknown';
+                const currentType = tx.currentType || tx.type || tx.payType || '1回払い';
+                const isRegistered = !!tx.registered;
+                const months = parseInt(tx.months) || 3;
+                const isSplit = (currentType === '分割払い' || currentType.includes('分割'));
+                const txAmount = Number(tx.amount) || Number(tx.price) || 0;
                 let displayAmount = txAmount;
                 let subText = '';
                 
@@ -697,8 +701,8 @@
         function renderSortedAndFiltered(data = getFilteredDataArray()) {
             if (currentSortKey) {
                 data.sort((a, b) => {
-                    let valA = currentSortKey === 'date' ? new Date(a.date||'').getTime()||0 : Number(a.amount)||0;
-                    let valB = currentSortKey === 'date' ? new Date(b.date||'').getTime()||0 : Number(b.amount)||0;
+                    let valA = currentSortKey === 'date' ? new Date(a.date||'').getTime()||0 : (Number(a.amount)||Number(a.price)||0);
+                    let valB = currentSortKey === 'date' ? new Date(b.date||'').getTime()||0 : (Number(b.amount)||Number(b.price)||0);
                     return currentSortOrder === 1 ? valA - valB : valB - valA;
                 });
             }
@@ -800,9 +804,56 @@
             renderSortedAndFiltered(dataToRender);
         }
 
-        function calculateTotals(targetData = dbStatements) {
-            let nextPaymentTotal = 0, unconfirmedTotal = 0, bonusTotal = 0, splitMonthly = [0,0,0,0,0], viewcardTotal = 0;
-            const now = new Date(), currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+function calculateTotals(targetData = dbStatements) {
+            // --- 祝日リスト (2026年 - 2028年) ---
+            const HOLIDAYS = [
+                '2026-01-01','2026-01-12','2026-02-11','2026-02-23','2026-03-20','2026-04-29','2026-05-03','2026-05-04','2026-05-05','2026-05-06','2026-07-20','2026-08-11','2026-09-21','2026-09-22','2026-09-23','2026-10-12','2026-11-03','2026-11-23',
+                '2027-01-01','2027-01-11','2027-02-11','2027-02-23','2027-03-21','2027-03-22','2027-04-29','2027-05-03','2027-05-04','2027-05-05','2027-07-19','2027-08-11','2027-09-20','2027-09-23','2027-10-11','2027-11-03','2027-11-23',
+                '2028-01-01','2028-01-10','2028-02-11','2028-02-23','2028-03-20','2028-04-29','2028-05-03','2028-05-04','2028-05-05','2028-07-17','2028-08-11','2028-09-18','2028-09-22','2028-10-09','2028-11-03','2028-11-23'
+            ];
+
+            // --- 支払日(4日ベース・翌営業日対応)を計算する関数 ---
+            const getPaymentDate = (y, m) => {
+                let d = new Date(y, m - 1, 4);
+                while (true) {
+                    let day = d.getDay();
+                    let ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                    if (day === 0 || day === 6 || HOLIDAYS.includes(ds)) {
+                        d.setDate(d.getDate() + 1); // 休日・祝日なら翌日へ
+                    } else {
+                        break;
+                    }
+                }
+                return d;
+            };
+
+            const now = new Date();
+            // 15日を境に更新: 14日以前なら今月の支払、15日以降なら翌月の支払を「次回」とする
+            let targetYear = now.getFullYear();
+            let targetMonth = now.getDate() >= 15 ? now.getMonth() + 2 : now.getMonth() + 1;
+            if (targetMonth > 12) { targetMonth -= 12; targetYear++; }
+            
+            // ▼ ビューカード使用枠用の「次々回」請求月
+            let viewcardTargetYear = targetYear;
+            let viewcardTargetMonth = targetMonth + 1;
+            if (viewcardTargetMonth > 12) { viewcardTargetMonth -= 12; viewcardTargetYear++; }
+
+            const payDate = getPaymentDate(targetYear, targetMonth);
+            const payDateStr = `${payDate.getMonth()+1}月${payDate.getDate()}日`;
+            
+            // 画面のテキスト更新
+            if (document.getElementById('next-billing-date-txt')) document.getElementById('next-billing-date-txt').innerText = payDateStr;
+            if (document.getElementById('viewcard-usage-txt')) document.getElementById('viewcard-usage-txt').innerHTML = `<i class="fa-solid fa-credit-card" style="color: var(--accent-loan); margin-right: 4px;"></i>ビューカード使用枠 (${viewcardTargetMonth}月請求分 1回・ボーナス)`;
+
+            // 集計用変数
+            let unconfirmedTotal = 0; // システム全体の利用可能枠圧迫用
+            let bonusTotal = 0;
+            let splitMonthly = [0,0,0,0,0];
+            let nextBillingSingleBonus = 0; // 次回請求 (1回・ボーナス)
+            let nextBillingInstallment = 0; // 次回請求 (分割)
+            let viewcardSingleBonus = 0;    // ▼ ビューカード枠用 (次々回の1回・ボーナス)
+
+            const currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
             for (let i = 0; i < 4; i++) {
                 const el = document.getElementById(`label-${i + 1}`);
                 if (el) el.innerText = `${new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth() + i, 1).getMonth() + 1}月 支払`;
@@ -811,64 +862,130 @@
             (Array.isArray(targetData) ? targetData : Object.values(targetData)).forEach(tx => {
                 if (!tx) return;
                 const amount = Number(tx.amount) || Number(tx.price) || 0;
+                
                 if (amount <= 0) {
                     unconfirmedTotal += amount;
-                    viewcardTotal += amount;
+                    nextBillingSingleBonus += amount;
                     return;
                 }
-                const type = tx.currentType || tx.type || tx.payType || '1回払';
-                const isInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || type.includes('分割') || type.includes('リボ'));
+
+                // --- 1. ユーザー設定上の状態 (分割シミュレーション・ミニカード用) ---
+                const userType = tx.currentType || tx.type || tx.payType || '1回払い';
+                const userIsInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || userType.includes('分割') || userType.includes('リボ'));
+                const userMonthsCount = parseInt(tx.months) || 1;
+                const userYm = getBillingYearMonth(tx);
+
+                if (userType.includes('ボーナス')) bonusTotal += amount;
+
+                // --- 2. ViewsNETの実際の反映状態 (次回請求額・ビューカード枠用) ---
+                let isViewsNetReflected = true;
+                if (tx.registered && tx.viewsnetStatus !== 'registered') {
+                    isViewsNetReflected = false;
+                }
+
+                const effectiveType = isViewsNetReflected ? userType : (tx.type || tx.payType || '1回払い');
+                const effectiveIsInstallment = isViewsNetReflected ? userIsInstallment : (effectiveType.includes('分割') || effectiveType.includes('リボ'));
+                const effectiveMonthsCount = isViewsNetReflected ? userMonthsCount : 1;
                 
-                if (type.includes('ボーナス')) bonusTotal += amount;
-                
-                if (isInstallment) {
-                    const ym = getBillingYearMonth(tx);
-                    const monthsCount = parseInt(tx.months) || 1;
-                    const calc = calculateViewCardInstallment(amount, monthsCount, 12);
-                    
-                    if (ym) {
-                        const diff = (currentBaseDate.getFullYear() - ym.year) * 12 + (currentBaseDate.getMonth() + 1 - ym.month);
-                        const paidCount = Math.max(0, diff); 
-                        const remainingCount = Math.max(0, monthsCount - paidCount);
-                        
-                        if (remainingCount > 0) {
-                            unconfirmedTotal += (paidCount === 0) ? (calc.first + calc.second * (remainingCount - 1)) : (calc.second * remainingCount);
-                        }
-                        
+                let effectiveYm = userYm;
+                if (!isViewsNetReflected) {
+                    // ViewsNET未反映の場合は元の利用日からデフォルトの請求月を算出
+                    const dInfo = parseJSTDateInfo(tx.date || tx.useDate || '');
+                    if (dInfo) {
+                        let y = dInfo.year, m = (dInfo.day <= 5) ? dInfo.month + 1 : dInfo.month + 2;
+                        while (m > 12) { m -= 12; y++; }
+                        effectiveYm = { year: y, month: m };
+                    }
+                }
+
+                // 【A】ミニカード用 (4ヶ月分) は「計画ベース」で加算
+                if (userIsInstallment) {
+                    const calc = calculateViewCardInstallment(amount, userMonthsCount, 12);
+                    if (userYm) {
                         for (let i = 0; i < 4; i++) {
                             const d = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth() + i, 1);
-                            const diff_i = (d.getFullYear() - ym.year) * 12 + (d.getMonth() + 1 - ym.month);
-                            if (diff_i >= 0 && diff_i < monthsCount) { 
-                                let currentPay = (diff_i === 0) ? calc.first : calc.second;
-                                splitMonthly[i] += currentPay; 
-                                if(i===0) nextPaymentTotal += currentPay; 
+                            const diff_i = (d.getFullYear() - userYm.year) * 12 + (d.getMonth() + 1 - userYm.month);
+                            if (diff_i >= 0 && diff_i < userMonthsCount) { 
+                                splitMonthly[i] += (diff_i === 0) ? calc.first : calc.second; 
                             }
                         }
-                    } else {
-                        unconfirmedTotal += calc.total;
                     }
+                }
+
+                // 【B】次回請求額・全体枠・ビューカード枠 は「ViewsNET実態ベース」で加算
+                if (effectiveIsInstallment) {
+                    const calcVn = calculateViewCardInstallment(amount, effectiveMonthsCount, 12);
+                    
+                    // 次回請求額 (分割)
+                    if (effectiveYm) {
+                        const targetDiff = (targetYear - effectiveYm.year) * 12 + (targetMonth - effectiveYm.month);
+                        if (targetDiff >= 0 && targetDiff < effectiveMonthsCount) {
+                            nextBillingInstallment += (targetDiff === 0) ? calcVn.first : calcVn.second;
+                        }
+                    }
+                    
+                    // 未確定総額 (全体の物理枠圧迫)
+                    if (effectiveYm) {
+                        const diff = (currentBaseDate.getFullYear() - effectiveYm.year) * 12 + (currentBaseDate.getMonth() + 1 - effectiveYm.month);
+                        const paidCount = Math.max(0, diff); 
+                        const remainingCount = Math.max(0, effectiveMonthsCount - paidCount);
+                        if (remainingCount > 0) {
+                            unconfirmedTotal += (paidCount === 0) ? (calcVn.first + calcVn.second * (remainingCount - 1)) : (calcVn.second * remainingCount);
+                        }
+                    } else {
+                        unconfirmedTotal += calcVn.total;
+                    }
+                    
                 } else {
+                    let bMonth = 0;
+                    let bYear = 0;
+                    if (effectiveType.includes('ボーナス')) {
+                        bMonth = getBonusBillingMonth(tx.date||tx.useDate||'');
+                        const dInfo = parseJSTDateInfo(tx.date||tx.useDate||'');
+                        bYear = dInfo ? dInfo.year : now.getFullYear();
+                        if (dInfo && (dInfo.month >= 7 || (dInfo.month === 6 && dInfo.day >= 6)) && bMonth === 1) bYear++;
+                    } else {
+                        bMonth = effectiveYm?.month || 0;
+                        bYear = effectiveYm?.year || 0;
+                    }
+
+                    // 次回請求額への加算
+                    if (bYear === targetYear && bMonth === targetMonth) {
+                        nextBillingSingleBonus += amount;
+                    }
+                    
+                    // ▼ ビューカード使用枠 (次々回請求) への加算
+                    if (bYear === viewcardTargetYear && bMonth === viewcardTargetMonth) {
+                        viewcardSingleBonus += amount;
+                    }
+
                     unconfirmedTotal += amount;
-                    viewcardTotal += amount; // 1回払いとボーナス払いを加算
-                    const m = type.includes('ボーナス') ? getBonusBillingMonth(tx.date||tx.useDate||'') : (getBillingYearMonth(tx)?.month || 0);
-                    if (m === currentBaseDate.getMonth() + 1) nextPaymentTotal += amount; 
                 }
             });
+
+            // --- 画面描画の更新 ---
+            const nextTotal = nextBillingSingleBonus + nextBillingInstallment;
+            if (document.getElementById('next-billing-total')) document.getElementById('next-billing-total').innerText = `¥${nextTotal.toLocaleString()}`;
+            if (document.getElementById('next-billing-single')) document.getElementById('next-billing-single').innerText = `¥${nextBillingSingleBonus.toLocaleString()}`;
+            if (document.getElementById('next-billing-split')) document.getElementById('next-billing-split').innerText = `¥${nextBillingInstallment.toLocaleString()}`;
 
             const availableLimit = Math.max(800000 - unconfirmedTotal, 0);
             if (document.getElementById('unconfirmed-total')) document.getElementById('unconfirmed-total').innerText = `¥${availableLimit.toLocaleString()}`;
             if (document.getElementById('bonus-total-val')) document.getElementById('bonus-total-val').innerText = `¥${bonusTotal.toLocaleString()}`;
-            if (document.getElementById('viewcard-total')) document.getElementById('viewcard-total').innerText = `¥${viewcardTotal.toLocaleString()}`;
-            for (let i = 0; i < 4; i++) { if (document.getElementById(`split-${i+1}`)) document.getElementById(`split-${i+1}`).innerText = `¥${splitMonthly[i].toLocaleString()}`; }
+            
+            // ▼ ビューカード使用枠は「次々回請求月の1回・ボーナスの合計額」を表示
+            if (document.getElementById('viewcard-total')) document.getElementById('viewcard-total').innerText = `¥${viewcardSingleBonus.toLocaleString()}`;
+            
+            for (let i = 0; i < 4; i++) { 
+                if (document.getElementById(`split-${i+1}`)) document.getElementById(`split-${i+1}`).innerText = `¥${splitMonthly[i].toLocaleString()}`; 
+            }
             
             const percent = Math.min((unconfirmedTotal / 800000) * 100, 100);
             if (document.getElementById('meter-bar-total')) document.getElementById('meter-bar-total').style.width = `${percent}%`;
-            else if (document.querySelector('.meter-bar')) document.querySelector('.meter-bar').style.width = `${percent}%`;
-            
-            const viewcardPercent = Math.min((viewcardTotal / 800000) * 100, 100);
-            if (document.getElementById('meter-bar-viewcard')) document.getElementById('meter-bar-viewcard').style.width = `${viewcardPercent}%`;
-
             if (document.getElementById('usage-rate-txt')) document.getElementById('usage-rate-txt').innerText = `ご利用可能額（枠使用率: ${percent.toFixed(1)}%）`;
+
+            const viewcardPercent = Math.min((viewcardSingleBonus / 800000) * 100, 100);
+            if (document.getElementById('meter-bar-viewcard')) document.getElementById('meter-bar-viewcard').style.width = `${viewcardPercent}%`;
         }
 
         function toggleSort(key) {
@@ -884,6 +1001,15 @@
         function exportToCSV() {
             let data = getFilteredDataArray(); 
             if(!data.length) return alert('データがありません。');
+
+            // ▼ 画面のソート状態をCSVにも適用する
+            if (currentSortKey) {
+                data.sort((a, b) => {
+                    let valA = currentSortKey === 'date' ? new Date(a.date||'').getTime()||0 : (Number(a.amount)||Number(a.price)||0);
+                    let valB = currentSortKey === 'date' ? new Date(b.date||'').getTime()||0 : (Number(b.amount)||Number(b.price)||0);
+                    return currentSortOrder === 1 ? valA - valB : valB - valA;
+                });
+            }
 
             let parsedData = [];
             let allMonths = new Set(); 
