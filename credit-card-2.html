@@ -13,7 +13,8 @@
             --accent-credit: #38bdf8; --border-color: #334155; --sidebar-width: 260px; --grid-gap: 24px;
             --accent-loan: #fb923c; --accent-repay: #4ade80; --accent-bonus: #c084fc; 
             --accent-revo: #f43f5e;
-	/* =========================================
+        }
+        /* =========================================
            テーマ1: クリーン＆トラスト (ライト)
         ========================================= */
         body.theme-light {
@@ -26,7 +27,7 @@
             --accent-loan: #ea580c;
         }
         body.theme-light .credit-card {
-            background: linear-gradient(135deg, #475569 0%, #1e293b 100%); /* カード自体の色はお好みで */
+            background: linear-gradient(135deg, #475569 0%, #1e293b 100%);
             border: none;
         }
 
@@ -108,7 +109,7 @@
             border: none;
             background: transparent;
         }
-        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); }
         
@@ -179,16 +180,16 @@
         .badge-payment { padding: 4px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; background: #334155; color: var(--text-main); transition: all 0.3s; }
         .badge-payment.changed { background: rgba(251, 146, 60, 0.15); color: var(--accent-loan); border: 1px solid rgba(251, 146, 60, 0.3); }
         .badge-payment.revo { background: rgba(244, 63, 94, 0.15); color: var(--accent-revo); border: 1px solid rgba(244, 63, 94, 0.3); }
+        .badge-bonus { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; background: rgba(192, 132, 252, 0.18); color: var(--accent-bonus); border: 1px solid rgba(192, 132, 252, 0.4); margin-left: 6px; }
+        .bonus-row { background: rgba(192, 132, 252, 0.08); }
 
         .controls-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
         .chart-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
         .revo-input-group { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; background: var(--bg-main); padding: 16px; border-radius: 12px; border: 1px dashed var(--border-color); margin-bottom: 24px; }
         .revo-input-item { display: flex; align-items: center; gap: 8px; }
+        .revo-warning { display: none; margin-bottom: 16px; padding: 12px 16px; border-radius: 10px; background: rgba(244, 63, 94, 0.12); border: 1px solid var(--accent-revo); color: var(--accent-revo); font-size: 13px; font-weight: 600; }
         .empty-state { text-align: center; padding: 40px; color: var(--text-sub); background: var(--bg-main); border-radius: 12px; border: 1px dashed var(--border-color); }
-
-        /* デバッグログ表示用 */
-        #debug-log { background: #000; color: #0f0; font-family: monospace; padding: 12px; margin-bottom: 24px; border-radius: 8px; font-size: 12px; overflow-x: auto; max-height: 250px; overflow-y: auto; border: 1px solid #333; line-height: 1.5; }
 
         @media (max-width: 1023px) {
             .menu-toggle { top: 12px; left: 12px; width: 40px; height: 40px; }
@@ -212,25 +213,24 @@
 
     <div class="sidebar" id="sidebar">
         <ul class="nav-list">
-           <a href="index.html" class="nav-item"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
+            <a href="index.html" class="nav-item"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
             <a href="simulation.html" class="nav-item"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan);"></i>カードローン実績・計画</a>
             <a href="credit-card.html" class="nav-item"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>メインクレカ</a>
             <a href="credit-card-2.html" class="nav-item active"><i class="fa-brands fa-cc-visa" style="color: var(--accent-credit);"></i>サブクレカ(リボ)</a>
             <a href="installment.html" class="nav-item"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
         </ul>
-        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.0</div>
+        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.1</div>
     </div>
 
     <div class="main-wrapper">
         <div class="container">
-		<header style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <header style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
                 <div>
                     <h1>Sub Credit Card Statement 
                         <span>サブクレジットカード利用実績と支払いシミュレーション</span>
-                        <span id="debug-sheet-name" style="color: #fb923c; font-size: 13px; font-weight: bold; display: block; margin-top: 8px;"></span>
                     </h1>
                 </div>
-                <!-- ★ テーマスイッチャー追加 ★ -->
+                <!-- ★ テーマスイッチャー ★ -->
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-palette" style="color: var(--text-sub);"></i>
                     <select id="theme-selector" class="select-custom" style="padding: 8px 12px; font-weight: 600;">
@@ -242,9 +242,6 @@
                     </select>
                 </div>
             </header>
-
-            <!-- ★ デバッグログ表示エリア ★ -->
-            <div id="debug-log">==== デバッグログ開始 ====</div>
 
             <div class="top-flex">
                 <div class="credit-card">
@@ -262,7 +259,6 @@
                 <div class="status-block-group">
                     <div class="section-box">
                         <div class="progress-info">
-                            <!-- ▼ ここを「ご利用可能額」・「500,000」に修正 -->
                             <div id="usage-rate-txt" style="font-size: 13px;">ご利用可能額（枠使用率: 0.0%）</div>
                             <div style="font-size:22px; font-weight:700;"><span id="unconfirmed-total">¥0</span> <span style="font-size:13px; font-weight:400; color:var(--text-sub)">/ ¥500,000</span></div>
                         </div>
@@ -314,7 +310,6 @@
                             <option value="">すべて</option>
                         </select>
                     </div>
-                    <!-- ▼ ここに「支払方法」フィルターを追加 -->
                     <div>
                         <label style="color: #94a3b8; font-size: 12px; margin-right: 4px; margin-left: 8px;">支払方法:</label>
                         <select id="filter-type" class="select-custom">
@@ -377,21 +372,31 @@
             <!-- タブ3: リボ払い予定 -->
             <div id="tab-revo" class="tab-content">
                 <div class="section-box" style="margin-bottom: 24px;">
-                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;"><i class="fa-solid fa-sync" style="color: var(--accent-revo)"></i> リボ払い 残高推移・利息シミュレーション</div>
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;"><i class="fa-solid fa-sync" style="color: var(--accent-revo)"></i> リボ払い 残高推移・利息シミュレーション（元利定額＋ボーナス臨時返済）</div>
                     
                     <div class="revo-input-group">
                         <div class="revo-input-item">
-                            <label style="color:var(--text-sub); font-size:12px;">月々の元金返済額:</label>
-                            <input type="number" id="revo-principal-input" value="10000" step="5000" class="select-custom" style="width: 100px;"> 円
+                            <label style="color:var(--text-sub); font-size:12px;">月々の支払合計額:</label>
+                            <input type="number" id="revo-payment-input" value="19000" min="1000" step="1000" class="select-custom" style="width: 110px; text-align: right;"> 円
+                        </div>
+                        <div class="revo-input-item">
+                            <label style="color:var(--accent-bonus); font-size:12px; font-weight:600;"><i class="fa-solid fa-gift"></i> 7月ボーナス加算:</label>
+                            <input type="number" id="revo-bonus-july" value="0" min="0" step="10000" class="select-custom" style="width: 110px; text-align: right;"> 円
+                        </div>
+                        <div class="revo-input-item">
+                            <label style="color:var(--accent-bonus); font-size:12px; font-weight:600;"><i class="fa-solid fa-gift"></i> 12月ボーナス加算:</label>
+                            <input type="number" id="revo-bonus-dec" value="0" min="0" step="10000" class="select-custom" style="width: 110px; text-align: right;"> 円
                         </div>
                         <div class="revo-input-item">
                             <label style="color:var(--text-sub); font-size:12px;">実質年率 (DC基準):</label>
-                            <input type="number" id="revo-apr-input" value="18.14" step="0.1" class="select-custom" style="width: 80px;"> %
+                            <input type="number" id="revo-apr-input" value="19.80" step="0.1" class="select-custom" style="width: 80px; text-align: right;"> %
                         </div>
                         <button onclick="renderRevoTab()" class="action-btn" style="background: rgba(244,63,94,0.1); border-color: var(--accent-revo); color: var(--accent-revo);">
                             <i class="fa-solid fa-calculator"></i> 計算を更新
                         </button>
                     </div>
+
+                    <div id="revo-warning-box" class="revo-warning"></div>
 
                     <div class="summary-mini-grid" style="margin-bottom: 24px;">
                         <div class="mini-card" style="border-color: var(--accent-revo);">
@@ -418,7 +423,7 @@
                 <div class="section-box">
                     <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;"><i class="fa-solid fa-list"></i> 月々のリボ支払い予定表</div>
                     <div class="table-responsive">
-                        <table class="statement-table" style="min-width: 500px;">
+                        <table class="statement-table" style="min-width: 550px;">
                             <thead>
                                 <tr>
                                     <th>支払月</th>
@@ -438,7 +443,7 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyz2cF8wFCKfBU-BXSEdOQKa8TO5ir3vo9tpNQdb4aRTIzebLMNzuWgDRY0P-Ohkhhl/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyZkHie9DWfQBbasNeBWYvojTpO_4SC4LAjSpOY58ETAXggt3-EpDP0XjQVKrIzC1PV/exec";
         const SHEET_NAME_LIST = "サブクレカ明細"; 
         const SHEET_NAME_SPLIT = "サブクレカ分割DB";  
         
@@ -448,7 +453,7 @@
         let dailyChartInstance = null;
         let revoChartInstance = null;
 
-	// ★ テーマ切り替えロジック ★
+        // ★ テーマ切り替えロジック ★
         const applyTheme = (themeName) => {
             const themes = ['theme-light', 'theme-luxury', 'theme-glass', 'theme-neumorphism'];
             themes.forEach(t => document.body.classList.remove(t));
@@ -460,24 +465,11 @@
             const themeSelector = document.getElementById('theme-selector');
             if(themeSelector) themeSelector.value = themeName;
             
-            // グラフがある場合は再描画（色を追従させるため）
             if (dailyChartInstance) renderDailyTab(); 
             if (revoChartInstance) renderRevoTab();
         };
 
-        // デバッグ出力用関数
-        function logDebug(msg) {
-            const el = document.getElementById('debug-log');
-            if (el) {
-                const time = new Date().toLocaleTimeString('ja-JP');
-                el.innerHTML += `<br>[${time}] ${msg}`;
-                el.scrollTop = el.scrollHeight; // 自動スクロール
-            }
-            console.log(msg);
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
-	// ★ 保存されたテーマの復元 ★
             const savedTheme = localStorage.getItem('selectedTheme');
             if (savedTheme) applyTheme(savedTheme);
 
@@ -517,67 +509,40 @@
 
         function loadStatementsFromSheet() {
             const tbody = document.getElementById('statement-tbody');
-            
-            // ★切り分けのため、キャッシュを強制クリアして必ず最新を取りに行く
             localStorage.removeItem('subCreditCardData');
-            logDebug("キャッシュを強制クリアしました。");
 
             if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> データを読み込み中...</td></tr>`;
 
-            if (!GAS_URL || GAS_URL.includes('XXXXX')) {
-                logDebug("❌ エラー: GASのURLが設定されていません。");
-                return;
-            }
+            if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
 
             const fetchUrl = `${GAS_URL}?listSheet=${encodeURIComponent(SHEET_NAME_LIST)}&splitSheet=${encodeURIComponent(SHEET_NAME_SPLIT)}&_=${new Date().getTime()}`;
-            logDebug(`Fetch開始: URLにアクセスします。`);
 
             fetch(fetchUrl)
                 .then(res => { 
-                    logDebug(`レスポンス受信完了。ステータス: ${res.status} ${res.statusText}`);
                     if(!res.ok) throw new Error(`HTTPエラー ${res.status}`); 
-                    return res.text(); // json()ではなくtext()で受け取りパースエラーを検知
+                    return res.text();
                 })
                 .then(textData => {
-                    logDebug(`テキストデータ取得成功。文字数: ${textData.length}`);
-                    logDebug(`受信データ(先頭100文字): ${textData.substring(0, 100)}...`);
-
                     let data;
                     try {
                         data = JSON.parse(textData);
-                        logDebug(`JSONパース成功。データの種類: ${Array.isArray(data) ? '配列 (正常)' : 'オブジェクト'}`);
                     } catch (e) {
-                        throw new Error(`JSONパースエラーが発生しました: ${e.message}`);
+                        throw new Error(`JSONパースエラー: ${e.message}`);
                     }
 
                     if (data && data.status === 'error') {
-                        throw new Error(`GAS側でエラーが発生しました: ${data.message}`);
+                        throw new Error(`GASエラー: ${data.message}`);
                     }
 
-                    const newData = Array.isArray(data) ? data : [];
-                    logDebug(`抽出されたデータ件数: ${newData.length} 件`);
-
-                    if (newData.length > 0) {
-                        logDebug(`先頭データのID: ${newData[0].id}, 読み込み元シート名: ${newData[0].debugSourceSheet}`);
-                    }
-
-                    dbStatements = newData;
-                    
-                    logDebug(`画面の描画処理を開始します...`);
-                    try {
-                        renderStatements();
-                        calculateTotals();
-                        applyFilter();
-                        renderDailyTab();
-                        renderRevoTab();
-                        logDebug(`✅ すべての画面描画が正常に完了しました！`);
-                    } catch (renderError) {
-                        logDebug(`❌ 画面描画中にエラー発生: ${renderError.message}`);
-                        console.error(renderError);
-                    }
+                    dbStatements = Array.isArray(data) ? data : [];
+                    renderStatements();
+                    calculateTotals();
+                    applyFilter();
+                    renderDailyTab();
+                    renderRevoTab();
                 })
                 .catch(err => {
-                    logDebug(`❌ 通信または処理の途中でエラー発生: ${err.message}`);
+                    console.error(err);
                     if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--accent-loan); padding: 40px;"><i class="fa-solid fa-circle-exclamation"></i> 読み込み失敗: ${err.message}</td></tr>`;
                 });
         }
@@ -764,7 +729,6 @@
             return ((dInfo.month === 6 && dInfo.day >= 6) || (dInfo.month > 6 && dInfo.month < 12) || (dInfo.month === 12 && dInfo.day <= 5)) ? 1 : 8; 
         }
 
-        // ▼ 【修正】「支払方法」でのフィルター処理の追加
         function getFilteredDataArray() {
             const targetMonth = parseInt(document.getElementById('filter-month')?.value, 10);
             const targetType = document.getElementById('filter-type')?.value;
@@ -814,7 +778,16 @@
             renderStatements(data);
         }
 
-        // ▼ 【修正】画面・CSVと完全一致させるための「合計」再計算処理
+        function toggleSort(key) {
+            currentSortOrder = currentSortKey === key ? (currentSortOrder === 1 ? -1 : (currentSortOrder === -1 ? 0 : 1)) : 1;
+            currentSortKey = currentSortOrder === 0 ? null : key;
+            ['date','amount'].forEach(k => {
+                const el = document.getElementById(`sort-icon-${k}`);
+                if(el) el.className = `fa-solid fa-sort${currentSortKey === k ? (currentSortOrder === 1 ? " fa-sort-up" : " fa-sort-down") : ""}`;
+            });
+            renderSortedAndFiltered();
+        }
+
         function applyFilter() {
             const targetMonth = parseInt(document.getElementById('filter-month')?.value, 10);
             calculateTotals(dbStatements); 
@@ -831,19 +804,16 @@
                 const isRevo = currentType.includes('リボ');
                 const monthsCount = parseInt(tx.months) || 1;
                 
-                // 画面・CSVと同じ表示金額を算出（リボの場合は全額）
                 let displayAmount = amt;
                 if (isSplit && monthsCount > 0) {
                     displayAmount = Math.floor(amt / monthsCount);
                 }
 
                 if (targetMonth) {
-                    // 〇月で絞り込んでいる場合：画面の金額をそのまま合算（キャンセル等のマイナスも合算）
                     totalAmount += displayAmount;
                 } else {
-                    // 「すべて」表示の場合：全体の未払い残高を計算
                     if (amt <= 0) {
-                        totalAmount += amt; // 返金などのマイナスはそのまま引く
+                        totalAmount += amt;
                     } else if (isSplit) {
                         const ym = getBillingYearMonth(tx);
                         if (ym) {
@@ -870,7 +840,20 @@
             renderSortedAndFiltered(dataToRender);
         }
 
-        // ▼ 【修正】ご利用可能額・枠使用率・残金の計算処理
+        // ★ リボ払い（元利定額＋7月/12月ボーナス臨時返済）の1ヶ月分計算ヘルパー ★
+        function calcRevoMonthStep(balance, monthlyTotalSetting, aprSetting, monthNum, bonusJuly, bonusDec) {
+            const interest = Math.floor(balance * (aprSetting / 100) / 12);
+            const bonusExtra = (monthNum === 7 ? bonusJuly : 0) + (monthNum === 12 ? bonusDec : 0);
+            const targetTotalPay = monthlyTotalSetting + bonusExtra;
+
+            const availableForPrincipal = Math.max(0, targetTotalPay - interest);
+            const principalPay = Math.min(balance, availableForPrincipal);
+            const totalPay = principalPay + interest;
+            const nextBalance = balance - principalPay;
+
+            return { interest, principalPay, totalPay, nextBalance, bonusExtra, isShortfall: (targetTotalPay <= interest) };
+        }
+
         function calculateTotals(targetData = dbStatements) {
             let nextPaymentTotal = 0, unconfirmedTotal = 0, bonusTotal = 0, splitMonthly = [0,0,0,0,0];
             const now = new Date(), currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -884,8 +867,6 @@
             (Array.isArray(targetData) ? targetData : Object.values(targetData)).forEach(tx => {
                 if (!tx) return;
                 const amount = Number(tx.amount) || Number(tx.price) || 0;
-                
-                // マイナス・0円の明細は一切合算しない
                 if (amount <= 0) return;
 
                 const type = tx.currentType || tx.type || tx.payType || '1回払';
@@ -893,23 +874,15 @@
                 
                 let remainingAmount = amount;
                 
-                // 分割払いの場合、すでに支払った分の金額を総額から差し引く
                 if (type.includes('分割')) {
                     const ym = getBillingYearMonth(tx);
                     if (ym) {
                         const totalMonths = parseInt(tx.months) || 1;
                         const monthly = Math.floor(amount / totalMonths);
-                        
                         let paidCount = (now.getFullYear() - ym.year) * 12 + ((now.getMonth() + 1) - ym.month);
-                        
-                        // 4日が引き落とし日のため、4日を過ぎていれば当月分も支払い完了とする
-                        if (now.getDate() > 4) {
-                            paidCount += 1;
-                        }
-                        
+                        if (now.getDate() > 4) paidCount += 1;
                         if (paidCount < 0) paidCount = 0;
                         if (paidCount > totalMonths) paidCount = totalMonths;
-                        
                         remainingAmount = amount - (monthly * paidCount);
                         if (remainingAmount < 0) remainingAmount = 0;
                     }
@@ -941,21 +914,23 @@
 
             if (revoTotalBalance > 0) {
                 let tempBal = revoTotalBalance;
-                let rPrincipal = parseInt(document.getElementById('revo-principal-input')?.value) || 10000;
-                let rApr = parseFloat(document.getElementById('revo-apr-input')?.value) || 18.14;
+                let rMonthlyTotal = parseInt(document.getElementById('revo-payment-input')?.value, 10) || 10000;
+                let rBonusJuly = parseInt(document.getElementById('revo-bonus-july')?.value, 10) || 0;
+                let rBonusDec = parseInt(document.getElementById('revo-bonus-dec')?.value, 10) || 0;
+                let rApr = parseFloat(document.getElementById('revo-apr-input')?.value) || 19.80;
                 
                 for (let i = 0; i < 4; i++) {
                     if (tempBal > 0) {
-                        let interest = Math.floor(tempBal * (rApr / 100) / 12);
-                        let principal = Math.min(tempBal, rPrincipal);
-                        splitMonthly[i] += (principal + interest);
-                        if (i === 0) nextPaymentTotal += (principal + interest);
-                        tempBal -= principal;
+                        const d = new Date(currentBaseDate.getFullYear(), currentBaseDate.getMonth() + i, 1);
+                        const monthNum = d.getMonth() + 1;
+                        const step = calcRevoMonthStep(tempBal, rMonthlyTotal, rApr, monthNum, rBonusJuly, rBonusDec);
+                        splitMonthly[i] += step.totalPay;
+                        if (i === 0) nextPaymentTotal += step.totalPay;
+                        tempBal = step.nextBalance;
                     }
                 }
             }
 
-            // ご利用可能額（枠50万円から利用残高を差し引く）
             const availableLimit = Math.max(1000000 - unconfirmedTotal, 0);
 
             if (document.getElementById('unconfirmed-total')) document.getElementById('unconfirmed-total').innerText = `¥${availableLimit.toLocaleString()}`;
@@ -1024,6 +999,10 @@
                 forecastLines = new Array(timeline.length).fill(null);
             }
 
+            const isLightMode = document.body.classList.contains('theme-light') || document.body.classList.contains('theme-neumorphism');
+            const chartTextColor = isLightMode ? '#64748b' : '#94a3b8';
+            const chartGridColor = isLightMode ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+
             if (dailyChartInstance) dailyChartInstance.destroy();
             dailyChartInstance = new Chart(document.getElementById('dailyTrendChart').getContext('2d'), {
                 type: 'bar',
@@ -1037,8 +1016,8 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { labels: { color: '#f8fafc' } }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ¥${Math.round(ctx.parsed.y).toLocaleString()}` } } },
-                    scales: { x: { ticks: { color: '#94a3b8', maxTicksLimit: 15 }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#94a3b8', callback: v => '¥'+v.toLocaleString() }, grid: { color: 'rgba(255,255,255,0.05)' } } }
+                    plugins: { legend: { labels: { color: chartTextColor } }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ¥${Math.round(ctx.parsed.y).toLocaleString()}` } } },
+                    scales: { x: { ticks: { color: chartTextColor, maxTicksLimit: 15 }, grid: { color: chartGridColor } }, y: { ticks: { color: chartTextColor, callback: v => '¥'+v.toLocaleString() }, grid: { color: chartGridColor } } }
                 }
             });
 
@@ -1072,21 +1051,28 @@
             document.getElementById('revo-total-balance').innerText = `¥${totalRevoBalance.toLocaleString()}`;
 
             const tbody = document.getElementById('revo-tbody');
+            const warningBox = document.getElementById('revo-warning-box');
             tbody.innerHTML = '';
+            if (warningBox) { warningBox.style.display = 'none'; warningBox.innerText = ''; }
 
             if (totalRevoBalance <= 0) {
                 tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">現在、リボ払いに設定されている明細はありません。</div></td></tr>`;
                 document.getElementById('revo-total-interest').innerText = `¥0`;
                 document.getElementById('revo-payoff-date').innerText = `---`;
                 if (revoChartInstance) revoChartInstance.destroy();
+                calculateTotals(dbStatements);
                 return;
             }
 
-            const principalSetting = parseInt(document.getElementById('revo-principal-input').value) || 10000;
-            const aprSetting = parseFloat(document.getElementById('revo-apr-input').value) || 18.14;
+            const monthlyTotalSetting = parseInt(document.getElementById('revo-payment-input').value, 10) || 10000;
+            const bonusJuly = parseInt(document.getElementById('revo-bonus-july').value, 10) || 0;
+            const bonusDec = parseInt(document.getElementById('revo-bonus-dec').value, 10) || 0;
+            const aprSetting = parseFloat(document.getElementById('revo-apr-input').value) || 19.80;
             
             let tempBalance = totalRevoBalance;
             let totalInterest = 0;
+            let reachedLimit = false;
+            let hasShortfallMonth = false;
             
             const now = new Date();
             let startYear = now.getFullYear();
@@ -1097,36 +1083,72 @@
             let currentM = startMonth, currentY = startYear;
 
             while (tempBalance > 0) {
-                let interest = Math.floor(tempBalance * (aprSetting / 100) / 12);
-                let principalPay = Math.min(tempBalance, principalSetting);
-                let totalPay = principalPay + interest;
-                
-                tempBalance -= principalPay;
-                totalInterest += interest;
+                const step = calcRevoMonthStep(tempBalance, monthlyTotalSetting, aprSetting, currentM, bonusJuly, bonusDec);
 
-                labels.push(`${currentY}年${currentM}月`);
-                principalData.push(principalPay);
-                interestData.push(interest);
+                if (step.isShortfall) {
+                    hasShortfallMonth = true;
+                    if (bonusJuly === 0 && bonusDec === 0) {
+                        if (warningBox) {
+                            warningBox.style.display = 'block';
+                            warningBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 月々の支払合計額（¥${monthlyTotalSetting.toLocaleString()}）が初月の利息（¥${step.interest.toLocaleString()}）以下のため、元金が減りません。支払額を引き上げてください。`;
+                        }
+                        document.getElementById('revo-total-interest').innerText = `計算不可`;
+                        document.getElementById('revo-payoff-date').innerText = `完済不可`;
+                        if (revoChartInstance) revoChartInstance.destroy();
+                        calculateTotals(dbStatements);
+                        return;
+                    }
+                }
+
+                tempBalance = step.nextBalance;
+                totalInterest += step.interest;
+
+                const isBonusMonth = step.bonusExtra > 0;
+                labels.push(`${currentY}年${currentM}月${isBonusMonth ? '★' : ''}`);
+                principalData.push(step.principalPay);
+                interestData.push(step.interest);
+
+                const bonusBadge = isBonusMonth ? `<span class="badge-bonus"><i class="fa-solid fa-gift"></i> +¥${step.bonusExtra.toLocaleString()}</span>` : '';
+                const rowClass = isBonusMonth ? ' class="bonus-row"' : '';
 
                 tbody.insertAdjacentHTML('beforeend', `
-                    <tr>
-                        <td><strong>${currentY}/${String(currentM).padStart(2,'0')}</strong></td>
-                        <td style="text-align: right;">¥${principalPay.toLocaleString()}</td>
-                        <td style="text-align: right; color: var(--text-sub);">¥${interest.toLocaleString()}</td>
-                        <td style="text-align: right; font-weight: 600; color: var(--accent-revo);">¥${totalPay.toLocaleString()}</td>
+                    <tr${rowClass}>
+                        <td><strong>${currentY}/${String(currentM).padStart(2,'0')}</strong>${bonusBadge}</td>
+                        <td style="text-align: right;">¥${step.principalPay.toLocaleString()}</td>
+                        <td style="text-align: right; color: var(--text-sub);">¥${step.interest.toLocaleString()}</td>
+                        <td style="text-align: right; font-weight: 600; color: var(--accent-revo);">¥${step.totalPay.toLocaleString()}</td>
                         <td style="text-align: right;">¥${tempBalance.toLocaleString()}</td>
                     </tr>
                 `);
 
                 currentM++;
                 if (currentM > 12) { currentM -= 12; currentY++; }
-                if (labels.length > 120) break;
+                if (labels.length >= 120) {
+                    reachedLimit = true;
+                    break;
+                }
+            }
+
+            if (reachedLimit && warningBox) {
+                warningBox.style.display = 'block';
+                warningBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 120ヶ月（10年）以内に完済できない設定です。月々の支払額またはボーナス加算額を引き上げてください。`;
+            } else if (hasShortfallMonth && warningBox) {
+                warningBox.style.display = 'block';
+                warningBox.innerHTML = `<i class="fa-solid fa-circle-info"></i> 通常月の支払合計額が利息を下回る月があります（ボーナス加算分で元金を返済しています）。`;
             }
 
             document.getElementById('revo-total-interest').innerText = `¥${totalInterest.toLocaleString()}`;
-            let payoffYear = currentM === 1 ? currentY - 1 : currentY;
-            let payoffMonth = currentM === 1 ? 12 : currentM - 1;
-            document.getElementById('revo-payoff-date').innerText = `${payoffYear}年${payoffMonth}月`;
+            if (reachedLimit) {
+                document.getElementById('revo-payoff-date').innerText = `10年以上`;
+            } else {
+                let payoffYear = currentM === 1 ? currentY - 1 : currentY;
+                let payoffMonth = currentM === 1 ? 12 : currentM - 1;
+                document.getElementById('revo-payoff-date').innerText = `${payoffYear}年${payoffMonth}月`;
+            }
+
+            const isLightMode = document.body.classList.contains('theme-light') || document.body.classList.contains('theme-neumorphism');
+            const chartTextColor = isLightMode ? '#64748b' : '#94a3b8';
+            const chartGridColor = isLightMode ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
 
             if (revoChartInstance) revoChartInstance.destroy();
             revoChartInstance = new Chart(document.getElementById('revoChart').getContext('2d'), {
@@ -1141,12 +1163,12 @@
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { 
-                        legend: { labels: { color: '#f8fafc' } },
+                        legend: { labels: { color: chartTextColor } },
                         tooltip: { mode: 'index', intersect: false, callbacks: { label: ctx => `${ctx.dataset.label}: ¥${ctx.parsed.y.toLocaleString()}` } }
                     },
                     scales: { 
-                        x: { stacked: true, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }, 
-                        y: { stacked: true, ticks: { color: '#94a3b8', callback: v => '¥'+v.toLocaleString() }, grid: { color: 'rgba(255,255,255,0.05)' } } 
+                        x: { stacked: true, ticks: { color: chartTextColor }, grid: { color: chartGridColor } }, 
+                        y: { stacked: true, ticks: { color: chartTextColor, callback: v => '¥'+v.toLocaleString() }, grid: { color: chartGridColor } } 
                     }
                 }
             });

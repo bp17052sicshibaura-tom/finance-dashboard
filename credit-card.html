@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --accent-credit: #38bdf8; --border-color: #334155; --sidebar-width: 260px; --grid-gap: 24px; --accent-loan: #fb923c; --accent-repay: #4ade80; --accent-bonus: #c084fc; --shadow-custom: 0 4px 12px rgba(0,0,0,0.3); --card-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        :root { --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-sub: #94a3b8; --accent-credit: #38bdf8; --border-color: #334155; --sidebar-width: 260px; --grid-gap: 24px; --accent-loan: #fb923c; --accent-repay: #4ade80; --accent-bonus: #c084fc; --accent-revo: #f43f5e; --shadow-custom: 0 4px 12px rgba(0,0,0,0.3); --card-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         body.theme-light { --bg-main: #f8fafc; --bg-card: #ffffff; --text-main: #0f172a; --text-sub: #64748b; --accent-credit: #0284c7; --border-color: #e2e8f0; --accent-loan: #ea580c; --shadow-custom: 0 4px 6px rgba(0,0,0,0.05); --card-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         body.theme-light .credit-card { background: linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%); border: none; }
         body.theme-luxury { --bg-main: #0a0a0a; --bg-card: #171717; --text-main: #f5f5f5; --text-sub: #a3a3a3; --accent-credit: #d4af37; --border-color: #333333; --accent-loan: #c0c0c0; --accent-repay: #b8860b; }
@@ -23,7 +23,7 @@
         body.theme-neumorphism .credit-card { background: #e0e5ec; box-shadow: 12px 12px 24px #a3b1c6, -12px -12px 24px #ffffff; border: none; }
         body.theme-neumorphism .card-number, body.theme-neumorphism .card-logo-txt, body.theme-neumorphism .card-holder div { color: #2d3748 !important; }
         body.theme-neumorphism .statement-table th, body.theme-neumorphism .statement-table td { border-bottom: 1px solid #d1d9e6; }
-        body.theme-neumorphism .select-custom { box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff; border: none; background: transparent; }
+        body.theme-neumorphism .select-custom, body.theme-neumorphism .input-custom { box-shadow: inset 3px 3px 6px #a3b1c6, inset -3px -3px 6px #ffffff; border: none; background: transparent; }
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', 'Noto Sans JP', sans-serif; background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); transition: background 0.3s, color 0.3s; }
@@ -43,7 +43,8 @@
         header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
         h1 { font-size: 24px; font-weight: 700; line-height: 1.3; margin:0;}
         h1 span { color: var(--text-sub); font-size: 14px; display: block; margin-top: 6px; font-weight: 400; }
-        .select-custom { padding: 8px 12px; font-weight: 600; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none; cursor: pointer; transition: all 0.3s; }
+        .select-custom, .input-custom { padding: 8px 12px; font-weight: 600; background: var(--bg-main); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 6px; outline: none; transition: all 0.3s; font-family: inherit; font-size: 13px; }
+        .select-custom { cursor: pointer; }
 
         .top-flex { display: flex; gap: var(--grid-gap); flex-wrap: wrap; margin-bottom: 24px; }
         .credit-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px 30px; position: relative; overflow: hidden; box-shadow: var(--card-shadow); width: 100%; max-width: 400px; aspect-ratio: 1.586; display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; }
@@ -88,26 +89,30 @@
         .action-btn:disabled { opacity: 0.4; cursor: not-allowed; border-color: var(--border-color) !important; color: var(--text-sub) !important; background: transparent !important; }
         .action-btn.update-btn { border-color: var(--accent-repay); color: var(--accent-repay); background: rgba(74, 222, 128, 0.1); }
         .action-btn.update-btn:hover { background: var(--accent-repay); color: #fff; }
+        .action-btn.danger-btn { border-color: var(--accent-revo); color: var(--accent-revo); background: rgba(244, 63, 94, 0.1); min-width: auto; padding: 6px 10px; font-size: 12px; }
+        .action-btn.danger-btn:hover { background: var(--accent-revo); color: #fff; }
 
         .controls-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; }
         .chart-scroll-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .div-months-wrap { display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
         .billing-month-select { padding: 4px 6px; font-size: 11px; margin-top: 6px; }
 
+        /* ▼▼▼ 臨時返済 シンプル入力パネル ▼▼▼ */
+        .extra-repay-panel { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-color); animation: fadeIn 0.2s ease-out; }
+        .extra-repay-panel.open { display: block; }
+        .extra-repay-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end; }
+        .extra-repay-input { width: 150px; text-align: right; }
+
 /* ▼▼▼ タブレット向け (768px 〜 1023px) ▼▼▼ */
         @media (max-width: 1023px) {
             .menu-toggle { top: 12px; left: 12px; width: 44px; height: 44px; }
             .main-wrapper { padding: 70px 20px 30px; }
             .container { padding-top: 0px; }
-            
-            /* ヘッダーとカードエリアは横並びを維持 */
             header { flex-direction: row; align-items: center; margin-bottom: 20px; }
             h1 { font-size: 22px; }
-            
             .top-flex { flex-direction: row; flex-wrap: wrap; gap: 20px; }
             .credit-card { max-width: 340px; height: auto; margin: 0; }
             .status-block-group { min-width: 60%; flex: 1; }
-            
             .statement-table { font-size: 12px; }
         }
 
@@ -117,30 +122,27 @@
             header { flex-direction: column; align-items: flex-start; gap: 12px; border-bottom: none; padding-bottom: 0; }
             h1 { font-size: 18px; }
             h1 span { font-size: 12px; margin-top: 4px; }
-            
             .top-flex { flex-direction: column; gap: 16px; margin-bottom: 16px; }
-            /* クレカ画像をスマホの横幅に合わせて綺麗に縮小 */
-            .credit-card { max-width: 100%; aspect-ratio: 1.586;  margin: 0 auto; padding: 20px; }
+            .credit-card { max-width: 100%; aspect-ratio: 1.586; margin: 0 auto; padding: 20px; }
             .status-block-group { min-width: 100%; }
             .section-box { padding: 16px; }
             .summary-mini-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .mini-val { font-size: 16px; }
-
-            /* ▼ 検索・操作エリアをスマホで押しやすい縦並びのブロックに変更 */
             .controls-row { flex-direction: column; align-items: stretch; gap: 12px; background: rgba(150,150,150,0.05); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); }
             .controls-row > div { display: flex; flex-direction: column; gap: 6px; }
-            .controls-row label { margin: 0 !important; } /* 強制マージンリセット */
+            .controls-row label { margin: 0 !important; }
             .controls-row button { width: 100%; justify-content: center; padding: 12px; margin-left: 0 !important; font-size: 14px; }
-
-            /* ▼ テーブルのスマホ表示調整（指で横スクロールしやすく） */
             .tabs-container { gap: 4px; padding-bottom: 4px; }
             .tab-btn { font-size: 13px; padding: 10px 12px; }
             .table-responsive { border-radius: 8px; border: 1px solid var(--border-color); margin-top: 16px; }
-            /* 無理に縮めるとレイアウトが崩れるため、最低幅を保って横スクロールさせる */
             .statement-table { font-size: 11px; min-width: 800px; } 
             .statement-table th, .statement-table td { padding: 12px 8px; }
-            .select-custom { padding: 8px; font-size: 12px; }
+            .select-custom, .input-custom { padding: 8px; font-size: 12px; }
             .badge-payment { font-size: 10px; }
+            .extra-repay-row { flex-direction: column; align-items: stretch; }
+            .extra-repay-input { width: 100%; }
+            .extra-repay-btns { display: flex; gap: 6px; }
+            .extra-repay-btns button { flex: 1; }
         }
     </style>
 </head>
@@ -150,13 +152,13 @@
 
     <div class="sidebar" id="sidebar">
         <ul class="nav-list">
-          <a href="index.html" class="nav-item"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
+            <a href="index.html" class="nav-item"><i class="fa-solid fa-chart-pie" style="color: var(--accent-credit);"></i>実績管理ダッシュボード</a>
             <a href="simulation.html" class="nav-item"><i class="fa-solid fa-building-columns" style="color: var(--accent-loan);"></i>カードローン実績・計画</a>
             <a href="credit-card.html" class="nav-item active"><i class="fa-solid fa-credit-card" style="color: var(--accent-credit);"></i>メインクレカ</a>
             <a href="credit-card-2.html" class="nav-item"><i class="fa-brands fa-cc-visa" style="color: var(--accent-credit);"></i>サブクレカ(リボ)</a>
             <a href="installment.html" class="nav-item"><i class="fa-solid fa-layer-group" style="color: var(--accent-bonus);"></i>分割・ボーナス管理</a>
         </ul>
-        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.1</div>
+        <div style="font-size: 11px; color: var(--text-sub); text-align: center;">Finance Dashboard v5.4 (GAS Sync)</div>
     </div>
 
     <div class="main-wrapper">
@@ -194,29 +196,59 @@
                 </div>
 
                 <div class="status-block-group">
-                    <!-- ▼▼▼ 新規追加: 次回請求額ブロック ▼▼▼ -->
+                    <!-- ▼▼▼ 次回請求額ブロック（シンプル臨時返済登録付き） ▼▼▼ -->
                     <div class="section-box" style="border: 1px solid var(--accent-repay); background: rgba(74, 222, 128, 0.05);">
-                        <div class="progress-info" style="margin-bottom: 0;">
-                            <div style="font-size: 14px; font-weight: 600; color: var(--accent-repay);">
-                                <i class="fa-solid fa-calendar-check"></i> 次回ご請求額 (<span id="next-billing-date-txt">--月--日</span> 予定)
+                        <div class="progress-info" style="margin-bottom: 0; align-items: center;">
+                            <div style="font-size: 14px; font-weight: 600; color: var(--accent-repay); display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span><i class="fa-solid fa-calendar-check"></i> 次回ご請求額 (<span id="next-billing-date-txt">--月--日</span> 予定)</span>
+                                <button type="button" class="action-btn update-btn" style="padding: 4px 10px; font-size: 11px; min-width: auto;" onclick="toggleExtraRepayPanel()">
+                                    <i class="fa-solid fa-hand-holding-dollar"></i> 臨時返済を登録
+                                </button>
                             </div>
                             <div style="font-size:24px; font-weight:700; color: var(--text-main);">
                                 <span id="next-billing-total">¥0</span>
                             </div>
                         </div>
-                        <div style="font-size: 12px; color: var(--text-sub); text-align: right; margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
-                            内訳: 1回/ボーナス <span id="next-billing-single" style="font-weight:600; color:var(--text-main);">¥0</span> ＋ 分割 <span id="next-billing-split" style="font-weight:600; color:var(--text-main);">¥0</span>
+                        <div style="font-size: 12px; color: var(--text-sub); text-align: right; margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px; line-height: 1.6;">
+                            内訳: 1回/ボーナス <span id="next-billing-single" style="font-weight:600; color:var(--text-main);">¥0</span>
+                            ＋ 分割 <span id="next-billing-split" style="font-weight:600; color:var(--text-main);">¥0</span>
+                            － 臨時返済 <span id="next-billing-extra-repay" style="font-weight:700; color:var(--accent-repay);">¥0</span>
+                        </div>
+
+                        <!-- ▼ シンプル金額登録パネル（インライン開閉） ▼ -->
+                        <div id="extra-repay-panel" class="extra-repay-panel">
+                            <div class="extra-repay-row">
+                                <span style="font-size: 12px; color: var(--text-sub); margin-right: auto;">
+                                    <span id="extra-repay-target-label">--月請求分</span> の臨時返済額:
+                                </span>
+                                <input type="number" id="extra-repay-input" class="input-custom extra-repay-input" min="0" step="1" placeholder="金額を入力 (円)">
+                                <div class="extra-repay-btns" style="display: flex; gap: 6px;">
+                                    <button type="button" id="btn-repay-add" class="action-btn update-btn" style="padding: 7px 12px; font-size: 12px; min-width: auto;" onclick="submitExtraRepayment('add', this)">
+                                        <i class="fa-solid fa-plus"></i> 加算
+                                    </button>
+                                    <button type="button" id="btn-repay-set" class="action-btn" style="padding: 7px 12px; font-size: 12px; min-width: auto;" onclick="submitExtraRepayment('set', this)">
+                                        <i class="fa-solid fa-pen"></i> 上書き
+                                    </button>
+                                    <button type="button" id="btn-repay-reset" class="action-btn danger-btn" style="padding: 7px 10px; font-size: 12px;" onclick="submitExtraRepayment('reset', this)" title="0円にリセット">
+                                        0円
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <!-- ▲▲▲ 新規追加ここまで ▲▲▲ -->
+                    <!-- ▲▲▲ 次回請求額ブロックここまで ▲▲▲ -->
+
                     <div class="section-box">
                         <div class="progress-info">
                             <div id="usage-rate-txt" style="font-size: 13px;">ご利用可能額（枠使用率: 0.0%）</div>
                             <div style="font-size:22px; font-weight:700;"><span id="unconfirmed-total">¥0</span> <span style="font-size:13px; font-weight:400; color:var(--text-sub)">/ ¥800,000</span></div>
                         </div>
                         <div class="meter-container"><div class="meter-bar" id="meter-bar-total"></div></div>
-                        
+                        <div id="available-extra-repay-note" style="display: none; font-size: 11px; color: var(--accent-repay); margin-top: 8px; text-align: right;">
+                            <i class="fa-solid fa-circle-info"></i> 臨時返済分（<span id="available-extra-repay-val">¥0</span>）の利用枠回復を反映済み
+                        </div>
                     </div>
+
                     <div class="section-box">
                         <div class="progress-info">
                             <div id="filtered-month-title" style="color: var(--text-sub); font-size: 14px;">未決済明細の総残高</div>
@@ -284,13 +316,14 @@
                         <i class="fa-solid fa-arrow-rotate-left"></i> ソート解除
                     </button>
                     <button type="button" onclick="forceRefreshData(this)" style="padding: 8px 12px; background-color: var(--accent-credit); color: #000; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.2s;">
-                    <i class="fa-solid fa-rotate-right"></i> 最新データを取得
+                        <i class="fa-solid fa-rotate-right"></i> 最新データを取得
                     </button>
                     <button type="button" onclick="deleteSelectedStatements(this)" style="padding: 8px 12px; background-color: rgba(244, 63, 94, 0.1); color: var(--accent-revo); border: 1px solid var(--accent-revo); border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; margin-left: auto; transition: all 0.2s;">
                         <i class="fa-solid fa-trash-can"></i> 選択した明細を削除
                     </button>
                 </div>
-<!-- ▼▼▼ ViewsNET反映管理リスト ▼▼▼ -->
+
+                <!-- ▼▼▼ ViewsNET反映管理リスト ▼▼▼ -->
                 <div class="section-box" id="viewsnet-section" style="margin-bottom: 24px; display: none; border-color: var(--accent-loan);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                         <div style="font-size: 16px; font-weight: 600; color: var(--accent-loan);">
@@ -320,7 +353,7 @@
                         </table>
                     </div>
                 </div>
-                <!-- ▲▲▲ 新規追加ここまで ▲▲▲ -->
+                <!-- ▲▲▲ ViewsNET反映管理リストここまで ▲▲▲ -->
 
                 <div class="section-box">
                     <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">最近の利用明細と支払いタイプ変更</div>
@@ -384,8 +417,11 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw6OpWl9K3wB-jDTGMB6ubjREM1RqbcOk10Vp9O8Yb5DkaOtru8JOLvtVGIl63fJEiU/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbyZkHie9DWfQBbasNeBWYvojTpO_4SC4LAjSpOY58ETAXggt3-EpDP0XjQVKrIzC1PV/exec";
+        const EXTRA_REPAY_SHEET_NAME = "クレカ臨時返済DB";
+        const EXTRA_REPAY_STORAGE_KEY = 'creditCardExtraRepaymentMap';
         let dbStatements = [];
+        let extraRepaymentMap = {}; // { "2026-12": 30000 }
         let currentSortKey = null;
         let currentSortOrder = 0; 
         let dailyChartInstance = null;
@@ -408,11 +444,152 @@
             const savedTheme = localStorage.getItem('selectedTheme');
             if (savedTheme) applyTheme(savedTheme);
 
+            loadExtraRepaymentsFromSheet();
             initMonthFilter();
             loadStatementsFromSheet();
             const filterBtn = document.getElementById('filter-btn');
             if (filterBtn) filterBtn.addEventListener('click', applyFilter);
         });
+
+        // ★ 直近の次回請求月（15日を境に切替）を取得する共通関数 ★
+        function getNextBillingTarget() {
+            const now = new Date();
+            let targetYear = now.getFullYear();
+            let targetMonth = now.getDate() >= 15 ? now.getMonth() + 2 : now.getMonth() + 1;
+            if (targetMonth > 12) { targetMonth -= 12; targetYear++; }
+            return {
+                year: targetYear,
+                month: targetMonth,
+                key: `${targetYear}-${String(targetMonth).padStart(2, '0')}`
+            };
+        }
+
+        function normalizeBillingMonthKey(val) {
+            if (!val) return '';
+            const str = String(val).trim().replace(/\//g, '-');
+            const m = str.match(/^(\d{4})-(\d{1,2})/);
+            if (m) return `${m[1]}-${String(parseInt(m[2], 10)).padStart(2, '0')}`;
+            return str;
+        }
+
+        // ★ 臨時返済（月ごとの金額のみ）GAS同期 ★
+        function loadExtraRepaymentsFromSheet() {
+            try {
+                const raw = localStorage.getItem(EXTRA_REPAY_STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                        extraRepaymentMap = parsed;
+                        calculateTotals(dbStatements);
+                    }
+                }
+            } catch (e) { console.error(e); }
+
+            if (!GAS_URL || GAS_URL.includes('XXXXX')) return Promise.resolve();
+
+            return fetch(`${GAS_URL}?action=get_extra_repayments&sheetName=${encodeURIComponent(EXTRA_REPAY_SHEET_NAME)}&_=${new Date().getTime()}`)
+                .then(res => { if (!res.ok) throw new Error('ネットワークエラー'); return res.json(); })
+                .then(data => {
+                    const nextMap = {};
+                    if (Array.isArray(data)) {
+                        data.forEach(row => {
+                            const key = normalizeBillingMonthKey(row.billingMonth);
+                            if (key) nextMap[key] = (nextMap[key] || 0) + (Number(row.amount) || 0);
+                        });
+                    } else if (data && typeof data === 'object') {
+                        Object.keys(data).forEach(k => {
+                            const key = normalizeBillingMonthKey(k);
+                            if (key) nextMap[key] = Number(data[k]) || 0;
+                        });
+                    }
+                    extraRepaymentMap = nextMap;
+                    localStorage.setItem(EXTRA_REPAY_STORAGE_KEY, JSON.stringify(extraRepaymentMap));
+                    calculateTotals(dbStatements);
+                })
+                .catch(err => console.error('臨時返済データ取得エラー:', err));
+        }
+
+        function getExtraRepaymentTotal(billingMonthKey) {
+            return Number(extraRepaymentMap[normalizeBillingMonthKey(billingMonthKey)]) || 0;
+        }
+
+        function toggleExtraRepayPanel() {
+            const panel = document.getElementById('extra-repay-panel');
+            const target = getNextBillingTarget();
+            const label = document.getElementById('extra-repay-target-label');
+            if (label) label.innerText = `${target.year}年${target.month}月請求分`;
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                document.getElementById('extra-repay-input')?.focus();
+            }
+        }
+
+        function submitExtraRepayment(mode, btn) {
+            const target = getNextBillingTarget();
+            const inputEl = document.getElementById('extra-repay-input');
+            const currentVal = getExtraRepaymentTotal(target.key);
+            let newAmount = 0;
+
+            if (mode === 'reset') {
+                if (currentVal === 0) return;
+                if (!confirm(`${target.month}月請求分の臨時返済額を ¥0 にリセットしますか？`)) return;
+                newAmount = 0;
+            } else {
+                const inputVal = parseInt(inputEl.value, 10);
+                if (isNaN(inputVal) || inputVal < 0) {
+                    alert('0以上の金額を入力してください。');
+                    return;
+                }
+                if (mode === 'add') {
+                    if (inputVal === 0) return;
+                    newAmount = currentVal + inputVal;
+                } else {
+                    newAmount = inputVal;
+                }
+            }
+
+            const buttons = [
+                document.getElementById('btn-repay-add'),
+                document.getElementById('btn-repay-set'),
+                document.getElementById('btn-repay-reset')
+            ];
+            const originalHtml = btn.innerHTML;
+            buttons.forEach(b => { if (b) b.disabled = true; });
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+
+            fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action: "save_extra_repayment",
+                    sheetName: EXTRA_REPAY_SHEET_NAME,
+                    billingMonth: target.key,
+                    amount: newAmount
+                })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    extraRepaymentMap[target.key] = newAmount;
+                    localStorage.setItem(EXTRA_REPAY_STORAGE_KEY, JSON.stringify(extraRepaymentMap));
+                    inputEl.value = '';
+                    calculateTotals(dbStatements);
+
+                    btn.innerHTML = `<i class="fa-solid fa-check"></i>`;
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        buttons.forEach(b => { if (b) b.disabled = false; });
+                    }, 1000);
+                } else {
+                    throw new Error(result.message || '保存に失敗しました');
+                }
+            })
+            .catch(err => {
+                alert('GAS送信エラー: ' + err.message);
+                btn.innerHTML = originalHtml;
+                buttons.forEach(b => { if (b) b.disabled = false; });
+            });
+        }
 
         // ビューカード方式の分割払い計算（実質年率12%）
         function calculateViewCardInstallment(principal, months, apr = 12) {
@@ -462,7 +639,7 @@
                     renderStatements(); calculateTotals(); applyFilter(); renderDailyTab();
                 } catch(e) { console.error(e); }
             } else {
-                if (tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> データを読み込み中...</td></tr>`;
+                if (tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> データを読み込み中...</td></tr>`;
             }
 
             if (!GAS_URL || GAS_URL.includes('XXXXX')) return;
@@ -478,7 +655,7 @@
                     }
                 })
                 .catch(err => {
-                    if (dbStatements.length === 0 && tbody) tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--accent-loan); padding: 40px;"><i class="fa-solid fa-circle-exclamation"></i> 読み込み失敗</td></tr>`;
+                    if (dbStatements.length === 0 && tbody) tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--accent-loan); padding: 40px;"><i class="fa-solid fa-circle-exclamation"></i> 読み込み失敗</td></tr>`;
                 });
         }
 
@@ -529,14 +706,14 @@
             let simulatedTx = { ...tx, currentType: typeSelect.value };
             if (simulatedTx.currentType === '分割払い') simulatedTx.months = monthsSelect ? monthsSelect.value : 3;
             if (billingSelect) simulatedTx.simulationBillingMonth = billingSelect.value;
-            row.cells[4].innerHTML = getInstallmentPeriodText(simulatedTx);
+            row.cells[5].innerHTML = getInstallmentPeriodText(simulatedTx);
         }
 
         function renderStatements(targetData = dbStatements) {
             const tbody = document.getElementById('statement-tbody');
             tbody.innerHTML = '';
             if (targetData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;">データなし</td></tr>`; return;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px;">データなし</td></tr>`; return;
             }
 
             targetData.forEach(tx => {
@@ -675,7 +852,7 @@
                     const isBonus = type.includes('ボーナス');
                     if (targetType === 'single') return !isInstallment && !isBonus;
                     else if (targetType === 'installment') return isInstallment || isBonus;
-                    else if (targetType === 'single_bonus') return !isInstallment; // 分割・リボ以外 (1回とボーナス)
+                    else if (targetType === 'single_bonus') return !isInstallment;
                     return true;
                 });
             }
@@ -707,11 +884,9 @@
                 });
             }
             renderStatements(data);
-	// ▼ この1行を追加（フィルタされたデータをViewsNET管理リストにも渡す）
             renderChangedList(data);
         }
 
-        
         function toggleAllChecks(source) {
             const checkboxes = document.querySelectorAll('.row-checkbox');
             checkboxes.forEach(cb => cb.checked = source.checked);
@@ -804,22 +979,20 @@
             renderSortedAndFiltered(dataToRender);
         }
 
-function calculateTotals(targetData = dbStatements) {
-            // --- 祝日リスト (2026年 - 2028年) ---
+        function calculateTotals(targetData = dbStatements) {
             const HOLIDAYS = [
                 '2026-01-01','2026-01-12','2026-02-11','2026-02-23','2026-03-20','2026-04-29','2026-05-03','2026-05-04','2026-05-05','2026-05-06','2026-07-20','2026-08-11','2026-09-21','2026-09-22','2026-09-23','2026-10-12','2026-11-03','2026-11-23',
                 '2027-01-01','2027-01-11','2027-02-11','2027-02-23','2027-03-21','2027-03-22','2027-04-29','2027-05-03','2027-05-04','2027-05-05','2027-07-19','2027-08-11','2027-09-20','2027-09-23','2027-10-11','2027-11-03','2027-11-23',
                 '2028-01-01','2028-01-10','2028-02-11','2028-02-23','2028-03-20','2028-04-29','2028-05-03','2028-05-04','2028-05-05','2028-07-17','2028-08-11','2028-09-18','2028-09-22','2028-10-09','2028-11-03','2028-11-23'
             ];
 
-            // --- 支払日(4日ベース・翌営業日対応)を計算する関数 ---
             const getPaymentDate = (y, m) => {
                 let d = new Date(y, m - 1, 4);
                 while (true) {
                     let day = d.getDay();
                     let ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
                     if (day === 0 || day === 6 || HOLIDAYS.includes(ds)) {
-                        d.setDate(d.getDate() + 1); // 休日・祝日なら翌日へ
+                        d.setDate(d.getDate() + 1);
                     } else {
                         break;
                     }
@@ -828,12 +1001,10 @@ function calculateTotals(targetData = dbStatements) {
             };
 
             const now = new Date();
-            // 15日を境に更新: 14日以前なら今月の支払、15日以降なら翌月の支払を「次回」とする
-            let targetYear = now.getFullYear();
-            let targetMonth = now.getDate() >= 15 ? now.getMonth() + 2 : now.getMonth() + 1;
-            if (targetMonth > 12) { targetMonth -= 12; targetYear++; }
-            
-            // ▼ ビューカード使用枠用の「次々回」請求月
+            const nextTarget = getNextBillingTarget();
+            const targetYear = nextTarget.year;
+            const targetMonth = nextTarget.month;
+
             let viewcardTargetYear = targetYear;
             let viewcardTargetMonth = targetMonth + 1;
             if (viewcardTargetMonth > 12) { viewcardTargetMonth -= 12; viewcardTargetYear++; }
@@ -841,17 +1012,15 @@ function calculateTotals(targetData = dbStatements) {
             const payDate = getPaymentDate(targetYear, targetMonth);
             const payDateStr = `${payDate.getMonth()+1}月${payDate.getDate()}日`;
             
-            // 画面のテキスト更新
             if (document.getElementById('next-billing-date-txt')) document.getElementById('next-billing-date-txt').innerText = payDateStr;
             if (document.getElementById('viewcard-usage-txt')) document.getElementById('viewcard-usage-txt').innerHTML = `<i class="fa-solid fa-credit-card" style="color: var(--accent-loan); margin-right: 4px;"></i>ビューカード使用枠 (${viewcardTargetMonth}月請求分 1回・ボーナス)`;
 
-            // 集計用変数
-            let unconfirmedTotal = 0; // システム全体の利用可能枠圧迫用
+            let unconfirmedTotal = 0;
             let bonusTotal = 0;
             let splitMonthly = [0,0,0,0,0];
-            let nextBillingSingleBonus = 0; // 次回請求 (1回・ボーナス)
-            let nextBillingInstallment = 0; // 次回請求 (分割)
-            let viewcardSingleBonus = 0;    // ▼ ビューカード枠用 (次々回の1回・ボーナス)
+            let nextBillingSingleBonus = 0;
+            let nextBillingInstallment = 0;
+            let viewcardSingleBonus = 0;
 
             const currentBaseDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
             for (let i = 0; i < 4; i++) {
@@ -865,11 +1034,20 @@ function calculateTotals(targetData = dbStatements) {
                 
                 if (amount <= 0) {
                     unconfirmedTotal += amount;
-                    nextBillingSingleBonus += amount;
+                    const ym = getBillingYearMonth(tx);
+                    if (ym) {
+                        if (ym.year === targetYear && ym.month === targetMonth) {
+                            nextBillingSingleBonus += amount;
+                        }
+                        if (ym.year === viewcardTargetYear && ym.month === viewcardTargetMonth) {
+                            viewcardSingleBonus += amount;
+                        }
+                    } else {
+                        nextBillingSingleBonus += amount;
+                    }
                     return;
                 }
 
-                // --- 1. ユーザー設定上の状態 (分割シミュレーション・ミニカード用) ---
                 const userType = tx.currentType || tx.type || tx.payType || '1回払い';
                 const userIsInstallment = (tx.registered||tx.isRegistered||false) && ((parseInt(tx.months)||parseInt(tx.payCount)||1) > 1 || userType.includes('分割') || userType.includes('リボ'));
                 const userMonthsCount = parseInt(tx.months) || 1;
@@ -877,7 +1055,6 @@ function calculateTotals(targetData = dbStatements) {
 
                 if (userType.includes('ボーナス')) bonusTotal += amount;
 
-                // --- 2. ViewsNETの実際の反映状態 (次回請求額・ビューカード枠用) ---
                 let isViewsNetReflected = true;
                 if (tx.registered && tx.viewsnetStatus !== 'registered') {
                     isViewsNetReflected = false;
@@ -889,7 +1066,6 @@ function calculateTotals(targetData = dbStatements) {
                 
                 let effectiveYm = userYm;
                 if (!isViewsNetReflected) {
-                    // ViewsNET未反映の場合は元の利用日からデフォルトの請求月を算出
                     const dInfo = parseJSTDateInfo(tx.date || tx.useDate || '');
                     if (dInfo) {
                         let y = dInfo.year, m = (dInfo.day <= 5) ? dInfo.month + 1 : dInfo.month + 2;
@@ -898,7 +1074,6 @@ function calculateTotals(targetData = dbStatements) {
                     }
                 }
 
-                // 【A】ミニカード用 (4ヶ月分) は「計画ベース」で加算
                 if (userIsInstallment) {
                     const calc = calculateViewCardInstallment(amount, userMonthsCount, 12);
                     if (userYm) {
@@ -912,11 +1087,9 @@ function calculateTotals(targetData = dbStatements) {
                     }
                 }
 
-                // 【B】次回請求額・全体枠・ビューカード枠 は「ViewsNET実態ベース」で加算
                 if (effectiveIsInstallment) {
                     const calcVn = calculateViewCardInstallment(amount, effectiveMonthsCount, 12);
                     
-                    // 次回請求額 (分割)
                     if (effectiveYm) {
                         const targetDiff = (targetYear - effectiveYm.year) * 12 + (targetMonth - effectiveYm.month);
                         if (targetDiff >= 0 && targetDiff < effectiveMonthsCount) {
@@ -924,7 +1097,6 @@ function calculateTotals(targetData = dbStatements) {
                         }
                     }
                     
-                    // 未確定総額 (全体の物理枠圧迫)
                     if (effectiveYm) {
                         const diff = (currentBaseDate.getFullYear() - effectiveYm.year) * 12 + (currentBaseDate.getMonth() + 1 - effectiveYm.month);
                         const paidCount = Math.max(0, diff); 
@@ -935,7 +1107,6 @@ function calculateTotals(targetData = dbStatements) {
                     } else {
                         unconfirmedTotal += calcVn.total;
                     }
-                    
                 } else {
                     let bMonth = 0;
                     let bYear = 0;
@@ -949,12 +1120,9 @@ function calculateTotals(targetData = dbStatements) {
                         bYear = effectiveYm?.year || 0;
                     }
 
-                    // 次回請求額への加算
                     if (bYear === targetYear && bMonth === targetMonth) {
                         nextBillingSingleBonus += amount;
                     }
-                    
-                    // ▼ ビューカード使用枠 (次々回請求) への加算
                     if (bYear === viewcardTargetYear && bMonth === viewcardTargetMonth) {
                         viewcardSingleBonus += amount;
                     }
@@ -963,24 +1131,40 @@ function calculateTotals(targetData = dbStatements) {
                 }
             });
 
-            // --- 画面描画の更新 ---
-            const nextTotal = nextBillingSingleBonus + nextBillingInstallment;
+            // ▼ 臨時返済の合計（直近の次回請求月分）を取得して差し引く ▼
+            const extraRepayTotal = getExtraRepaymentTotal(nextTarget.key);
+
+            // 次回ご請求額から臨時返済合計を差し引く
+            const nextTotal = Math.max(0, nextBillingSingleBonus + nextBillingInstallment - extraRepayTotal);
             if (document.getElementById('next-billing-total')) document.getElementById('next-billing-total').innerText = `¥${nextTotal.toLocaleString()}`;
             if (document.getElementById('next-billing-single')) document.getElementById('next-billing-single').innerText = `¥${nextBillingSingleBonus.toLocaleString()}`;
             if (document.getElementById('next-billing-split')) document.getElementById('next-billing-split').innerText = `¥${nextBillingInstallment.toLocaleString()}`;
+            if (document.getElementById('next-billing-extra-repay')) document.getElementById('next-billing-extra-repay').innerText = `¥${extraRepayTotal.toLocaleString()}`;
 
-            const availableLimit = Math.max(800000 - unconfirmedTotal, 0);
+            // ご利用可能額（枠使用残高からも臨時返済合計を差し引く → 利用可能額が空く）
+            const effectiveUnconfirmedTotal = Math.max(0, unconfirmedTotal - extraRepayTotal);
+            const availableLimit = Math.min(800000, Math.max(800000 - effectiveUnconfirmedTotal, 0));
             if (document.getElementById('unconfirmed-total')) document.getElementById('unconfirmed-total').innerText = `¥${availableLimit.toLocaleString()}`;
+
+            const extraNoteEl = document.getElementById('available-extra-repay-note');
+            const extraValEl = document.getElementById('available-extra-repay-val');
+            if (extraNoteEl && extraValEl) {
+                if (extraRepayTotal > 0) {
+                    extraNoteEl.style.display = 'block';
+                    extraValEl.innerText = `¥${extraRepayTotal.toLocaleString()}`;
+                } else {
+                    extraNoteEl.style.display = 'none';
+                }
+            }
+
             if (document.getElementById('bonus-total-val')) document.getElementById('bonus-total-val').innerText = `¥${bonusTotal.toLocaleString()}`;
-            
-            // ▼ ビューカード使用枠は「次々回請求月の1回・ボーナスの合計額」を表示
             if (document.getElementById('viewcard-total')) document.getElementById('viewcard-total').innerText = `¥${viewcardSingleBonus.toLocaleString()}`;
             
             for (let i = 0; i < 4; i++) { 
                 if (document.getElementById(`split-${i+1}`)) document.getElementById(`split-${i+1}`).innerText = `¥${splitMonthly[i].toLocaleString()}`; 
             }
             
-            const percent = Math.min((unconfirmedTotal / 800000) * 100, 100);
+            const percent = Math.min((effectiveUnconfirmedTotal / 800000) * 100, 100);
             if (document.getElementById('meter-bar-total')) document.getElementById('meter-bar-total').style.width = `${percent}%`;
             if (document.getElementById('usage-rate-txt')) document.getElementById('usage-rate-txt').innerText = `ご利用可能額（枠使用率: ${percent.toFixed(1)}%）`;
 
@@ -1002,7 +1186,6 @@ function calculateTotals(targetData = dbStatements) {
             let data = getFilteredDataArray(); 
             if(!data.length) return alert('データがありません。');
 
-            // ▼ 画面のソート状態をCSVにも適用する
             if (currentSortKey) {
                 data.sort((a, b) => {
                     let valA = currentSortKey === 'date' ? new Date(a.date||'').getTime()||0 : (Number(a.amount)||Number(a.price)||0);
@@ -1100,7 +1283,6 @@ function calculateTotals(targetData = dbStatements) {
             a.click();
         }
 
-        // ★ グラフ描画（テーマカラー追従） ★
         function renderDailyTab() {
             const filterEl = document.getElementById('daily-filter');
             const filterValue = filterEl ? filterEl.value : 'all';
@@ -1168,7 +1350,6 @@ function calculateTotals(targetData = dbStatements) {
                 forecastLines = new Array(timeline.length).fill(null);
             }
 
-            // テーマに基づくグラフカラーの設定
             const isLightMode = document.body.classList.contains('theme-light') || document.body.classList.contains('theme-neumorphism');
             const chartTextColor = isLightMode ? '#64748b' : '#94a3b8';
             const chartGridColor = isLightMode ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
@@ -1215,75 +1396,68 @@ function calculateTotals(targetData = dbStatements) {
                 `);
             }
         }
-        // ★ 強制的にキャッシュをクリアして最新データを取得する関数
-function forceRefreshData(btn) {
-    const originalHtml = btn.innerHTML;
-    // ボタンをローディング状態に変更
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 取得中...';
-    btn.disabled = true;
 
-    // キャッシュを削除
-    localStorage.removeItem('creditCardData');
-    dbStatements = [];
-    
-    // テーブルをローディング表示にリセット
-    const tbody = document.getElementById('statement-tbody');
-    if (tbody) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> 最新データを読み込み中...</td></tr>`;
-    }
+        function forceRefreshData(btn) {
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 取得中...';
+            btn.disabled = true;
 
-    if (!GAS_URL || GAS_URL.includes('XXXXX')) {
-        alert('GAS_URLが設定されていません');
-        btn.innerHTML = originalHtml;
-        btn.disabled = false;
-        return;
-    }
-
-    // キャッシュ無効化のためのタイムスタンプを付与して再フェッチ
-    fetch(`${GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}&_=${new Date().getTime()}`)
-        .then(res => { 
-            if(!res.ok) throw new Error('ネットワークエラー'); 
-            return res.json(); 
-        })
-        .then(data => {
-            dbStatements = Array.isArray(data) ? data : [];
-            // 新しいデータをキャッシュに保存
-            localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
+            localStorage.removeItem('creditCardData');
+            localStorage.removeItem(EXTRA_REPAY_STORAGE_KEY);
+            dbStatements = [];
+            extraRepaymentMap = {};
             
-            // 画面の再描画
-            renderStatements();
-            calculateTotals();
-            applyFilter();
-            renderDailyTab();
-            
-            // ボタンを完了状態にしてから元に戻す
-            btn.innerHTML = '<i class="fa-solid fa-check"></i> 更新完了';
-            setTimeout(() => { 
-                btn.innerHTML = originalHtml; 
-                btn.disabled = false; 
-            }, 2000);
-        })
-        .catch(err => {
+            const tbody = document.getElementById('statement-tbody');
             if (tbody) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color: var(--accent-loan); padding: 40px;"><i class="fa-solid fa-circle-exclamation"></i> 読み込み失敗: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px;"><i class="fa-solid fa-spinner fa-spin"></i> 最新データを読み込み中...</td></tr>`;
             }
-            btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> エラー';
-            setTimeout(() => { 
-                btn.innerHTML = originalHtml; 
-                btn.disabled = false; 
-            }, 2000);
-        });
-}
-// ▼ ViewsNET反映管理リストを描画する関数
+
+            if (!GAS_URL || GAS_URL.includes('XXXXX')) {
+                alert('GAS_URLが設定されていません');
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                return;
+            }
+
+            Promise.all([
+                fetch(`${GAS_URL}?listSheet=${encodeURIComponent("クレカ明細一覧")}&splitSheet=${encodeURIComponent("クレカ分割DB")}&_=${new Date().getTime()}`)
+                    .then(res => { if(!res.ok) throw new Error('ネットワークエラー'); return res.json(); }),
+                loadExtraRepaymentsFromSheet()
+            ])
+                .then(([data]) => {
+                    dbStatements = Array.isArray(data) ? data : [];
+                    localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
+                    
+                    renderStatements();
+                    calculateTotals();
+                    applyFilter();
+                    renderDailyTab();
+                    
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> 更新完了';
+                    setTimeout(() => { 
+                        btn.innerHTML = originalHtml; 
+                        btn.disabled = false; 
+                    }, 2000);
+                })
+                .catch(err => {
+                    if (tbody) {
+                        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--accent-loan); padding: 40px;"><i class="fa-solid fa-circle-exclamation"></i> 読み込み失敗: ${err.message}</td></tr>`;
+                    }
+                    btn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> エラー';
+                    setTimeout(() => { 
+                        btn.innerHTML = originalHtml; 
+                        btn.disabled = false; 
+                    }, 2000);
+                });
+        }
+
         function renderChangedList(data) {
             const tbody = document.getElementById('viewsnet-tbody');
             const section = document.getElementById('viewsnet-section');
             const showRegistered = document.getElementById('toggle-show-registered')?.checked || false;
             
-            // 支払い方法がシステム上で変更（登録）されたベースの明細
             const baseChangedItems = data.filter(tx => !!tx.registered);
 
-            // 「自作システム上で変更したもの」自体がゼロ件なら、枠ごと非表示
             if (baseChangedItems.length === 0) {
                 section.style.display = 'none';
                 return;
@@ -1292,12 +1466,10 @@ function forceRefreshData(btn) {
             section.style.display = 'block';
             tbody.innerHTML = '';
 
-            // チェックボックスの状態に応じて表示内容を絞り込む
             const displayItems = showRegistered 
                 ? baseChangedItems 
                 : baseChangedItems.filter(tx => tx.viewsnetStatus !== 'registered');
 
-            // 未反映がゼロ件（すべて反映済みで、チェックを外している状態）の表示
             if (displayItems.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-sub);"><i class="fa-solid fa-check-circle" style="color: var(--accent-repay); margin-right: 4px;"></i> 未反映の明細はありません（すべて反映済み）</td></tr>`;
                 return;
@@ -1306,7 +1478,6 @@ function forceRefreshData(btn) {
             displayItems.forEach(tx => {
                 const txId = tx.id;
                 const txAmount = Number(tx.amount) || Number(tx.price) || 0;
-                // viewsnetStatusが無ければ未反映(pending)とする
                 const status = tx.viewsnetStatus || 'pending'; 
                 const isSplit = tx.currentType === '分割払い' || (tx.currentType && tx.currentType.includes('分割'));
                 const typeText = isSplit ? `分割 ${tx.months || 3}ヶ月` : (tx.currentType || '不明');
@@ -1315,7 +1486,6 @@ function forceRefreshData(btn) {
                 const dInfo = parseJSTDateInfo(txDateStr);
                 if (dInfo) txDateStr = dInfo.formatted;
 
-                // 登録済みなら行を少し暗くするスタイル
                 const rowStyle = status === 'registered' ? 'opacity: 0.5; background: rgba(150,150,150,0.05);' : '';
                 const selectStyle = status === 'registered' ? 'border-color: var(--accent-repay); color: var(--accent-repay);' : 'border-color: var(--accent-loan); color: var(--accent-loan); font-weight: 700;';
 
@@ -1339,7 +1509,6 @@ function forceRefreshData(btn) {
             });
         }
 
-        // ▼ ViewsNET反映状態をGASに保存する関数
         function updateViewsNetStatus(id) {
             const select = document.querySelector(`.vn-status-select[data-id="${id}"]`);
             const btn = document.getElementById(`vn-btn-${id}`);
@@ -1361,7 +1530,6 @@ function forceRefreshData(btn) {
             .then(res => res.json())
             .then(result => {
                 if (result.status === 'success') {
-                    // ローカルデータを更新
                     const tx = dbStatements.find(t => String(t.id) === String(id));
                     if (tx) tx.viewsnetStatus = status;
                     localStorage.setItem('creditCardData', JSON.stringify(dbStatements));
@@ -1370,7 +1538,7 @@ function forceRefreshData(btn) {
                     setTimeout(() => { 
                         btn.disabled = false; 
                         btn.innerHTML = '保存'; 
-                        renderSortedAndFiltered(); // 再描画してスタイル(色)を更新
+                        renderSortedAndFiltered();
                     }, 1000);
                 } else {
                     throw new Error(result.message);
